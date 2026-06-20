@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flock Off, Cobb — Remove Flock Safety license plate readers from Cobb County</title>
+<meta name="description" content="A campaign by Cobb County residents to cancel the county's Flock Safety contract and remove warrantless license plate surveillance. Talking points, a copy-paste letter, and contacts for your elected officials." />
+<meta property="og:title" content="Flock Off, Cobb" />
+<meta property="og:description" content="Remove Flock Safety license plate readers from Cobb County. Email your elected officials today." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Spectral:ital,wght@0,400;0,600;0,800;1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f1ece0;
+    --paper-2:#e7e0cf;
+    --ink:#161311;
+    --ink-soft:#3a342f;
+    --red:#d6233a;
+    --red-deep:#a81026;
+    --yellow:#f5c518;
+    --teal:#1f6f8b;
+    --line:#161311;
+    --shadow: 6px 6px 0 var(--ink);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background-color:var(--paper);
+    background-image:
+      radial-gradient(var(--paper-2) 1px, transparent 1px);
+    background-size:5px 5px;
+    color:var(--ink);
+    font-family:"Spectral", Georgia, serif;
+    font-size:18px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* grain overlay */
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:9999;
+    opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  a{color:var(--red-deep);text-underline-offset:3px;text-decoration-thickness:1.5px;}
+  a:hover{color:var(--ink);background:var(--yellow);}
+  h1,h2,h3{font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:.92;letter-spacing:.01em;margin:0;}
+  .mono{font-family:"Space Mono",monospace;text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:100;
+    background:var(--ink);
+    border-bottom:3px solid var(--ink);
+  }
+  .nav-inner{
+    max-width:1200px;margin:0 auto;padding:0 20px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;color:var(--paper);text-decoration:none;}
+  .brand:hover{background:none;color:var(--yellow);}
+  .brand .dot{width:14px;height:14px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px var(--paper);animation:blink 1.4s steps(1) infinite;}
+  @keyframes blink{50%{background:var(--ink);box-shadow:0 0 0 3px var(--red);}}
+  .brand b{font-family:"Anton",sans-serif;font-size:1.25rem;letter-spacing:.02em;}
+  nav ul{display:flex;gap:4px;list-style:none;margin:0;padding:0;}
+  nav a{
+    color:var(--paper);text-decoration:none;font-family:"Space Mono",monospace;
+    text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;padding:8px 12px;border-radius:2px;
+  }
+  nav a:hover,nav a.active{background:var(--red);color:var(--paper);}
+  .nav-toggle{display:none;background:var(--red);color:var(--paper);border:none;font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.1em;padding:8px 12px;cursor:pointer;}
+  @media(max-width:860px){
+    nav{position:fixed;inset:60px 0 auto 0;background:var(--ink);border-bottom:3px solid var(--red);transform:translateY(-120%);transition:transform .25s ease;}
+    nav.open{transform:translateY(0);}
+    nav ul{flex-direction:column;padding:8px 12px;}
+    nav a{display:block;padding:12px;border-bottom:1px solid #2c2622;}
+    .nav-toggle{display:block;}
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;max-width:1200px;margin:0 auto;padding:54px 20px 30px;
+    display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;
+  }
+  .viewfinder::before,.viewfinder::after,
+  .viewfinder .vf-tr,.viewfinder .vf-br{
+    content:"";position:absolute;width:34px;height:34px;border:4px solid var(--red);
+  }
+  .viewfinder::before{top:18px;left:6px;border-right:none;border-bottom:none;}
+  .viewfinder::after{bottom:6px;left:6px;border-right:none;border-top:none;}
+  .viewfinder .vf-tr{top:18px;right:6px;border-left:none;border-bottom:none;}
+  .viewfinder .vf-br{bottom:6px;right:6px;border-left:none;border-top:none;}
+
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--paper);padding:6px 12px;margin-bottom:18px;}
+  .eyebrow .rec{color:var(--red);}
+  h1.title{font-size:clamp(3.4rem,11vw,8rem);}
+  h1.title .l1{display:block;color:var(--ink);}
+  h1.title .l2{display:block;color:var(--red);-webkit-text-stroke:2px var(--ink);}
+  .subhead{font-size:1.18rem;max-width:38ch;margin:18px 0 8px;font-weight:600;}
+  .lede{max-width:46ch;color:var(--ink-soft);margin:0 0 26px;}
+  .cta-row{display:flex;flex-wrap:wrap;gap:14px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;font-family:"Space Mono",monospace;
+    text-transform:uppercase;letter-spacing:.08em;font-size:.82rem;font-weight:700;
+    padding:14px 22px;text-decoration:none;border:3px solid var(--ink);cursor:pointer;
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:var(--shadow);background:var(--yellow);color:var(--ink);}
+  .btn-primary{background:var(--red);color:var(--paper);}
+  .btn-ghost{background:var(--paper);color:var(--ink);}
+  .hero-art{position:relative;}
+  .hero-art .frame{
+    border:5px solid var(--ink);background:var(--teal);box-shadow:var(--shadow);
+    display:block;width:100%;height:auto;
+  }
+  .art-credit{margin-top:10px;text-align:right;color:var(--ink-soft);}
+  @media(max-width:860px){
+    .hero{grid-template-columns:1fr;padding-top:30px;}
+    .hero-art{order:-1;max-width:340px;}
+  }
+
+  /* ---------- TICKER ---------- */
+  .ticker{background:var(--ink);color:var(--paper);overflow:hidden;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);white-space:nowrap;}
+  .ticker .track{display:inline-block;padding:12px 0;animation:scroll 32s linear infinite;}
+  .ticker span{font-family:"Space Mono",monospace;text-transform:uppercase;letter-spacing:.14em;font-size:.78rem;}
+  .ticker .x{color:var(--red);margin:0 18px;}
+  @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  /* ---------- SECTIONS ---------- */
+  section{max-width:1100px;margin:0 auto;padding:72px 20px;scroll-margin-top:72px;}
+  .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:36px;border-bottom:4px solid var(--ink);padding-bottom:14px;}
+  .sec-head .num{font-family:"Space Mono",monospace;color:var(--red);font-weight:700;font-size:1rem;}
+  .sec-head h2{font-size:clamp(2rem,5vw,3.4rem);}
+
+  /* case cards */
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;}
+  .card{
+    background:var(--paper);border:3px solid var(--ink);padding:24px;position:relative;
+    transition:transform .1s ease, box-shadow .1s ease;
+  }
+  .card:hover{transform:translate(-3px,-3px);box-shadow:var(--shadow);}
+  .card .tag{display:inline-block;background:var(--ink);color:var(--paper);padding:3px 9px;margin-bottom:12px;font-family:"Space Mono",monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;}
+  .card h3{font-size:1.5rem;margin-bottom:10px;}
+  .card p{margin:0 0 12px;color:var(--ink-soft);font-size:.98rem;}
+  .card .src{font-family:"Space Mono",monospace;font-size:.72rem;}
+  @media(max-width:760px){.cards{grid-template-columns:1fr;}}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .step{display:flex;gap:18px;align-items:flex-start;background:var(--ink);color:var(--paper);padding:24px;border:3px solid var(--ink);}
+  .step .n{font-family:"Anton",sans-serif;font-size:2.6rem;color:var(--yellow);line-height:1;}
+  .step h3{color:var(--paper);font-size:1.3rem;margin-bottom:8px;}
+  .step p{margin:0;color:#d8d2c6;font-size:.96rem;}
+  .step a{color:var(--yellow);}
+  .step a:hover{background:var(--red);color:var(--paper);}
+  @media(max-width:760px){.steps{grid-template-columns:1fr;}}
+
+  /* letter */
+  .letter-wrap{border:3px solid var(--ink);background:var(--paper);box-shadow:var(--shadow);}
+  .letter-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--ink);color:var(--paper);padding:12px 18px;}
+  .letter-bar .mono{color:var(--paper);}
+  .letter-body{padding:28px;max-height:420px;overflow:auto;font-size:1rem;}
+  .letter-body p{margin:0 0 14px;}
+  .letter-body .sig{font-style:italic;color:var(--ink-soft);}
+  .copybtn{background:var(--yellow);color:var(--ink);border:2px solid var(--paper);font-family:"Space Mono",monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:8px 14px;cursor:pointer;}
+  .copybtn:hover{background:var(--red);color:var(--paper);}
+  .copybtn.copied{background:var(--teal);color:var(--paper);}
+
+  /* officials */
+  .gov-band{background:var(--ink);color:var(--paper);border:3px solid var(--ink);padding:26px;margin-bottom:26px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px;align-items:center;}
+  .gov-band h3{color:var(--yellow);font-size:1.7rem;}
+  .gov-band p{margin:6px 0 0;color:#d8d2c6;font-size:.92rem;max-width:46ch;}
+  .gov-band a{color:var(--yellow);}
+  .officials{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .official{border:3px solid var(--ink);background:var(--paper);padding:18px;}
+  .official .role{font-family:"Space Mono",monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--red-deep);}
+  .official .name{font-family:"Anton",sans-serif;font-size:1.35rem;text-transform:uppercase;margin:4px 0 12px;line-height:1;}
+  .official .contact{display:flex;flex-direction:column;gap:6px;font-size:.9rem;font-family:"Space Mono",monospace;}
+  .official .contact a{word-break:break-all;}
+  @media(max-width:860px){.officials{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:540px){.officials{grid-template-columns:1fr;}}
+
+  .cities-note{margin-top:30px;border-left:6px solid var(--red);background:var(--paper-2);padding:18px 22px;}
+  .cities{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px;}
+  .city{border:2px solid var(--ink);padding:14px 16px;background:var(--paper);}
+  .city b{font-family:"Anton",sans-serif;font-weight:400;letter-spacing:.02em;font-size:1.05rem;text-transform:uppercase;}
+  .city .meet{display:block;font-size:.86rem;color:var(--ink-soft);margin-top:4px;}
+  @media(max-width:620px){.cities{grid-template-columns:1fr;}}
+
+  /* resources */
+  .res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;}
+  .res-col h3{font-size:1.3rem;border-bottom:3px solid var(--red);padding-bottom:8px;margin-bottom:14px;}
+  .res-col ul{list-style:none;margin:0;padding:0;}
+  .res-col li{padding:8px 0;border-bottom:1px dashed var(--ink-soft);font-size:.95rem;}
+  @media(max-width:760px){.res-grid{grid-template-columns:1fr;}}
+
+  /* footer */
+  footer{background:var(--ink);color:var(--paper);border-top:5px solid var(--red);margin-top:40px;}
+  .foot-inner{max-width:1100px;margin:0 auto;padding:56px 20px;display:grid;grid-template-columns:1.3fr 1fr;gap:30px;}
+  footer h2{font-size:clamp(2rem,6vw,3.6rem);color:var(--paper);}
+  footer h2 em{color:var(--red);font-style:normal;}
+  footer .mono{color:var(--yellow);}
+  footer a{color:var(--yellow);}
+  footer a:hover{background:var(--red);color:var(--paper);}
+  .foot-cta{display:flex;flex-direction:column;gap:12px;justify-content:center;}
+  .foot-legal{border-top:1px solid #2c2622;color:#9a948a;font-family:"Space Mono",monospace;font-size:.68rem;letter-spacing:.08em;padding:18px 20px;text-align:center;text-transform:uppercase;}
+  @media(max-width:760px){.foot-inner{grid-template-columns:1fr;}}
+
+  /* reveal on load / scroll */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1;transform:none;}
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+    .ticker .track,.brand .dot{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top"><span class="dot"></span><b>FLOCK OFF, COBB</b></a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="menu">Menu</button>
+    <nav id="menu">
+      <ul>
+        <li><a href="#case">The Case</a></li>
+        <li><a href="#act">Take Action</a></li>
+        <li><a href="#letter">The Letter</a></li>
+        <li><a href="#officials">Officials</a></li>
+        <li><a href="#resources">Resources</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<a id="top"></a>
+<div class="hero viewfinder reveal">
+  <span class="vf-tr"></span><span class="vf-br"></span>
+  <div class="hero-copy">
+    <span class="eyebrow mono"><span class="rec">●&nbsp;REC</span>&nbsp;Cobb County, Georgia</span>
+    <h1 class="title"><span class="l1">Flock</span><span class="l2">Off, Cobb.</span></h1>
+    <p class="subhead">Cancel the contract. Take the cameras down.</p>
+    <p class="lede">A campaign by local, concerned residents to remove Flock Safety automated license plate readers — and the warrantless, nationwide surveillance they enable — from Cobb County.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#letter">✊ Send the Letter</a>
+      <a class="btn btn-ghost" href="#officials">☎ Contact Officials</a>
+    </div>
+  </div>
+  <div class="hero-art">
+    <img class="frame" src="assets/img0.jpeg" alt="Comic illustration of a red robotic surveillance bird, the mascot of the Flock Off Cobb campaign" />
+    <p class="art-credit mono">Art by Marietta artist Justin · @mind_invader_comics</p>
+  </div>
+</div>
+
+<div class="ticker" aria-hidden="true">
+  <div class="track">
+    <span>No warrant&nbsp;<span class="x">✕</span>&nbsp;No oversight&nbsp;<span class="x">✕</span>&nbsp;No consent&nbsp;<span class="x">✕</span>&nbsp;Shared with ICE&nbsp;<span class="x">✕</span>&nbsp;Hackable in under a minute&nbsp;<span class="x">✕</span>&nbsp;Logins found on the dark web&nbsp;<span class="x">✕</span>&nbsp;</span>
+    <span>No warrant&nbsp;<span class="x">✕</span>&nbsp;No oversight&nbsp;<span class="x">✕</span>&nbsp;No consent&nbsp;<span class="x">✕</span>&nbsp;Shared with ICE&nbsp;<span class="x">✕</span>&nbsp;Hackable in under a minute&nbsp;<span class="x">✕</span>&nbsp;Logins found on the dark web&nbsp;<span class="x">✕</span>&nbsp;</span>
+  </div>
+</div>
+
+<!-- THE CASE -->
+<section id="case" class="reveal">
+  <div class="sec-head"><span class="num">01</span><h2>The Case</h2></div>
+  <p style="max-width:62ch;margin:-14px 0 30px;font-size:1.1rem;">Overwhelming evidence from recent public records releases and national reporting shows our personal travel data — accessed without warrants — has been grossly mishandled by Flock Safety and the agencies it sells to. These talking points work for the County <em>and</em> for any city with an active contract.</p>
+  <div class="cards">
+    <article class="card">
+      <span class="tag">Profit Motive</span>
+      <h3>Fear is the business model</h3>
+      <p>Flock and rival ALPR vendors are private, for-profit companies. Their revenue grows with the perceived threat of crime — they have no business interest in actually ending it. Flock is now valued at $8.4 billion.</p>
+      <p class="src"><a href="https://techstartups.com/2026/04/17/flock-safety-hits-8-4b-valuation-as-ai-powered-police-tech-sparks-nationwide-protests/">Source: TechStartups →</a></p>
+    </article>
+    <article class="card">
+      <span class="tag">Tracking People</span>
+      <h3>Built to jump from plate to person</h3>
+      <p>Leaked materials show Flock building a tool to "jump from LPR to person," letting police identify and track specific individuals across the country — no warrant, no court order.</p>
+      <p class="src"><a href="https://www.404media.co/license-plate-reader-company-flock-is-building-a-massive-people-lookup-tool-leak-shows/">Source: 404 Media →</a></p>
+    </article>
+    <article class="card">
+      <span class="tag">ICE Access</span>
+      <h3>No firewall against ICE</h3>
+      <p>Once data is collected, it can be reached for immigration enforcement. Even where Cobb PD has a "strong" policy, the agencies it shares with may have a weak policy — or none at all.</p>
+      <p class="src"><a href="https://www.404media.co/ice-taps-into-nationwide-ai-enabled-camera-network-data-shows/">Source: 404 Media →</a></p>
+    </article>
+    <article class="card">
+      <span class="tag">Security</span>
+      <h3>Hackable. And already breached.</h3>
+      <p>Researchers showed Flock cameras can be compromised with simple tools in under a minute. A "side door" gave Customs &amp; Border Patrol secret access to 80,000+ cameras, and portal logins have surfaced on the dark web.</p>
+      <p class="src"><a href="https://stateofsurveillance.org/news/flock-safety-cameras-exposed-no-password-2026/">Source: State of Surveillance →</a> · <a href="https://myprivacy.blog/federal-surveillance-exposed-how-cbp-gained-secret-access-to-over-80-000-ai-cameras-nationwide/">CBP side door →</a></p>
+    </article>
+    <article class="card">
+      <span class="tag">Abuse</span>
+      <h3>Used to stalk and target</h3>
+      <p>Officers have used ALPR networks to track women who had abortions, to follow ex-partners, and to stalk people for personal reasons. The accountability "audits" Flock offers are too unwieldy for most agencies to actually use.</p>
+      <p class="src"><a href="https://www.404media.co/cops-keep-getting-arrested-for-using-flock-to-stalk-people/">Source: 404 Media →</a></p>
+    </article>
+    <article class="card">
+      <span class="tag">The Law</span>
+      <h3>Courts are taking notice</h3>
+      <p>Residents of Norfolk, Virginia are suing over ALPRs as a Fourth Amendment violation, with similar suits in San Jose and Oakland. Mass, suspicionless tracking of ordinary drivers is a costly legal liability.</p>
+      <p class="src"><a href="https://ij.org/wp-content/uploads/2024/10/2024.10.21-1-Complaint.pdf">Source: Institute for Justice →</a></p>
+    </article>
+  </div>
+</section>
+
+<!-- TAKE ACTION -->
+<section id="act" class="reveal">
+  <div class="sec-head"><span class="num">02</span><h2>Take Action</h2></div>
+  <div class="steps">
+    <div class="step">
+      <span class="n">1</span>
+      <div>
+        <h3>Sign on to the campaign</h3>
+        <p>Add your name and stay in the loop. Questions? Email us at <a href="mailto:deflockcobb@proton.me">deflockcobb@proton.me</a> and opt in to be listed as a supporter.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <div>
+        <h3>Email your officials</h3>
+        <p>Cobb County and several cities still have active Flock contracts. Copy the letter below, personalize it, and send it to the <a href="#officials">Board of Commissioners</a> or your city council.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <div>
+        <h3>Call &amp; show up</h3>
+        <p>A phone call carries weight. Ask your reps to agendize an item to cancel the Flock contract — then say it out loud at a public meeting.</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">4</span>
+      <div>
+        <h3>Spread the word</h3>
+        <p>Share this page with neighbors. The more residents who speak up across Cobb's cities, the harder this is for officials to ignore.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE LETTER -->
+<section id="letter" class="reveal">
+  <div class="sec-head"><span class="num">03</span><h2>The Letter</h2></div>
+  <p style="max-width:62ch;margin:-14px 0 26px;font-size:1.1rem;">Copy this, edit it in your own voice, and send it to your commissioners or council members. A personal sentence at the top makes it far more effective.</p>
+  <div class="letter-wrap">
+    <div class="letter-bar">
+      <span class="mono">DRAFT · COPY &amp; PASTE</span>
+      <button class="copybtn" id="copyLetter" type="button">Copy letter</button>
+    </div>
+    <div class="letter-body" id="letterText">
+      <p><strong>Dear Commissioners / Council members:</strong></p>
+      <p>Flock cameras and automated license plate readers were approved by our commissioners or city council and installed in our communities. These cameras have been used in cooperation with ICE and federal agents to conduct clearly unconstitutional immigration "enforcement," to track women who have had abortions, and by officers to stalk ex-partners and other people for personal reasons.</p>
+      <p>As recent audits of our local data have confirmed, and as national reporting has shown over the past six months, the information these cameras collect is accessible not just by police departments nationwide, but by ICE. We are quickly becoming a mass-surveillance nation. Is this what we really want?</p>
+      <p>Residents across the political spectrum already feel their data is unprotected and exposed — to every level of government and to private, even multinational, companies. Residents of Norfolk, Virginia are suing their city over ALPR installation as a violation of the Fourth Amendment's protection against unreasonable searches.</p>
+      <p>Flock is a private company with one goal: to make money. It is partially funded by Peter Thiel's Founders Fund, which also bankrolls Palantir, a surveillance tool used by ICE and Border Patrol to target migrants. Flock has been caught in national reporting making one false statement after another about its technological controls and security. Researchers have shown Flock cameras can be hacked with simple tools in under a minute. There is no way to secure the data this faulty technology collects, and handing the current federal government more of our private travel data is dangerous and unacceptable.</p>
+      <p>Your job is to protect our residents — our constitutional rights, our privacy, and our safety, including our travel data. The only acceptable option is to <strong>cancel the contract and remove the cameras.</strong> Protect our residents' privacy and prevent a costly civil-liberties lawsuit like those underway in San Jose, Oakland, and Norfolk.</p>
+      <p>We must stop building mass-surveillance infrastructure, especially under an authoritarian-leaning regime. Cancel the Flock contract immediately and take the cameras down. If they cannot come down at once, cover them — and hold public hearings on this critical data-security and civil-rights issue.</p>
+      <p class="sig">Yours truly,<br/>[Your name]</p>
+    </div>
+  </div>
+</section>
+
+<!-- OFFICIALS -->
+<section id="officials" class="reveal">
+  <div class="sec-head"><span class="num">04</span><h2>Reach Cobb Officials</h2></div>
+  <div class="gov-band">
+    <div>
+      <h3>Cobb Board of Commissioners</h3>
+      <p>Call, email, and — if you can — meet in person. Ask them to agendize an item to cancel the Flock contract and take the cameras down. Regular meetings: 2nd &amp; 4th Tuesday, 7&nbsp;PM, Cobb Administration Building, 100 Cherokee St, Marietta.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a class="btn btn-primary" href="https://www.cobbcounty.gov/board/county-clerk/agenda-minutes">Meeting agendas →</a>
+      <a class="btn btn-ghost" style="background:var(--yellow);" href="https://www.cobbcounty.gov/board/county-clerk/public-meetings">Meeting calendar →</a>
+    </div>
+  </div>
+  <div class="officials">
+    <div class="official">
+      <span class="role">Commission Chairwoman</span>
+      <div class="name">Lisa Cupid</div>
+      <div class="contact"><a href="tel:+17705283305">(770) 528-3305</a><a href="mailto:lisa.cupid@cobbcounty.gov">lisa.cupid@cobbcounty.gov</a></div>
+    </div>
+    <div class="official">
+      <span class="role">District 1 Commissioner</span>
+      <div class="name">Keli Gambrill</div>
+      <div class="contact"><a href="tel:+17705283313">(770) 528-3313</a><a href="mailto:keli.gambrill@cobbcounty.gov">keli.gambrill@cobbcounty.gov</a></div>
+    </div>
+    <div class="official">
+      <span class="role">District 2 Commissioner</span>
+      <div class="name">Erick Allen</div>
+      <div class="contact"><a href="tel:+17705283315">(770) 528-3315</a><a href="mailto:erick.allen@cobbcounty.gov">erick.allen@cobbcounty.gov</a></div>
+    </div>
+    <div class="official">
+      <span class="role">District 3 Commissioner</span>
+      <div class="name">JoAnn K. Birrell</div>
+      <div class="contact"><a href="tel:+17705283317">(770) 528-3317</a><a href="mailto:joann.birrell@cobbcounty.gov">joann.birrell@cobbcounty.gov</a></div>
+    </div>
+    <div class="official">
+      <span class="role">District 4 Commissioner</span>
+      <div class="name">Monique Sheffield</div>
+      <div class="contact"><a href="tel:+17705283312">(770) 528-3312</a><a href="mailto:monique.sheffield@cobbcounty.gov">monique.sheffield@cobbcounty.gov</a></div>
+    </div>
+  </div>
+
+  <div class="cities-note">
+    <p style="margin:0 0 4px;"><strong>Several Cobb cities have their own contracts.</strong> Council email lists are being compiled — for now, find your agenda below and show up. <span class="mono">Got a council contact? Email deflockcobb@proton.me</span></p>
+    <div class="cities">
+      <div class="city"><b>Acworth</b><span class="meet">Council meeting agendas · <a href="https://acworth-ga.gov/agenda/">acworth-ga.gov →</a></span></div>
+      <div class="city"><b>Austell</b><span class="meet">1st Monday, 7 PM · <a href="https://austell-ga.municodemeetings.com/">agendas →</a></span></div>
+      <div class="city"><b>Kennesaw</b><span class="meet">1st &amp; 3rd Monday, 6:30 PM · <a href="https://kennesawga.portal.civicclerk.com/">agendas →</a></span></div>
+      <div class="city"><b>Mableton</b><span class="meet">2nd &amp; 4th Wednesday, 6:30 PM · <a href="https://mabletonga.portal.civicclerk.com/">agendas →</a></span></div>
+      <div class="city"><b>Marietta</b><span class="meet">2nd Wednesday, 7 PM · <a href="https://www.mariettaga.gov/agendacenter">agendas →</a></span></div>
+      <div class="city"><b>Powder Springs</b><span class="meet">3rd Wednesday, 7 PM · <a href="https://www.powderspringsga.gov/501/City-Council-Meeting-Dates">agendas →</a></span></div>
+      <div class="city"><b>Smyrna</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.smyrnaga.gov/departments/office-of-the-city-clerk/upcoming-meetings-and-agendas-calendar">agendas →</a></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESOURCES -->
+<section id="resources" class="reveal">
+  <div class="sec-head"><span class="num">05</span><h2>Resources</h2></div>
+  <div class="res-grid">
+    <div class="res-col">
+      <h3>Media Coverage</h3>
+      <ul>
+        <li><a href="https://www.404media.co/cbp-had-access-to-more-than-80-000-flock-ai-cameras-nationwide/">CBP had access to 80,000+ Flock cameras nationwide</a> — 404 Media</li>
+        <li><a href="https://www.404media.co/flock-logins-exposed-in-malware-infections-senator-asks-ftc-to-investigate-the-company/">Flock logins exposed in malware infections; senator asks FTC to investigate</a> — 404 Media</li>
+        <li><a href="https://www.9news.com/article/tech/researchers-claim-flock-cameras-are-easy-to-hack/73-6c805b4a-7b64-4d71-828e-961dda84b8e5">Researchers: Flock cameras are easy to hack</a> — 9News</li>
+        <li><a href="https://www.sfchronicle.com/bayarea/article/flock-safety-19852696.php">AI car-tracking cameras called unconstitutional in lawsuit</a> — SF Chronicle</li>
+      </ul>
+    </div>
+    <div class="res-col">
+      <h3>Lawsuits &amp; Legal</h3>
+      <ul>
+        <li><a href="https://ij.org/wp-content/uploads/2024/10/2024.10.21-1-Complaint.pdf">Norfolk, VA Fourth Amendment complaint</a> — Institute for Justice</li>
+        <li><a href="https://www.kqed.org/news/12064587/civil-liberties-groups-sue-san-jose-over-license-plate-reader-use">Civil-liberties groups sue San Jose over ALPRs</a> — KQED</li>
+        <li><a href="https://sfstandard.com/2025/11/18/oakland-police-opd-lawsuit-flock-surveillance/">Oakland sued over Flock surveillance</a> — SF Standard</li>
+        <li><a href="https://constitution.congress.gov/constitution/amendment-4/">The Fourth Amendment</a> — Constitution Annotated</li>
+      </ul>
+    </div>
+    <div class="res-col">
+      <h3>Other Communities</h3>
+      <ul>
+        <li><a href="https://deflock.me/">DeFlock</a> — crowdsourced national map of Flock camera locations</li>
+        <li><a href="https://www.gettheflockout.org/">Get The Flock Out</a> — Santa Cruz County campaign</li>
+        <li><a href="https://www.eff.org/">Electronic Frontier Foundation</a> — surveillance &amp; privacy advocacy</li>
+        <li><a href="https://oaklandprivacy.org/ca-automated-license-plate-readers-alpr-and-ice/">Oakland Privacy</a> — ALPRs &amp; ICE</li>
+      </ul>
+    </div>
+    <div class="res-col">
+      <h3>Dig Into the Data</h3>
+      <ul>
+        <li><a href="https://www.cobbcounty.gov/board">Cobb Board of Commissioners</a> — official county page</li>
+        <li><a href="https://transparency.flocksafety.com/">Flock transparency portals</a> — agency-by-agency usage</li>
+        <li><a href="https://docs.google.com/document/d/1Z7AOSbm2zifC6-jxwRuFlL68NG9FHwNpEmdhh7Qgt0E/edit">Full resource doc</a> — for researchers, residents &amp; reporters</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <div>
+      <span class="mono">The ask is simple</span>
+      <h2>Cancel the<br/>contract. <em>Remove<br/>the cameras.</em></h2>
+    </div>
+    <div class="foot-cta">
+      <a class="btn btn-primary" href="mailto:deflockcobb@proton.me">✉ deflockcobb@proton.me</a>
+      <a class="btn btn-ghost" style="background:var(--yellow);" href="#letter">Send the letter →</a>
+      <p class="mono" style="color:#9a948a;">"Flock Off — Cobb" · organized by local, concerned residents.</p>
+    </div>
+  </div>
+  <div class="foot-legal">Not affiliated with Flock Safety. Built by Cobb County residents · Art by Justin @mind_invader_comics</div>
+</footer>
+
+<script>
+  // mobile menu
+  const toggle = document.querySelector('.nav-toggle');
+  const menu = document.getElementById('menu');
+  toggle.addEventListener('click', () => {
+    const open = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open);
+  });
+  menu.addEventListener('click', e => { if(e.target.tagName === 'A') menu.classList.remove('open'); });
+
+  // copy the letter
+  const copyBtn = document.getElementById('copyLetter');
+  copyBtn.addEventListener('click', async () => {
+    const text = document.getElementById('letterText').innerText.trim();
+    try {
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = '✓ Copied!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => { copyBtn.textContent = 'Copy letter'; copyBtn.classList.remove('copied'); }, 2200);
+    } catch {
+      const r = document.createRange(); r.selectNode(document.getElementById('letterText'));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      copyBtn.textContent = 'Press Ctrl/Cmd+C';
+    }
+  });
+
+  // scroll reveals
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // scrollspy active nav
+  const links = [...document.querySelectorAll('nav a')];
+  const sections = links.map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if(en.isIntersecting){
+        links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + en.target.id));
+      }
+    });
+  }, {rootMargin:'-45% 0px -50% 0px'});
+  sections.forEach(s => spy.observe(s));
+</script>
+</body>
+</html>
