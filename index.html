@@ -149,7 +149,14 @@
   .leaflet-container{font-family:"Space Mono",monospace;background:#e9e4d8;}
   .leaflet-bar a{color:var(--ink);}
   .leaflet-popup-content{font-family:"Spectral",serif;}
-  @media(max-width:680px){#cobbmap{height:360px;}}
+  /* draggable "home" pin + live readout */
+  .home-pin .dotp{display:block;width:16px;height:16px;border-radius:50%;background:var(--teal);border:2px solid var(--ink);box-shadow:0 0 0 4px rgba(31,111,139,.28);cursor:grab;}
+  .home-pin:active .dotp{cursor:grabbing;}
+  .map-readout{font-family:"Space Mono",monospace;background:var(--paper);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:9px 12px;min-width:158px;line-height:1.25;}
+  .map-readout .ro-num{font-family:"Anton",sans-serif;font-size:1.95rem;color:var(--red-deep);letter-spacing:.01em;}
+  .map-readout .ro-label{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink);margin-top:1px;}
+  .map-readout .ro-sub{font-size:.63rem;color:var(--ink-soft);margin-top:6px;border-top:1px dashed rgba(58,52,47,.4);padding-top:5px;}
+  @media(max-width:680px){#cobbmap{height:360px;}.map-readout{min-width:0;padding:7px 9px;}.map-readout .ro-num{font-size:1.6rem;}}
 
   /* ---------- SECTIONS ---------- */
   section{max-width:1100px;margin:0 auto;padding:72px 20px;scroll-margin-top:72px;}
@@ -548,6 +555,53 @@
             lyr.bindPopup(b + "<br><span style='font-size:.85em'>Automated license plate reader</span>");
           }
         }).addTo(map);
+
+        // ---- Draggable "home" pin: live count of cameras within 1 mile ----
+        const cams = data.features
+          .filter(f => f.geometry && f.geometry.type === "Point" && f.geometry.coordinates)
+          .map(f => L.latLng(f.geometry.coordinates[1], f.geometry.coordinates[0]));
+        const MILE = 1609.34, RADIUS = MILE; // 1 mile
+        const start = map.getCenter();
+
+        const ring = L.circle(start, {
+          radius: RADIUS, color: "#1f6f8b", weight: 2, dashArray: "4 4",
+          fillColor: "#1f6f8b", fillOpacity: 0.08, interactive: false
+        }).addTo(map);
+
+        const home = L.marker(start, {
+          icon: L.divIcon({ className: "home-pin", html: '<span class="dotp"></span>', iconSize: [16,16], iconAnchor: [8,8] }),
+          draggable: true, autoPan: true, zIndexOffset: 1000, keyboard: false
+        }).addTo(map);
+        home.bindTooltip("Drag me to your neighborhood", { direction: "top", offset: [0,-9] });
+
+        const readout = L.control({ position: "topright" });
+        readout.onAdd = function(){
+          this._div = L.DomUtil.create("div", "map-readout");
+          L.DomEvent.disableClickPropagation(this._div);
+          return this._div;
+        };
+        readout.addTo(map);
+
+        function update(latlng){
+          ring.setLatLng(latlng);
+          let within = 0, nearest = Infinity;
+          for(const c of cams){
+            const d = latlng.distanceTo(c);
+            if(d <= RADIUS) within++;
+            if(d < nearest) nearest = d;
+          }
+          const nearStr = nearest < 0.1 * MILE
+            ? Math.round(nearest * 3.28084) + " ft"
+            : (nearest / MILE).toFixed(1) + " mi";
+          readout._div.innerHTML =
+            '<div class="ro-num">' + within + '</div>' +
+            '<div class="ro-label">ALPR cameras within 1 mile</div>' +
+            '<div class="ro-sub">Nearest: ' + nearStr + ' &middot; drag the blue pin</div>';
+        }
+
+        home.on("drag", e => update(e.latlng));
+        home.on("dragend", e => update(e.target.getLatLng()));
+        update(start);
       })
       .catch(() => {});
   })();
