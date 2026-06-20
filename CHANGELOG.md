@@ -5,6 +5,7 @@ All notable changes to the Flock Off Cobb site are recorded here.
 ## 2026-06-20
 
 ### Added
+- Subtle risograph "misregistration" effect: Anton headings get a red/teal channel split on hover (hover-capable devices only; transition disabled under prefers-reduced-motion).
 - Live "next meeting" countdown on each city card (all except Acworth, which has no published recurring schedule). Computed client-side from each council's recurring rule, locked to America/New_York with DST-correct math, including the Powder Springs July–Sept "3rd Monday only" exception. No backend or ongoing maintenance for the regular cadence.
 - Caveat note under the city grid: countdowns are estimates; confirm via the agenda link before showing up.
 

@@ -52,7 +52,14 @@
   }
   a{color:var(--red-deep);text-underline-offset:3px;text-decoration-thickness:1.5px;}
   a:hover{color:var(--ink);background:var(--yellow);}
-  h1,h2,h3{font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:.92;letter-spacing:.01em;margin:0;}
+  h1,h2,h3{font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:.92;letter-spacing:.01em;margin:0;text-shadow:0 0 0 rgba(0,0,0,0),0 0 0 rgba(0,0,0,0);transition:text-shadow .18s ease;}
+  /* riso misregistration: red/teal channel split on hover */
+  @media(hover:hover){
+    h1:hover,h2:hover,h3:hover{text-shadow:-1.5px 0 0 var(--red),1.5px 0 0 var(--teal);}
+  }
+  @media(prefers-reduced-motion:reduce){
+    h1,h2,h3{transition:none;}
+  }
   .mono{font-family:"Space Mono",monospace;text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;}
 
   /* ---------- NAV ---------- */
