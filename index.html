@@ -133,6 +133,17 @@
   .ticker .x{color:var(--red);margin:0 18px;}
   @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
+  /* ---------- MAP ---------- */
+  .map-frame{border:5px solid var(--ink);box-shadow:var(--shadow);background:var(--ink);}
+  .map-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--ink);color:var(--paper);padding:12px 18px;border-bottom:3px solid var(--red);}
+  .map-bar .mono{color:var(--paper);}
+  .map-bar a.mono{color:var(--yellow);text-decoration:none;}
+  .map-bar a.mono:hover{background:var(--red);color:var(--paper);}
+  .map-bar .mono:first-child{display:inline-flex;align-items:center;gap:7px;}
+  .map-frame iframe{display:block;width:100%;height:540px;border:0;background:#0a0a0f;}
+  .map-cap{margin-top:14px;font-family:"Space Mono",monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);}
+  @media(max-width:680px){.map-frame iframe{height:420px;}}
+
   /* ---------- SECTIONS ---------- */
   section{max-width:1100px;margin:0 auto;padding:72px 20px;scroll-margin-top:72px;}
   .sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:36px;border-bottom:4px solid var(--ink);padding-bottom:14px;}
@@ -231,6 +242,7 @@
     <button class="nav-toggle" aria-expanded="false" aria-controls="menu">Menu</button>
     <nav id="menu">
       <ul>
+        <li><a href="#map">The Map</a></li>
         <li><a href="#case">The Case</a></li>
         <li><a href="#act">Take Action</a></li>
         <li><a href="#letter">The Letter</a></li>
@@ -266,6 +278,20 @@
     <span>No warrant&nbsp;<span class="x">✕</span>&nbsp;No oversight&nbsp;<span class="x">✕</span>&nbsp;No consent&nbsp;<span class="x">✕</span>&nbsp;Shared with ICE&nbsp;<span class="x">✕</span>&nbsp;Hackable in under a minute&nbsp;<span class="x">✕</span>&nbsp;Logins found on the dark web&nbsp;<span class="x">✕</span>&nbsp;</span>
   </div>
 </div>
+
+<!-- THE MAP -->
+<section id="map" class="reveal">
+  <div class="sec-head"><span class="num">00</span><h2>The Cameras Are Already Here</h2></div>
+  <p style="max-width:62ch;margin:-14px 0 26px;font-size:1.1rem;">Every marker below is an automated license plate reader logged by the DeFlock project. Pan and zoom around Cobb County, and notice how close the nearest one already sits to where you live, work, and drive.</p>
+  <div class="map-frame">
+    <div class="map-bar">
+      <span class="mono">● Live · ALPR cameras in Cobb</span>
+      <a class="mono" href="https://maps.deflock.org/#map=11/33.9150/-84.5800" target="_blank" rel="noopener">Open full map →</a>
+    </div>
+    <iframe src="https://maps.deflock.org/#map=11/33.9150/-84.5800" title="DeFlock map of automated license plate reader cameras in Cobb County, Georgia" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+  <p class="map-cap">Map data from <a href="https://deflock.org" target="_blank" rel="noopener">DeFlock</a>, a community project that crowdsources camera locations. If the map does not load, <a href="https://maps.deflock.org/#map=11/33.9150/-84.5800" target="_blank" rel="noopener">open it in a new tab</a>.</p>
+</section>
 
 <!-- THE CASE -->
 <section id="case" class="reveal">
