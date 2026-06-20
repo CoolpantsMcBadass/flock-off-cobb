@@ -650,17 +650,29 @@
              .replace(/#\s*[\w-]+/g, "")
           );
         }
-        // Build progressively looser query attempts; first hit wins
+        // Build progressively looser query attempts; first hit wins.
+        // Key trick: a street's mailing city often isn't its OSM admin city
+        // (e.g. Blackshear Dr has a "Marietta" mailing address but sits in
+        // unincorporated Cobb), so adding "Marietta" makes the lookup fail.
+        // We fall back to street + ZIP/state, dropping the city, trimming
+        // trailing tokens until something resolves.
         function addrVariants(raw){
           const base = cleanAddr(raw);
-          const list = [base];
           const noUnit = stripUnit(base);
-          if(noUnit && noUnit !== base) list.push(noUnit);
-          const hasState = /\b(?:ga|georgia)\b/i.test(base) || /\b\d{5}\b/.test(base);
-          if(!hasState){
-            list.push(cleanAddr(base + ", Georgia, USA"));
-            if(noUnit && noUnit !== base) list.push(cleanAddr(noUnit + ", Georgia, USA"));
+          const list = [base];
+          if(noUnit !== base) list.push(noUnit);
+
+          const zip = (base.match(/\b\d{5}\b/) || [])[0] || "";
+          const hasGA = /\b(?:ga|georgia)\b/i.test(base);
+          const region = zip ? ("GA " + zip) : "Georgia, USA";
+
+          let core = noUnit.replace(/\b\d{5}(?:-\d{4})?\b/g, "").replace(/\b(?:ga|georgia)\b/gi, "");
+          core = cleanAddr(core);
+          const tokens = core.split(/[\s,]+/).filter(Boolean);
+          for(let n = tokens.length; n >= 2 && list.length < 6; n--){
+            list.push(cleanAddr(tokens.slice(0, n).join(" ") + ", " + region));
           }
+          if(!zip && !hasGA) list.push(cleanAddr(noUnit + ", Georgia, USA"));
           return [...new Set(list)].filter(Boolean);
         }
         async function geocode(raw){

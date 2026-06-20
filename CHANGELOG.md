@@ -5,7 +5,7 @@ All notable changes to the Flock Off Cobb site are recorded here.
 ## 2026-06-20
 
 ### Fixed
-- Address lookup is far more forgiving: it now normalizes whitespace and stray/duplicate commas, and falls back through looser query variants when the first try fails — stripping apartment/unit/suite tokens (which made the geocoder return nothing) and adding a "Georgia, USA" hint for inputs with no state. Bumped to 5 candidate results. The original query is always tried first, so good addresses are unaffected.
+- Address lookup is far more forgiving. It normalizes whitespace and stray/duplicate commas, then falls back through looser query variants when the first try fails: strips apartment/unit/suite tokens (which made the geocoder return nothing), and — the big one — handles the common case where a street's mailing city isn't its OSM administrative city (e.g. a "Marietta, GA" address that actually sits in unincorporated Cobb). It detects the ZIP/state, drops the conflicting city, and trims trailing tokens until the street resolves. The original query is always tried first, so addresses that already worked are unaffected.
 
 ### Changed
 - Expanded the map's camera dataset from the Cobb-area bounding box (2,109 points) to the northern half of Georgia (6,878 points), re-pulled from OpenStreetMap via Overpass. Renamed `assets/cobb-cameras.geojson` → `assets/ga-alpr-cameras.geojson`. Map now uses a canvas renderer (`preferCanvas`) and a lower `minZoom` (7) to stay smooth and let users zoom out to the regional view.
