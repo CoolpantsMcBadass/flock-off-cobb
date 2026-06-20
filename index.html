@@ -634,6 +634,47 @@
         const form = document.getElementById("addrForm");
         const input = document.getElementById("addrInput");
         const statusEl = document.getElementById("addrStatus");
+
+        // Tidy whitespace and stray/duplicate commas a user might type
+        function cleanAddr(s){
+          return s.replace(/\s+/g, " ")
+                  .replace(/\s*,\s*/g, ", ")
+                  .replace(/(?:,\s*){2,}/g, ", ")
+                  .replace(/^[\s,]+|[\s,]+$/g, "")
+                  .trim();
+        }
+        // Drop apartment/unit/suite tokens, which make Nominatim return nothing
+        function stripUnit(s){
+          return cleanAddr(
+            s.replace(/[#,]?\s*\b(?:apt|apartment|unit|suite|ste|bldg|building|fl|floor|rm|room|lot|trlr)\b\.?\s*#?\s*[\w-]+/gi, "")
+             .replace(/#\s*[\w-]+/g, "")
+          );
+        }
+        // Build progressively looser query attempts; first hit wins
+        function addrVariants(raw){
+          const base = cleanAddr(raw);
+          const list = [base];
+          const noUnit = stripUnit(base);
+          if(noUnit && noUnit !== base) list.push(noUnit);
+          const hasState = /\b(?:ga|georgia)\b/i.test(base) || /\b\d{5}\b/.test(base);
+          if(!hasState){
+            list.push(cleanAddr(base + ", Georgia, USA"));
+            if(noUnit && noUnit !== base) list.push(cleanAddr(noUnit + ", Georgia, USA"));
+          }
+          return [...new Set(list)].filter(Boolean);
+        }
+        async function geocode(raw){
+          for(const q of addrVariants(raw)){
+            const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=us"
+              + "&viewbox=-85.75,35.05,-80.80,32.50&q=" + encodeURIComponent(q);
+            const r = await fetch(url, { headers: { Accept: "application/json" } });
+            if(!r.ok) continue;
+            const j = await r.json();
+            if(j && j.length) return j[0];
+          }
+          return null;
+        }
+
         form.addEventListener("submit", async (e) => {
           e.preventDefault();
           const q = input.value.trim();
@@ -641,16 +682,12 @@
           statusEl.className = "addr-status";
           statusEl.textContent = "Searching…";
           try {
-            const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us"
-              + "&viewbox=-85.75,35.05,-80.80,32.50&q=" + encodeURIComponent(q);
-            const r = await fetch(url, { headers: { Accept: "application/json" } });
-            const j = await r.json();
-            if(!j || !j.length){
+            const hit = await geocode(q);
+            if(!hit){
               statusEl.className = "addr-status err";
-              statusEl.textContent = "Couldn’t find that address. Try adding city and state — e.g. “123 Main St, Marietta GA”.";
+              statusEl.textContent = "Couldn’t find that one. Try just street + city, e.g. “590 Whitlock Ave, Marietta”.";
               return;
             }
-            const hit = j[0];
             place(L.latLng(+hit.lat, +hit.lon), true);
             statusEl.className = "addr-status";
             statusEl.textContent = "Pin dropped near " + hit.display_name.split(",").slice(0,3).join(",").trim() + ". Drag it to fine-tune.";
