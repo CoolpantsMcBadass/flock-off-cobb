@@ -4,6 +4,10 @@ All notable changes to the Flock Off Cobb site are recorded here.
 
 ## 2026-06-20
 
+### Added
+- Live "next meeting" countdown on each city card (all except Acworth, which has no published recurring schedule). Computed client-side from each council's recurring rule, locked to America/New_York with DST-correct math, including the Powder Springs July–Sept "3rd Monday only" exception. No backend or ongoing maintenance for the regular cadence.
+- Caveat note under the city grid: countdowns are estimates; confirm via the agenda link before showing up.
+
 ### Changed
 - Art credit now reads "Art by Marietta artist @mind_invader_comics" (removed first name) in both the main credit and the footer.
 

@@ -203,6 +203,10 @@
   .city{border:2px solid var(--ink);padding:14px 16px;background:var(--paper);}
   .city b{font-family:"Anton",sans-serif;font-weight:400;letter-spacing:.02em;font-size:1.05rem;text-transform:uppercase;}
   .city .meet{display:block;font-size:.86rem;color:var(--ink-soft);margin-top:4px;}
+  .city .countdown{display:block;margin-top:9px;padding-top:8px;border-top:1px dashed rgba(58,52,47,.4);font-family:"Space Mono",monospace;font-size:.76rem;color:var(--ink-soft);letter-spacing:.01em;}
+  .city .countdown .cd-label{text-transform:uppercase;font-size:.64rem;letter-spacing:.09em;color:var(--ink);margin-right:2px;}
+  .city .countdown .cd-when{color:var(--red-deep);font-weight:700;white-space:nowrap;}
+  .cities-caveat{margin-top:16px;font-size:.78rem;font-style:italic;color:var(--ink-soft);line-height:1.5;}
   @media(max-width:620px){.cities{grid-template-columns:1fr;}}
 
   /* resources */
@@ -435,13 +439,14 @@
     <p style="margin:0 0 4px;"><strong>Several Cobb cities have their own contracts.</strong> We're still compiling council email lists, so for now, find your agenda below and show up. <span class="mono">Have a council contact to share? Email deflockcobb@proton.me</span></p>
     <div class="cities">
       <div class="city"><b>Acworth</b><span class="meet">Council meeting agendas · <a href="https://acworth-ga.gov/agenda/">acworth-ga.gov →</a></span></div>
-      <div class="city"><b>Austell</b><span class="meet">1st Monday, 7 PM · <a href="https://austell-ga.municodemeetings.com/">agendas →</a></span></div>
-      <div class="city"><b>Kennesaw</b><span class="meet">1st &amp; 3rd Monday, 6:30 PM · <a href="https://kennesawga.portal.civicclerk.com/">agendas →</a></span></div>
-      <div class="city"><b>Mableton</b><span class="meet">2nd &amp; 4th Wednesday, 6:30 PM · <a href="https://mabletonga.portal.civicclerk.com/">agendas →</a></span></div>
-      <div class="city"><b>Marietta</b><span class="meet">2nd Wednesday, 7 PM · <a href="https://www.mariettaga.gov/agendacenter">agendas →</a></span></div>
-      <div class="city"><b>Powder Springs</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.powderspringsga.gov/501/City-Council-Meeting-Dates">agendas →</a></span></div>
-      <div class="city"><b>Smyrna</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.smyrnaga.gov/departments/office-of-the-city-clerk/upcoming-meetings-and-agendas-calendar">agendas →</a></span></div>
+      <div class="city"><b>Austell</b><span class="meet">1st Monday, 7 PM · <a href="https://austell-ga.municodemeetings.com/">agendas →</a></span><span class="countdown" data-city="austell"></span></div>
+      <div class="city"><b>Kennesaw</b><span class="meet">1st &amp; 3rd Monday, 6:30 PM · <a href="https://kennesawga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="kennesaw"></span></div>
+      <div class="city"><b>Mableton</b><span class="meet">2nd &amp; 4th Wednesday, 6:30 PM · <a href="https://mabletonga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="mableton"></span></div>
+      <div class="city"><b>Marietta</b><span class="meet">2nd Wednesday, 7 PM · <a href="https://www.mariettaga.gov/agendacenter">agendas →</a></span><span class="countdown" data-city="marietta"></span></div>
+      <div class="city"><b>Powder Springs</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.powderspringsga.gov/501/City-Council-Meeting-Dates">agendas →</a></span><span class="countdown" data-city="powder"></span></div>
+      <div class="city"><b>Smyrna</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.smyrnaga.gov/departments/office-of-the-city-clerk/upcoming-meetings-and-agendas-calendar">agendas →</a></span><span class="countdown" data-city="smyrna"></span></div>
     </div>
+    <p class="cities-caveat">Countdowns are estimated from each council's regular meeting schedule. Meetings can be cancelled, moved, or specially called &mdash; always confirm the date via the agenda link before you show up.</p>
   </div>
 </section>
 
@@ -582,6 +587,65 @@
     });
   }, {rootMargin:'-45% 0px -50% 0px'});
   sections.forEach(s => spy.observe(s));
+
+  /* City council meeting countdowns — computed live from each council's
+     recurring rule. wd: 0=Sun..6=Sat. weeks: which nth-of-month occurrences.
+     Powder Springs meets only the 3rd Monday in Jul–Sep (summer override). */
+  (function(){
+    const TZ = 'America/New_York';
+    const SCHED = {
+      austell:  {wd:1, weeks:[1],   h:19, mi:0},
+      kennesaw: {wd:1, weeks:[1,3], h:18, mi:30},
+      mableton: {wd:3, weeks:[2,4], h:18, mi:30},
+      marietta: {wd:3, weeks:[2],   h:19, mi:0},
+      powder:   {wd:1, weeks:[1,3], h:19, mi:0, summer:[3]},
+      smyrna:   {wd:1, weeks:[1,3], h:19, mi:0}
+    };
+    function etToday(){
+      const p = new Intl.DateTimeFormat('en-US',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+      const g = t => +p.find(x => x.type === t).value;
+      return {y:g('year'), mo:g('month')-1, da:g('day')};
+    }
+    // UTC instant for a given Eastern wall-clock time (DST-correct)
+    function zoned(y, mo, da, h, mi){
+      const guess = Date.UTC(y, mo, da, h, mi), inv = new Date(guess);
+      const et  = new Date(inv.toLocaleString('en-US',{timeZone:TZ}));
+      const utc = new Date(inv.toLocaleString('en-US',{timeZone:'UTC'}));
+      return new Date(guess - (et.getTime() - utc.getTime()));
+    }
+    function nextMeeting(rule, now){
+      const t0 = etToday();
+      for(let i = 0; i < 90; i++){
+        const d = new Date(Date.UTC(t0.y, t0.mo, t0.da));
+        d.setUTCDate(d.getUTCDate() + i);
+        if(d.getUTCDay() !== rule.wd) continue;
+        const da = d.getUTCDate(), mo = d.getUTCMonth(), nth = Math.ceil(da/7);
+        let weeks = rule.weeks;
+        if(rule.summer && mo >= 6 && mo <= 8) weeks = rule.summer;
+        if(weeks.indexOf(nth) < 0) continue;
+        const t = zoned(d.getUTCFullYear(), mo, da, rule.h, rule.mi);
+        if(t.getTime() > now.getTime()) return t;
+      }
+      return null;
+    }
+    function rel(ms){
+      const days = Math.floor(ms / 864e5);
+      if(days >= 1) return 'in ' + days + ' day' + (days === 1 ? '' : 's');
+      const hrs = Math.floor(ms / 36e5);
+      if(hrs >= 1) return 'in ' + hrs + ' hour' + (hrs === 1 ? '' : 's');
+      return 'starting soon';
+    }
+    const now = new Date();
+    document.querySelectorAll('.countdown[data-city]').forEach(el => {
+      const rule = SCHED[el.dataset.city];
+      if(!rule) return;
+      const t = nextMeeting(rule, now);
+      if(!t){ el.style.display = 'none'; return; }
+      const date = t.toLocaleString('en-US',{timeZone:TZ,weekday:'short',month:'short',day:'numeric'});
+      const time = t.toLocaleString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+      el.innerHTML = '<span class="cd-label">Next</span>' + date + ' · ' + time + ' <span class="cd-when">' + rel(t - now) + '</span>';
+    });
+  })();
 </script>
 </body>
 </html>
