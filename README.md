@@ -8,6 +8,28 @@ Plain HTML/CSS/JS — no build step, no dependencies.
 ## Files
 - `index.html` — the entire site (styles + scripts are inline)
 - `assets/img0.jpeg` — campaign art by Justin (@mind_invader_comics)
+- `assets/cobb-cameras.geojson` — Cobb-area ALPR camera points for the map
+
+## The map
+The "Cameras Are Already Here" section is a self-hosted Leaflet map centered on
+Marietta, with red dots from `assets/cobb-cameras.geojson` (sourced from DeFlock /
+OpenStreetMap). It is a snapshot, not live. To refresh it, download the national data
+and re-filter to the Cobb-area bounding box:
+```
+curl -L -H "Referer: https://maps.deflock.org/" \
+  "https://data.dontgetflocked.com/cameras.geojson.gz" -o cams.json
+python3 - <<'PY'
+import json
+d=json.load(open("cams.json")); W,E,S,N=-84.95,-84.25,33.65,34.20
+out=[{"type":"Feature","geometry":{"type":"Point","coordinates":[round(c[0],6),round(c[1],6)]},
+      "properties":{"brand":(f.get("properties") or {}).get("brand","")}}
+     for f in d["features"]
+     for c in [ (f.get("geometry") or {}).get("coordinates") ]
+     if c and (f["geometry"]["type"]=="Point") and W<=c[0]<=E and S<=c[1]<=N]
+json.dump({"type":"FeatureCollection","features":out}, open("assets/cobb-cameras.geojson","w"))
+print(len(out),"cameras")
+PY
+```
 
 ## Preview locally
 ```

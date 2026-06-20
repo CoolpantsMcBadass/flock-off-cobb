@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Spectral:ital,wght@0,400;0,600;0,800;1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <style>
   :root{
     --paper:#f1ece0;
@@ -134,15 +135,14 @@
   @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
   /* ---------- MAP ---------- */
-  .map-frame{border:5px solid var(--ink);box-shadow:var(--shadow);background:var(--ink);}
-  .map-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--ink);color:var(--paper);padding:12px 18px;border-bottom:3px solid var(--red);}
-  .map-bar .mono{color:var(--paper);}
-  .map-bar a.mono{color:var(--yellow);text-decoration:none;}
-  .map-bar a.mono:hover{background:var(--red);color:var(--paper);}
-  .map-bar .mono:first-child{display:inline-flex;align-items:center;gap:7px;}
-  .map-frame iframe{display:block;width:100%;height:460px;border:0;background:#0a0a0f;}
-  .map-cap{margin-top:14px;font-family:"Space Mono",monospace;font-size:.78rem;text-transform:none;letter-spacing:.02em;color:var(--ink-soft);}
-  @media(max-width:680px){.map-frame iframe{height:360px;}}
+  .map-frame{border:5px solid var(--ink);box-shadow:var(--shadow);background:#e9e4d8;line-height:0;}
+  #cobbmap{width:100%;height:460px;background:#e9e4d8;}
+  .map-cap{margin-top:14px;font-family:"Space Mono",monospace;font-size:.78rem;letter-spacing:.02em;color:var(--ink-soft);line-height:1.5;}
+  .map-cap a{color:var(--red-deep);}
+  .leaflet-container{font-family:"Space Mono",monospace;background:#e9e4d8;}
+  .leaflet-bar a{color:var(--ink);}
+  .leaflet-popup-content{font-family:"Spectral",serif;}
+  @media(max-width:680px){#cobbmap{height:360px;}}
 
   /* ---------- SECTIONS ---------- */
   section{max-width:1100px;margin:0 auto;padding:72px 20px;scroll-margin-top:72px;}
@@ -282,15 +282,11 @@
 <!-- THE MAP -->
 <section id="map" class="reveal">
   <div class="sec-head"><span class="num">00</span><h2>The Cameras Are Already Here</h2></div>
-  <p style="max-width:62ch;margin:-14px 0 26px;font-size:1.1rem;">More than 660 automated license plate readers are mapped in and around Cobb County, and almost all of them are Flock Safety cameras. The map below is centered on Marietta. Pan and zoom it, and notice how close the nearest one already sits to where you live, work, and drive.</p>
+  <p style="max-width:62ch;margin:-14px 0 26px;font-size:1.1rem;">Each red dot is an automated license plate reader, almost all of them Flock Safety cameras. The map is centered on Marietta. Pan and zoom it, and notice how close the nearest one already sits to where you live, work, and drive.</p>
   <div class="map-frame">
-    <div class="map-bar">
-      <span class="mono"><span style="color:var(--red)">●</span> <b style="color:var(--yellow)">662</b> ALPR cameras in the Cobb area</span>
-      <a class="mono" href="https://maps.deflock.org/#map=12/33.9526/-84.5499" target="_blank" rel="noopener">Open full map →</a>
-    </div>
-    <iframe src="https://maps.deflock.org/#map=12/33.9526/-84.5499" title="DeFlock map of automated license plate reader cameras around Marietta and Cobb County, Georgia" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div id="cobbmap"></div>
   </div>
-  <p class="map-cap">About 96% are Flock Safety cameras. Counts come from <a href="https://deflock.org" target="_blank" rel="noopener">DeFlock</a>, a community project that crowdsources camera locations, and they change as new cameras are reported. If the map does not load, <a href="https://maps.deflock.org/#map=12/33.9526/-84.5499" target="_blank" rel="noopener">open it in a new tab</a>.</p>
+  <p class="map-cap">Camera locations from <a href="https://deflock.org" target="_blank" rel="noopener">DeFlock</a> and <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors. <a href="https://maps.deflock.org/#map=12/33.9526/-84.5499" target="_blank" rel="noopener">Open the full national map →</a></p>
 </section>
 
 <!-- THE CASE -->
@@ -506,7 +502,44 @@
   <div class="foot-legal">Not affiliated with Flock Safety. Built by Cobb County residents · Art by Justin @mind_invader_comics</div>
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
+  // ---- Cobb County camera map (Leaflet) ----
+  (function(){
+    if(typeof L === "undefined") return;
+    const map = L.map("cobbmap", {
+      center: [33.9526, -84.5499],   // Marietta, GA
+      zoom: 12,
+      scrollWheelZoom: false,        // don't hijack page scroll; click to zoom
+      minZoom: 9,
+      maxZoom: 18
+    });
+    map.on("focus", () => map.scrollWheelZoom.enable());
+    map.on("blur",  () => map.scrollWheelZoom.disable());
+
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a> &middot; cameras via <a href="https://deflock.org">DeFlock</a>',
+      subdomains: "abcd",
+      maxZoom: 20
+    }).addTo(map);
+
+    fetch("assets/cobb-cameras.geojson")
+      .then(r => r.json())
+      .then(data => {
+        const layer = L.geoJSON(data, {
+          pointToLayer: (feat, latlng) => L.circleMarker(latlng, {
+            radius: 5, color: "#161311", weight: 1,
+            fillColor: "#d6233a", fillOpacity: 0.85
+          }),
+          onEachFeature: (feat, lyr) => {
+            const b = (feat.properties && feat.properties.brand) || "ALPR camera";
+            lyr.bindPopup(b + "<br><span style='font-size:.85em'>Automated license plate reader</span>");
+          }
+        }).addTo(map);
+      })
+      .catch(() => {});
+  })();
+
   // mobile menu
   const toggle = document.querySelector('.nav-toggle');
   const menu = document.getElementById('menu');
