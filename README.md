@@ -7,28 +7,30 @@ Plain HTML/CSS/JS — no build step, no dependencies.
 
 ## Files
 - `index.html` — the entire site (styles + scripts are inline)
-- `assets/img0.jpeg` — campaign art by Justin (@mind_invader_comics)
-- `assets/cobb-cameras.geojson` — Cobb-area ALPR camera points for the map
+- `assets/img0.jpeg` — campaign art by @mind_invader_comics
+- `assets/ga-alpr-cameras.geojson` — ALPR camera points for the map (northern half of GA)
 
 ## The map
 The "Cameras Are Already Here" section is a self-hosted Leaflet map centered on
-Marietta, with red dots from `assets/cobb-cameras.geojson` (sourced from DeFlock /
-OpenStreetMap). It is a snapshot, not live. To refresh it, download the national data
-and re-filter to the Cobb-area bounding box:
+Marietta, with red dots from `assets/ga-alpr-cameras.geojson` (sourced from
+OpenStreetMap, the same data DeFlock uses). It covers the northern half of Georgia
+(lat 32.5–35.05) so the Cobb cluster reads in regional context. It is a snapshot, not
+live. To refresh it, re-query the Overpass API for ALPR-tagged nodes in that bbox:
 ```
-curl -L -H "Referer: https://maps.deflock.org/" \
-  "https://data.dontgetflocked.com/cameras.geojson.gz" -o cams.json
-python3 - <<'PY'
-import json
-d=json.load(open("cams.json")); W,E,S,N=-84.95,-84.25,33.65,34.20
-out=[{"type":"Feature","geometry":{"type":"Point","coordinates":[round(c[0],6),round(c[1],6)]},
-      "properties":{"brand":(f.get("properties") or {}).get("brand","")}}
-     for f in d["features"]
-     for c in [ (f.get("geometry") or {}).get("coordinates") ]
-     if c and (f["geometry"]["type"]=="Point") and W<=c[0]<=E and S<=c[1]<=N]
-json.dump({"type":"FeatureCollection","features":out}, open("assets/cobb-cameras.geojson","w"))
-print(len(out),"cameras")
-PY
+cat > /tmp/q.ql <<'EOF'
+[out:json][timeout:120];
+( node["man_made"="surveillance"]["surveillance:type"="ALPR"](32.5,-85.75,35.05,-80.8); );
+out body;
+EOF
+curl -s -A "flock-off-cobb/1.0" --data-urlencode "data@/tmp/q.ql" \
+  https://overpass-api.de/api/interpreter -o /tmp/alpr.json
+node -e '
+const fs=require("fs"),d=JSON.parse(fs.readFileSync("/tmp/alpr.json","utf8")),r=x=>Math.round(x*1e6)/1e6;
+const feats=d.elements.filter(e=>e.type==="node"&&e.lat!=null).map(e=>({type:"Feature",
+  geometry:{type:"Point",coordinates:[r(e.lon),r(e.lat)]},
+  properties:{brand:(e.tags&&(e.tags.manufacturer||e.tags.brand||e.tags.operator))||""}}));
+fs.writeFileSync("assets/ga-alpr-cameras.geojson",JSON.stringify({type:"FeatureCollection",features:feats}));
+console.log(feats.length,"cameras");'
 ```
 
 ## Preview locally

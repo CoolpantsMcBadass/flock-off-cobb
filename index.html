@@ -527,10 +527,11 @@
   (function(){
     if(typeof L === "undefined") return;
     const map = L.map("cobbmap", {
+      preferCanvas: true,            // canvas renderer stays smooth with thousands of markers
       center: [33.9526, -84.5499],   // Marietta, GA
       zoom: 11,
       scrollWheelZoom: false,        // don't hijack page scroll; click to zoom
-      minZoom: 9,
+      minZoom: 7,
       maxZoom: 18
     });
     map.on("focus", () => map.scrollWheelZoom.enable());
@@ -542,7 +543,7 @@
       maxZoom: 20
     }).addTo(map);
 
-    fetch("assets/cobb-cameras.geojson")
+    fetch("assets/ga-alpr-cameras.geojson")
       .then(r => r.json())
       .then(data => {
         const layer = L.geoJSON(data, {

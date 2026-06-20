@@ -4,6 +4,9 @@ All notable changes to the Flock Off Cobb site are recorded here.
 
 ## 2026-06-20
 
+### Changed
+- Expanded the map's camera dataset from the Cobb-area bounding box (2,109 points) to the northern half of Georgia (6,878 points), re-pulled from OpenStreetMap via Overpass. Renamed `assets/cobb-cameras.geojson` → `assets/ga-alpr-cameras.geojson`. Map now uses a canvas renderer (`preferCanvas`) and a lower `minZoom` (7) to stay smooth and let users zoom out to the regional view.
+
 ### Added
 - Interactive map: a draggable "home" pin (Red Blob Games-style explorable). Drag it anywhere and a live readout shows how many ALPR cameras sit within 1 mile and the distance to the nearest, with a dashed 1-mile radius ring. Counts computed from the real DeFlock camera data already on the map.
 - Subtle risograph "misregistration" effect: Anton headings get a red/teal channel split on hover (hover-capable devices only; transition disabled under prefers-reduced-motion).
