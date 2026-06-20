@@ -146,6 +146,16 @@
   #cobbmap{width:100%;height:460px;background:#e9e4d8;}
   .map-cap{margin-top:14px;font-family:"Space Mono",monospace;font-size:.78rem;letter-spacing:.02em;color:var(--ink-soft);line-height:1.5;}
   .map-cap a{color:var(--red-deep);}
+  /* address lookup tool */
+  .addr-tool{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:0 0 10px;}
+  .addr-tool input{flex:1 1 300px;min-width:0;font-family:"Space Mono",monospace;font-size:.95rem;padding:11px 13px;border:2px solid var(--ink);background:var(--paper);color:var(--ink);}
+  .addr-tool input:focus{outline:none;box-shadow:3px 3px 0 var(--ink);}
+  .addr-tool button{font-family:"Space Mono",monospace;text-transform:uppercase;letter-spacing:.08em;font-size:.8rem;font-weight:700;padding:11px 18px;border:2px solid var(--ink);background:var(--red);color:var(--paper);cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .05s ease;}
+  .addr-tool button:hover{background:var(--ink);color:var(--yellow);}
+  .addr-tool button:active{transform:translate(3px,3px);box-shadow:none;}
+  .addr-status{font-family:"Space Mono",monospace;font-size:.74rem;line-height:1.5;color:var(--ink-soft);margin:0 0 18px;}
+  .addr-status.err{color:var(--red-deep);}
+  .map-readout .ro-prompt{font-size:.72rem;line-height:1.45;color:var(--ink);max-width:172px;}
   .leaflet-container{font-family:"Space Mono",monospace;background:#e9e4d8;}
   .leaflet-bar a{color:var(--ink);}
   .leaflet-popup-content{font-family:"Spectral",serif;}
@@ -344,7 +354,12 @@
 <!-- THE MAP -->
 <section id="map" class="reveal">
   <div class="sec-head"><span class="num">02</span><h2>The Cameras Are Already Here</h2></div>
-  <p style="max-width:62ch;margin:-14px 0 26px;font-size:1.1rem;">Each red dot is an automated license plate reader, almost all of them Flock Safety cameras. The map is centered on Marietta. Pan and zoom it, and notice how close the nearest one already sits to where you live, work, and drive.</p>
+  <p style="max-width:62ch;margin:-14px 0 22px;font-size:1.1rem;">Each red dot is an automated license plate reader, almost all of them Flock Safety cameras. Type your address below to drop a pin and count how many already sit within a mile of where you live, work, and drive.</p>
+  <form class="addr-tool" id="addrForm" autocomplete="off">
+    <input id="addrInput" type="text" name="address" placeholder="Type your address or ZIP…" aria-label="Your address" />
+    <button type="submit">Show cameras near me</button>
+  </form>
+  <p class="addr-status" id="addrStatus">Enter an address (or just click the map) to drop a pin and count the ALPR cameras within one mile. Your address isn&rsquo;t stored &mdash; lookups run through OpenStreetMap.</p>
   <div class="map-frame">
     <div id="cobbmap"></div>
   </div>
@@ -564,16 +579,18 @@
         const MILE = 1609.34, RADIUS = MILE; // 1 mile
         const start = map.getCenter();
 
+        let placed = false;
+
         const ring = L.circle(start, {
           radius: RADIUS, color: "#1f6f8b", weight: 2, dashArray: "4 4",
           fillColor: "#1f6f8b", fillOpacity: 0.08, interactive: false
-        }).addTo(map);
+        }); // added to map on first placement
 
         const home = L.marker(start, {
           icon: L.divIcon({ className: "home-pin", html: '<span class="dotp"></span>', iconSize: [16,16], iconAnchor: [8,8] }),
           draggable: true, autoPan: true, zIndexOffset: 1000, keyboard: false
-        }).addTo(map);
-        home.bindTooltip("Drag me to your neighborhood", { direction: "top", offset: [0,-9] });
+        });
+        home.bindTooltip("Drag to fine-tune", { direction: "top", offset: [0,-9] });
 
         const readout = L.control({ position: "topright" });
         readout.onAdd = function(){
@@ -582,6 +599,7 @@
           return this._div;
         };
         readout.addTo(map);
+        readout._div.innerHTML = '<div class="ro-prompt">Enter your address &mdash; or click the map &mdash; to count the ALPR cameras within 1 mile.</div>';
 
         function update(latlng){
           ring.setLatLng(latlng);
@@ -600,9 +618,47 @@
             '<div class="ro-sub">Nearest: ' + nearStr + ' &middot; drag the blue pin</div>';
         }
 
-        home.on("drag", e => update(e.latlng));
+        function place(latlng, fly){
+          if(!placed){ ring.addTo(map); home.addTo(map); placed = true; }
+          home.setLatLng(latlng);
+          update(latlng);
+          if(fly) map.flyTo(latlng, Math.max(map.getZoom(), 14), { duration: 0.8 });
+        }
+
+        home.on("drag",    e => update(e.latlng));
         home.on("dragend", e => update(e.target.getLatLng()));
-        update(start);
+        map.on("click",    e => place(e.latlng, false));
+
+        // ---- Address geocoding via OpenStreetMap Nominatim (no key; browser
+        // sends Referer to identify the site, per their usage policy) ----
+        const form = document.getElementById("addrForm");
+        const input = document.getElementById("addrInput");
+        const statusEl = document.getElementById("addrStatus");
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const q = input.value.trim();
+          if(!q) return;
+          statusEl.className = "addr-status";
+          statusEl.textContent = "Searching…";
+          try {
+            const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us"
+              + "&viewbox=-85.75,35.05,-80.80,32.50&q=" + encodeURIComponent(q);
+            const r = await fetch(url, { headers: { Accept: "application/json" } });
+            const j = await r.json();
+            if(!j || !j.length){
+              statusEl.className = "addr-status err";
+              statusEl.textContent = "Couldn’t find that address. Try adding city and state — e.g. “123 Main St, Marietta GA”.";
+              return;
+            }
+            const hit = j[0];
+            place(L.latLng(+hit.lat, +hit.lon), true);
+            statusEl.className = "addr-status";
+            statusEl.textContent = "Pin dropped near " + hit.display_name.split(",").slice(0,3).join(",").trim() + ". Drag it to fine-tune.";
+          } catch (err) {
+            statusEl.className = "addr-status err";
+            statusEl.textContent = "Address lookup failed. Check your connection and try again.";
+          }
+        });
       })
       .catch(() => {});
   })();
