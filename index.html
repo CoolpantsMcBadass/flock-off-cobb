@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Flock Off – Cobb: Remove Flock Safety license plate readers from Cobb County</title>
+<title>DeFlock Cobb: Remove Flock Safety license plate readers from Cobb County</title>
 <meta name="description" content="A campaign by Cobb County residents to cancel the county's Flock Safety contract and remove warrantless license plate surveillance. Talking points, a letter you can copy and send, and contacts for your elected officials." />
-<meta property="og:title" content="Flock Off – Cobb" />
+<meta property="og:title" content="DeFlock Cobb" />
+<meta property="og:url" content="https://deflockcobb.com/" />
+<link rel="canonical" href="https://deflockcobb.com/" />
 <meta property="og:description" content="Remove Flock Safety license plate readers from Cobb County. Email your elected officials today." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -258,7 +260,45 @@
   @media(prefers-reduced-motion:reduce){
     .reveal{opacity:1;transform:none;transition:none;}
     .ticker .track,.brand .dot{animation:none;}
+    .social-float{animation:none;}
     html{scroll-behavior:auto;}
+  }
+
+  /* floating social cluster */
+  .social-float{
+    position:fixed;right:18px;bottom:28px;top:auto;
+    transform:translateY(var(--sf-y, 0px));
+    z-index:90;display:flex;flex-direction:column;gap:0;
+    background:var(--ink);border:3px solid var(--ink);box-shadow:var(--shadow);
+    will-change:transform;
+  }
+  .city-status{
+    display:block;margin-top:6px;padding:5px 9px;
+    background:var(--teal);color:var(--paper);
+    font-family:"Space Mono",monospace;font-size:.72rem;line-height:1.35;
+    border-left:4px solid var(--ink);
+  }
+  .social-float a{
+    display:flex;align-items:center;justify-content:center;
+    width:46px;height:46px;color:var(--paper);background:var(--ink);
+    border-bottom:2px solid var(--paper);transition:background .15s ease, color .15s ease;
+  }
+  .social-float a:last-child{border-bottom:0;}
+  .social-float a:hover{background:var(--red);color:var(--paper);}
+  .social-float svg{width:22px;height:22px;fill:currentColor;display:block;}
+  .social-float .sf-label{
+    writing-mode:vertical-rl;text-orientation:mixed;
+    font-family:"Space Mono",monospace;font-size:9px;letter-spacing:1px;
+    color:var(--paper);background:var(--red);padding:8px 0;text-transform:uppercase;
+  }
+  @media(max-width:760px){
+    .social-float{
+      right:0;left:0;top:auto;bottom:0;transform:none;animation:none;
+      flex-direction:row;justify-content:center;border-left:0;border-right:0;border-bottom:0;
+    }
+    .social-float a{border-bottom:0;border-right:2px solid var(--paper);width:54px;height:44px;}
+    .social-float a:last-child{border-right:0;}
+    .social-float .sf-label{display:none;}
   }
 </style>
 </head>
@@ -266,13 +306,13 @@
 
 <header class="nav">
   <div class="nav-inner">
-    <a class="brand" href="#top"><span class="dot"></span><b>FLOCK OFF – COBB</b></a>
+    <a class="brand" href="#top"><span class="dot"></span><b>DEFLOCK COBB</b></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="menu">Menu</button>
     <nav id="menu">
       <ul>
         <li><a href="#case">The Case</a></li>
         <li><a href="#map">The Map</a></li>
-        <li><a href="#act">Take Action</a></li>
+        <li><a href="#act">Join the Campaign</a></li>
         <li><a href="#letter">The Letter</a></li>
         <li><a href="#officials">Officials</a></li>
         <li><a href="#resources">Resources</a></li>
@@ -368,7 +408,8 @@
 
 <!-- TAKE ACTION -->
 <section id="act" class="reveal">
-  <div class="sec-head"><span class="num">03</span><h2>Take Action</h2></div>
+  <div class="sec-head"><span class="num">03</span><h2>Join the Campaign</h2></div>
+  <p style="max-width:62ch;margin:-14px 0 22px;font-size:1.1rem;">Email us at <a href="mailto:deflockcobb@proton.me">deflockcobb@proton.me</a> with questions, or to get active with our grassroots, resident led movement.</p>
   <div class="steps">
     <div class="step">
       <span class="n">1</span>
@@ -470,7 +511,7 @@
       <div class="city"><b>Acworth</b><span class="meet">Council meeting agendas · <a href="https://acworth-ga.gov/agenda/">acworth-ga.gov →</a></span></div>
       <div class="city"><b>Austell</b><span class="meet">1st Monday, 7 PM · <a href="https://austell-ga.municodemeetings.com/">agendas →</a></span><span class="countdown" data-city="austell"></span></div>
       <div class="city"><b>Kennesaw</b><span class="meet">1st &amp; 3rd Monday, 6:30 PM · <a href="https://kennesawga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="kennesaw"></span></div>
-      <div class="city"><b>Mableton</b><span class="meet">2nd &amp; 4th Wednesday, 6:30 PM · <a href="https://mabletonga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="mableton"></span></div>
+      <div class="city"><b>Mableton</b><span class="meet">2nd &amp; 4th Wednesday, 6:30 PM · <a href="https://mabletonga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="mableton"></span><span class="city-status">Newly incorporated, with no active Flock contract yet. Let's keep it that way and tell the council we don't want AI surveillance in our city.</span></div>
       <div class="city"><b>Marietta</b><span class="meet">2nd Wednesday, 7 PM · <a href="https://www.mariettaga.gov/agendacenter">agendas →</a></span><span class="countdown" data-city="marietta"></span></div>
       <div class="city"><b>Powder Springs</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.powderspringsga.gov/501/City-Council-Meeting-Dates">agendas →</a></span><span class="countdown" data-city="powder"></span></div>
       <div class="city"><b>Smyrna</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.smyrnaga.gov/departments/office-of-the-city-clerk/upcoming-meetings-and-agendas-calendar">agendas →</a></span><span class="countdown" data-city="smyrna"></span></div>
@@ -490,6 +531,10 @@
         <li><a href="https://www.404media.co/flock-logins-exposed-in-malware-infections-senator-asks-ftc-to-investigate-the-company/">Flock logins exposed in malware infections, and a senator asks the FTC to investigate</a> (404 Media)</li>
         <li><a href="https://www.9news.com/article/tech/researchers-claim-flock-cameras-are-easy-to-hack/73-6c805b4a-7b64-4d71-828e-961dda84b8e5">Researchers say Flock cameras are easy to hack</a> (9News)</li>
         <li><a href="https://www.sfchronicle.com/bayarea/article/flock-safety-19852696.php">A lawsuit calls AI cameras that track cars unconstitutional</a> (SF Chronicle)</li>
+        <li><a href="https://atlpresscollective.com/2026/04/17/atlanta-metro-residents-increasingly-concerned-about-flock-safety/">Communities are watching: metro Atlanta residents increasingly concerned about Flock</a> (ATL Press Collective)</li>
+        <li><a href="https://jasonhunyar.substack.com/p/why-are-flock-employees-watching-720">Why are Flock employees watching children?</a> (Jason Hunyar)</li>
+        <li><a href="https://www.youtube.com/watch?v=vU1-uiUlHTo">This Flock camera leak is like Netflix for stalkers</a> (YouTube)</li>
+        <li><a href="https://www.youtube.com/watch?v=4RM09nKczVs">Taxpayer funded AI surveillance: why Flock's 30,000 cameras have to go</a> (YouTube)</li>
       </ul>
     </div>
     <div class="res-col">
@@ -504,6 +549,9 @@
     <div class="res-col">
       <h3>Other Communities</h3>
       <ul>
+        <li><a href="https://deflockatlanta.org/">DeFlock Atlanta</a>, metro Atlanta organizing against ALPRs</li>
+        <li><a href="https://ksualprs.com/">KSU ALPRs</a>, the Kennesaw State University campaign</li>
+        <li><a href="https://noalprs.com/">National Week of Action</a>, demanding an end to all ALPRs</li>
         <li><a href="https://deflock.me/">DeFlock</a>, a crowdsourced national map of Flock camera locations</li>
         <li><a href="https://www.gettheflockout.org/">Get The Flock Out</a>, the Santa Cruz County campaign</li>
         <li><a href="https://www.eff.org/">Electronic Frontier Foundation</a>, which advocates on surveillance and privacy</li>
@@ -515,6 +563,9 @@
       <ul>
         <li><a href="https://www.cobbcounty.gov/board">Cobb Board of Commissioners</a>, the official county page</li>
         <li><a href="https://transparency.flocksafety.com/">Flock transparency portals</a>, showing how each agency uses the system</li>
+        <li><a href="https://transparency.flocksafety.com/woodstock-ga-pd">Woodstock transparency portal</a>, a neighboring city's Flock data</li>
+        <li><a href="https://www.404media.co/tag/flock/">404 Media's Flock reporting</a>, their full tag of investigations</li>
+        <li><a href="https://atlpresscollective.com/?s=Flock+Safety">ATL Press Collective on Flock</a>, metro Atlanta reporting</li>
         <li><a href="https://docs.google.com/document/d/1Z7AOSbm2zifC6-jxwRuFlL68NG9FHwNpEmdhh7Qgt0E/edit">The full resource doc</a> for researchers, residents, and reporters</li>
       </ul>
     </div>
@@ -812,6 +863,54 @@
       const time = t.toLocaleString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
       el.innerHTML = '<span class="cd-label">Next</span>' + date + ' · ' + time + ' <span class="cd-when">' + rel(t - now) + '</span>';
     });
+  })();
+</script>
+
+<aside class="social-float" aria-label="Follow DeFlock Cobb on social media">
+  <span class="sf-label">Follow</span>
+  <a href="https://www.instagram.com/deflockcobb/" target="_blank" rel="noopener" aria-label="DeFlock Cobb on Instagram" title="Instagram">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.31-1.46.72-2.12 1.38C1.36 2.67.95 3.34.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.8.72 1.47 1.38 2.13.66.66 1.33 1.07 2.12 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.8-.31 1.47-.72 2.13-1.38.66-.66 1.07-1.33 1.38-2.13.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.89 5.89 0 0 0-1.38-2.12A5.89 5.89 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.41-10.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88Z"/></svg>
+  </a>
+  <a href="https://www.tiktok.com/@deflockcobb" target="_blank" rel="noopener" aria-label="DeFlock Cobb on TikTok" title="TikTok">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.6 5.82a4.28 4.28 0 0 1-1.06-2.82h-3.3v13.4a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 0 1-.93-5 2.59 2.59 0 0 1 .93-.13v-3.3a5.92 5.92 0 0 0-.93-.07 5.9 5.9 0 1 0 5.9 5.9V8.94a7.57 7.57 0 0 0 4.42 1.42V7.06a4.28 4.28 0 0 1-2.44-1.24Z"/></svg>
+  </a>
+  <a href="https://www.facebook.com/share/g/18xwrT5dvU/" target="_blank" rel="noopener" aria-label="DeFlock Cobb Facebook group" title="Facebook group">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.92-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12Z"/></svg>
+  </a>
+</aside>
+
+<script>
+  /* scroll-driven inertial sway for the social cluster:
+     idle = perfectly still; scrolling gives it a slight gravity-like lag
+     that springs back to center once you stop. */
+  (function(){
+    var el = document.querySelector('.social-float');
+    if(!el) return;
+    var mqMobile = window.matchMedia('(max-width:760px)');
+    var mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var offset = 0, vel = 0, lastY = window.scrollY || window.pageYOffset, raf = null;
+    var STIFF = 0.045, DAMP = 0.80, MAX = 22, KICK = 0.05;
+    function frame(){
+      vel += -STIFF * offset;   // spring pulls back to center
+      vel *= DAMP;              // friction
+      offset += vel;
+      if(offset >  MAX){ offset =  MAX; vel *= -0.25; }
+      if(offset < -MAX){ offset = -MAX; vel *= -0.25; }
+      el.style.setProperty('--sf-y', offset.toFixed(2) + 'px');
+      if(Math.abs(offset) > 0.06 || Math.abs(vel) > 0.06){
+        raf = requestAnimationFrame(frame);
+      } else {
+        offset = 0; vel = 0; el.style.setProperty('--sf-y', '0px'); raf = null;
+      }
+    }
+    window.addEventListener('scroll', function(){
+      if(mqMobile.matches || mqReduce.matches) return;
+      var y = window.scrollY || window.pageYOffset;
+      var d = y - lastY; lastY = y;
+      if(d >  100) d =  100; else if(d < -100) d = -100;  // clamp jump-scrolls
+      vel += d * KICK;                                    // tug in scroll direction
+      if(raf === null) raf = requestAnimationFrame(frame);
+    }, {passive:true});
   })();
 </script>
 </body>

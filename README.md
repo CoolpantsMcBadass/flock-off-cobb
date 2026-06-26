@@ -42,13 +42,13 @@ Then open http://localhost:8777/ in a browser.
 (Opening index.html directly also works.)
 
 ## Deploy
-**GitHub Pages:** push this folder to a repo, then Settings → Pages → deploy from the
-`main` branch root. Site goes live at `https://<user>.github.io/<repo>/`.
+**Live at https://deflockcobb.com** via GitHub Pages
+(repo `CoolpantsMcBadass/flock-off-cobb`). The `CNAME` file in this folder holds the
+custom domain; DNS is four A records to GitHub's Pages IPs (185.199.108–111.153, set
+to "DNS only"/grey cloud on Cloudflare) plus a `www` CNAME to `coolpantsmcbadass.github.io`.
 
-**Netlify/Vercel:** drag the folder into the dashboard, or connect the repo — no build
-command needed, publish directory is the folder itself.
-
-A custom domain (e.g. flockoffcobb.org) can be pointed at either host.
+To redeploy: push to `main` and Pages rebuilds automatically. To move hosts, the same
+folder works on Netlify/Vercel with no build step (publish directory is the folder itself).
 
 ## To edit
 - **Letter text:** the `#letterText` block in `index.html`. The "Copy letter" button
