@@ -2,6 +2,21 @@
 
 All notable changes to the Flock Off Cobb site are recorded here.
 
+## 2026-06-26
+
+### Added
+- Deployed to the custom domain **https://deflockcobb.com** (GitHub Pages). `CNAME` file added; DNS is four A records to GitHub's Pages IPs (185.199.108–111.153, "DNS only" on Cloudflare) plus a `www` CNAME; HTTPS enforced.
+- Floating social cluster (Instagram, TikTok, Facebook group), fixed to the bottom-right, with a scroll-driven inertial sway: still when idle, tugs opposite the scroll direction and springs back to center. Disabled on mobile (becomes a bottom bar) and under prefers-reduced-motion.
+- "Join the Campaign" now has a 5th step, "Follow us on social," a full-width box with the three social accounts shown as icon buttons.
+- A teal status note on the Mableton city card: newly incorporated with no active Flock contract yet, framed proactively.
+- Resources (vetted for mission alignment, all links confirmed): Media Coverage — EFF Georgia school-residency searches, Cherokee County deputies' ALPR misuse, Atlanta PD ICE searches, Dunwoody contract. Lawsuits & Legal — Georgia's ALPR statute (§ 35-1-22) and the ACLU of Georgia contract-terms warning. Other Communities — DeFlock Atlanta's tracker, the ACLU "Get The Flock Out" toolkit, and EFF's wins roundup. Earlier in the day also added four media links and three Georgia/national community links.
+
+### Changed
+- Nav brand wordmark → "DEFLOCK COBB" to match the domain (the hero headline stays "Flock Off – Cobb").
+- Renamed the "Take Action" section (and its nav link) to "Join the Campaign," with a new intro line pointing people to deflockcobb@proton.me.
+- Page `<title>`, `og:title`, and a new `canonical` + `og:url` all updated to deflockcobb.com.
+- README deploy notes rewritten for the live domain and DNS setup.
+
 ## 2026-06-20
 
 ### Fixed
