@@ -16,6 +16,7 @@ All notable changes to the Flock Off Cobb site are recorded here.
 - Renamed the "Take Action" section (and its nav link) to "Join the Campaign," with a new intro line pointing people to deflockcobb@proton.me.
 - Page `<title>`, `og:title`, and a new `canonical` + `og:url` all updated to deflockcobb.com.
 - README deploy notes rewritten for the live domain and DNS setup.
+- Trimmed Resources to Georgia plus general/national pieces, removing items tied to other localities: the SF Chronicle article, the Norfolk/San Jose/Oakland lawsuits, the Get The Flock Out (Santa Cruz) campaign, and Oakland Privacy. With no lawsuits left in that column, renamed "Lawsuits & Legal" → "Know the Law." (The Norfolk/San Jose/Oakland references in The Case and The Letter were left in place as supporting content.)
 
 ## 2026-06-20
 
