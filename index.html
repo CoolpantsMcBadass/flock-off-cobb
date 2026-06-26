@@ -908,7 +908,7 @@
       var y = window.scrollY || window.pageYOffset;
       var d = y - lastY; lastY = y;
       if(d >  100) d =  100; else if(d < -100) d = -100;  // clamp jump-scrolls
-      vel += d * KICK;                                    // tug in scroll direction
+      vel -= d * KICK;                                    // tug opposite scroll (inertial lag)
       if(raf === null) raf = requestAnimationFrame(frame);
     }, {passive:true});
   })();
