@@ -4,6 +4,9 @@ All notable changes to the Flock Off Cobb site are recorded here.
 
 ## 2026-06-27
 
+### Added
+- GoatCounter analytics (privacy-friendly: no cookies, no IP retention, no cross-site tracking) via a small async beacon before `</body>`. Dashboard at deflockcobb.goatcounter.com.
+
 ### Removed
 - Resources cleanup, dropping duplicates and dead/uncertain links. Dig Into the Data: the broken top-level Flock transparency portal (Woodstock's working portal stays) and the Google-Docs "full resource doc" (unowned, of unknown provenance). Other Communities: the DeFlock Atlanta tracker and the "EFF on the communities" link, since DeFlock Atlanta and the EFF are already listed in that column.
 
