@@ -248,7 +248,12 @@
 
   /* footer */
   footer{background:var(--ink);color:var(--paper);border-top:5px solid var(--red);margin-top:40px;}
-  .foot-inner{max-width:1100px;margin:0 auto;padding:56px 20px;display:grid;grid-template-columns:1.3fr 1fr;gap:30px;}
+  .foot-inner{max-width:1100px;margin:0 auto;padding:56px 20px;display:grid;grid-template-columns:.95fr .9fr 1fr;gap:30px;align-items:center;}
+  .foot-art{display:flex;justify-content:center;}
+  .foot-art a{display:block;width:100%;max-width:290px;}
+  .foot-art a:hover{background:none;}
+  .foot-art img{width:100%;height:auto;display:block;border:4px solid var(--paper);box-shadow:8px 8px 0 var(--red);transform:rotate(-4deg);transition:transform .15s ease;}
+  .foot-art a:hover img{transform:rotate(0deg) scale(1.03);}
   footer h2{font-size:clamp(2rem,6vw,3.6rem);color:var(--paper);}
   footer h2 em{color:var(--red);font-style:normal;}
   footer .mono{color:var(--yellow);}
@@ -256,7 +261,11 @@
   footer a:hover{background:var(--red);color:var(--paper);}
   .foot-cta{display:flex;flex-direction:column;gap:12px;justify-content:center;}
   .foot-legal{border-top:1px solid #2c2622;color:#9a948a;font-family:"Space Mono",monospace;font-size:.68rem;letter-spacing:.08em;padding:18px 20px;text-align:center;text-transform:uppercase;}
-  @media(max-width:760px){.foot-inner{grid-template-columns:1fr;}}
+  @media(max-width:760px){
+    .foot-inner{grid-template-columns:1fr;}
+    .foot-art{order:1;}
+    .foot-art a{max-width:190px;}
+  }
 
   /* reveal on load / scroll */
   .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
@@ -339,7 +348,7 @@
     </div>
   </div>
   <div class="hero-art">
-    <img class="frame" src="assets/img0.jpeg" alt="Comic illustration of a red robotic surveillance bird, the mascot of the Flock Off Cobb campaign" />
+    <img class="frame" src="assets/deflockchicken.jpg" alt="Comic illustration of a red robotic chicken looming over a building under a lightning-filled sky, with the words DeFlock Cobb!" />
     <p class="art-credit mono">Art by Marietta artist @mind_invader_comics</p>
   </div>
 </div>
@@ -596,6 +605,11 @@
     <div>
       <span class="mono">The ask is simple</span>
       <h2>Cancel the<br/>contract. <em>Remove<br/>the cameras.</em></h2>
+    </div>
+    <div class="foot-art">
+      <a href="#top" aria-label="Back to top">
+        <img src="assets/img0.jpeg" alt="Comic illustration of a red robotic surveillance bird, the campaign mascot" loading="lazy" />
+      </a>
     </div>
     <div class="foot-cta">
       <a class="btn btn-primary" href="mailto:deflockcobb@proton.me">✉ deflockcobb@proton.me</a>

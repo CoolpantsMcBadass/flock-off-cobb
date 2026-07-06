@@ -7,7 +7,8 @@ Plain HTML/CSS/JS — no build step, no dependencies.
 
 ## Files
 - `index.html` — the entire site (styles + scripts are inline)
-- `assets/img0.jpeg` — campaign art by @mind_invader_comics
+- `assets/deflockchicken.jpg` — hero art by @mind_invader_comics
+- `assets/img0.jpeg` — original campaign art by @mind_invader_comics, now in the footer
 - `assets/ga-alpr-cameras.geojson` — ALPR camera points for the map (northern half of GA)
 
 ## The map

@@ -2,6 +2,12 @@
 
 All notable changes to the Flock Off Cobb site are recorded here.
 
+## 2026-07-06
+
+### Changed
+- Hero art replaced with new @mind_invader_comics piece (`assets/deflockchicken.jpg`, a red robotic chicken with "DeFlock Cobb!" lettering). Alt text updated to match.
+- The original bird art (`assets/img0.jpeg`) moved to the footer as a tilted poster between the headline and the CTA column: paper-white frame, red offset shadow, straightens on hover, lazy-loaded, and clicking it returns to the top of the page. Stacks below the CTAs on mobile.
+
 ## 2026-06-27
 
 ### Added
