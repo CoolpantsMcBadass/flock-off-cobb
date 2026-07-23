@@ -225,6 +225,10 @@
   .official .name{font-family:"Anton",sans-serif;font-size:1.35rem;text-transform:uppercase;margin:4px 0 12px;line-height:1;}
   .official .contact{display:flex;flex-direction:column;gap:6px;font-size:.9rem;font-family:"Space Mono",monospace;}
   .official .contact a{word-break:break-all;}
+  .rep-lookup{margin:0 0 22px;}
+  .rep-lookup .addr-status{margin:0;}
+  .official{transition:box-shadow .18s ease, transform .18s ease, border-color .18s ease;}
+  .official.match{border-color:var(--red);box-shadow:6px 6px 0 var(--red);transform:translate(-3px,-3px);}
   @media(max-width:860px){.officials{grid-template-columns:repeat(2,1fr);}}
   @media(max-width:540px){.officials{grid-template-columns:1fr;}}
 
@@ -508,28 +512,35 @@
       <a class="btn btn-ghost" style="background:var(--yellow);color:var(--ink);" href="https://www.cobbcounty.gov/board/county-clerk/public-meetings">Meeting calendar →</a>
     </div>
   </div>
+  <div class="rep-lookup">
+    <form class="addr-tool" id="cobbDistForm" autocomplete="off">
+      <input id="cobbDistInput" type="text" name="address" placeholder="Not sure which district? Type your address…" aria-label="Your address" />
+      <button type="submit">Find my district</button>
+    </form>
+    <p class="addr-status" id="cobbDistStatus">Enter your address to find which Cobb Commission district you&rsquo;re in and who represents you. Your address isn&rsquo;t stored &mdash; lookups run through OpenStreetMap.</p>
+  </div>
   <div class="officials">
     <div class="official">
       <span class="role">Commission Chairwoman</span>
       <div class="name">Lisa Cupid</div>
       <div class="contact"><a href="tel:+17705283305">(770) 528-3305</a><a href="mailto:lisa.cupid@cobbcounty.gov">lisa.cupid@cobbcounty.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-district="1">
       <span class="role">District 1 Commissioner</span>
       <div class="name">Keli Gambrill</div>
       <div class="contact"><a href="tel:+17705283313">(770) 528-3313</a><a href="mailto:keli.gambrill@cobbcounty.gov">keli.gambrill@cobbcounty.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-district="2">
       <span class="role">District 2 Commissioner</span>
       <div class="name">Erick Allen</div>
       <div class="contact"><a href="tel:+17705283315">(770) 528-3315</a><a href="mailto:erick.allen@cobbcounty.gov">erick.allen@cobbcounty.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-district="3">
       <span class="role">District 3 Commissioner</span>
       <div class="name">JoAnn K. Birrell</div>
       <div class="contact"><a href="tel:+17705283317">(770) 528-3317</a><a href="mailto:joann.birrell@cobbcounty.gov">joann.birrell@cobbcounty.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-district="4">
       <span class="role">District 4 Commissioner</span>
       <div class="name">Monique Sheffield</div>
       <div class="contact"><a href="tel:+17705283312">(770) 528-3312</a><a href="mailto:monique.sheffield@cobbcounty.gov">monique.sheffield@cobbcounty.gov</a></div>
@@ -545,43 +556,50 @@
       <a class="btn btn-primary" href="https://www.mariettaga.gov/agendacenter">Meeting agendas →</a>
     </div>
   </div>
+  <div class="rep-lookup">
+    <form class="addr-tool" id="wardForm" autocomplete="off">
+      <input id="wardInput" type="text" name="address" placeholder="Which ward am I in? Type your Marietta address…" aria-label="Your Marietta address" />
+      <button type="submit">Find my ward</button>
+    </form>
+    <p class="addr-status" id="wardStatus">Enter a Marietta address to find your ward and councilmember. Only addresses inside Marietta city limits have a ward. Your address isn&rsquo;t stored.</p>
+  </div>
   <div class="officials">
     <div class="official">
       <span class="role">Mayor</span>
       <div class="name">Steve Tumlin</div>
       <div class="contact"><a href="tel:+17707945501">(770) 794-5501</a><a href="mailto:stumlin@mariettaga.gov">stumlin@mariettaga.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-ward="1">
       <span class="role">Ward 1 Councilmember</span>
       <div class="name">Cheryl Richardson</div>
       <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:crichardson@mariettaga.gov">crichardson@mariettaga.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-ward="2">
       <span class="role">Ward 2 Councilmember</span>
       <div class="name">Jason Waters</div>
       <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:jwaters@mariettaga.gov">jwaters@mariettaga.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-ward="3">
       <span class="role">Ward 3 Councilmember</span>
       <div class="name">Daniel Gaddis</div>
       <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:dgaddis@mariettaga.gov">dgaddis@mariettaga.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-ward="4">
       <span class="role">Ward 4 Councilmember</span>
       <div class="name">Byron Anderson</div>
       <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:tanderson@mariettaga.gov">tanderson@mariettaga.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-ward="5">
       <span class="role">Ward 5 Councilmember</span>
       <div class="name">M. Carlyle Kent</div>
       <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:mckent@mariettaga.gov">mckent@mariettaga.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-ward="6">
       <span class="role">Ward 6 Councilmember</span>
       <div class="name">Andre L. Sims</div>
       <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:asims@mariettaga.gov">asims@mariettaga.gov</a></div>
     </div>
-    <div class="official">
+    <div class="official" data-ward="7">
       <span class="role">Ward 7 Councilmember</span>
       <div class="name">Joseph R. Goldstein</div>
       <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="tel:+17708415959">(770) 841-5959</a><a href="mailto:jgoldstein@mariettaga.gov">jgoldstein@mariettaga.gov</a></div>
@@ -595,7 +613,6 @@
       <div class="city"><b>Austell</b><span class="meet">1st Monday, 7 PM · <a href="https://austell-ga.municodemeetings.com/">agendas →</a></span><span class="countdown" data-city="austell"></span></div>
       <div class="city"><b>Kennesaw</b><span class="meet">1st &amp; 3rd Monday, 6:30 PM · <a href="https://kennesawga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="kennesaw"></span></div>
       <div class="city"><b>Mableton</b><span class="meet">2nd &amp; 4th Wednesday, 6:30 PM · <a href="https://mabletonga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="mableton"></span><span class="city-status">Newly incorporated, with no active Flock contract yet. Let's keep it that way and tell the council we don't want AI surveillance in our city.</span></div>
-      <div class="city"><b>Marietta</b><span class="meet">2nd Wednesday, 7 PM · <a href="https://www.mariettaga.gov/agendacenter">agendas →</a></span><span class="countdown" data-city="marietta"></span></div>
       <div class="city"><b>Powder Springs</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.powderspringsga.gov/501/City-Council-Meeting-Dates">agendas →</a></span><span class="countdown" data-city="powder"></span></div>
       <div class="city"><b>Smyrna</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.smyrnaga.gov/departments/office-of-the-city-clerk/upcoming-meetings-and-agendas-calendar">agendas →</a></span><span class="countdown" data-city="smyrna"></span></div>
     </div>
@@ -848,6 +865,105 @@
       .catch(() => {});
   })();
 
+  // ---- "Which district / ward am I in?" address lookups ----
+  (function(){
+    const NAMES = {
+      cobb: {1:"Keli Gambrill", 2:"Erick Allen", 3:"JoAnn K. Birrell", 4:"Monique Sheffield"},
+      ward: {1:"Cheryl Richardson", 2:"Jason Waters", 3:"Daniel Gaddis", 4:"Byron Anderson",
+             5:"M. Carlyle Kent", 6:"Andre L. Sims", 7:"Joseph R. Goldstein"}
+    };
+    const CFG = {
+      cobb: {file:"assets/cobb-districts.geojson", prop:"district", label:"District", cardAttr:"data-district",
+             notFound:"That address doesn’t fall inside a Cobb commission district. If you live inside a city, check your city council below."},
+      ward: {file:"assets/marietta-wards.geojson", prop:"ward", label:"Ward", cardAttr:"data-ward",
+             notFound:"That address is outside Marietta city limits, so it has no Marietta ward. Check the Cobb commissioners above, or your own city’s council."}
+    };
+    const cache = {};
+
+    // Address cleanup + geocode — mirrors the map’s forgiving Nominatim lookup.
+    const clean = s => s.replace(/\s+/g," ").replace(/\s*,\s*/g,", ").replace(/(?:,\s*){2,}/g,", ").replace(/^[\s,]+|[\s,]+$/g,"").trim();
+    function variants(raw){
+      const base = clean(raw);
+      const noUnit = clean(base.replace(/[#,]?\s*\b(?:apt|apartment|unit|suite|ste|bldg|building|fl|floor|rm|room|lot|trlr)\b\.?\s*#?\s*[\w-]+/gi,"").replace(/#\s*[\w-]+/g,""));
+      const list = [base]; if(noUnit !== base) list.push(noUnit);
+      const zip = (base.match(/\b\d{5}\b/) || [])[0] || "";
+      const region = zip ? ("GA " + zip) : "Georgia, USA";
+      let core = clean(noUnit.replace(/\b\d{5}(?:-\d{4})?\b/g,"").replace(/\b(?:ga|georgia)\b/gi,""));
+      const tok = core.split(/[\s,]+/).filter(Boolean);
+      for(let n = tok.length; n >= 2 && list.length < 6; n--) list.push(clean(tok.slice(0,n).join(" ") + ", " + region));
+      if(!zip && !/\b(?:ga|georgia)\b/i.test(base)) list.push(clean(noUnit + ", Georgia, USA"));
+      return [...new Set(list)].filter(Boolean);
+    }
+    async function geocode(raw){
+      for(const q of variants(raw)){
+        const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=us&viewbox=-85.75,35.05,-80.80,32.50&q=" + encodeURIComponent(q);
+        const r = await fetch(url, { headers: { Accept: "application/json" } });
+        if(!r.ok) continue;
+        const j = await r.json();
+        if(j && j.length) return j[0];
+      }
+      return null;
+    }
+
+    // Ray-casting point-in-polygon over GeoJSON [lng,lat] rings, with holes.
+    function inRing(x, y, ring){
+      let inside = false;
+      for(let i = 0, j = ring.length - 1; i < ring.length; j = i++){
+        const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+        if(((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+      }
+      return inside;
+    }
+    function inGeom(x, y, geom){
+      const polys = geom.type === "Polygon" ? [geom.coordinates] : geom.coordinates;
+      for(const poly of polys){
+        if(!inRing(x, y, poly[0])) continue;
+        let hole = false;
+        for(let k = 1; k < poly.length; k++){ if(inRing(x, y, poly[k])){ hole = true; break; } }
+        if(!hole) return true;
+      }
+      return false;
+    }
+    async function locate(kind, x, y){
+      const cfg = CFG[kind];
+      if(!cache[kind]) cache[kind] = fetch(cfg.file).then(r => r.json());
+      const data = await cache[kind];
+      for(const f of data.features){ if(inGeom(x, y, f.geometry)) return f.properties[cfg.prop]; }
+      return null;
+    }
+    function highlight(kind, num){
+      const attr = CFG[kind].cardAttr;
+      document.querySelectorAll("[" + attr + "]").forEach(el =>
+        el.classList.toggle("match", num != null && String(el.getAttribute(attr)) === String(num)));
+    }
+
+    function wire(kind, formId, inputId, statusId){
+      const form = document.getElementById(formId);
+      if(!form) return;
+      const input = document.getElementById(inputId), status = document.getElementById(statusId), cfg = CFG[kind];
+      form.addEventListener("submit", async e => {
+        e.preventDefault();
+        const q = input.value.trim(); if(!q) return;
+        status.className = "addr-status"; status.textContent = "Searching…";
+        try {
+          const hit = await geocode(q);
+          if(!hit){ highlight(kind, null); status.className = "addr-status err"; status.textContent = "Couldn’t find that address. Try street + city, e.g. “590 Whitlock Ave, Marietta”."; return; }
+          const num = await locate(kind, +hit.lon, +hit.lat);
+          if(num == null){ highlight(kind, null); status.className = "addr-status err"; status.textContent = cfg.notFound; return; }
+          highlight(kind, num);
+          status.className = "addr-status";
+          status.innerHTML = "You’re in <strong>" + cfg.label + " " + num + "</strong> — " + NAMES[kind][num] + ". Their card is highlighted below.";
+        } catch (err) {
+          highlight(kind, null);
+          status.className = "addr-status err";
+          status.textContent = "Lookup failed. Check your connection and try again.";
+        }
+      });
+    }
+    wire("cobb", "cobbDistForm", "cobbDistInput", "cobbDistStatus");
+    wire("ward", "wardForm", "wardInput", "wardStatus");
+  })();
+
   // mobile menu
   const toggle = document.querySelector('.nav-toggle');
   const menu = document.getElementById('menu');
@@ -900,7 +1016,6 @@
       austell:  {wd:1, weeks:[1],   h:19, mi:0},
       kennesaw: {wd:1, weeks:[1,3], h:18, mi:30},
       mableton: {wd:3, weeks:[2,4], h:18, mi:30},
-      marietta: {wd:3, weeks:[2],   h:19, mi:0},
       powder:   {wd:1, weeks:[1,3], h:19, mi:0, summer:[3]},
       smyrna:   {wd:1, weeks:[1,3], h:19, mi:0}
     };

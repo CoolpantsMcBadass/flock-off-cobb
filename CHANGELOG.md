@@ -6,6 +6,10 @@ All notable changes to the Flock Off Cobb site are recorded here.
 
 ### Added
 - "Marietta City Council" subsection in Reach Cobb Officials, below the Cobb Board of Commissioners. Reuses the officials-card layout with a dark header band, an agendas button, and cards for the mayor plus all seven ward councilmembers (name, phone, email). Each entry verified against the member's individual mariettaga.gov profile page. Councilmembers share the main line (770) 794-5526; the mayor and Ward 7 (Goldstein) list their own direct numbers.
+- "Which district/ward am I in?" address lookups. Each officials band now has an address box: the Cobb band returns your commission district (1–4) and commissioner; the Marietta band returns your ward (1–7) and councilmember. On a hit, the matching card is highlighted. Uses the same forgiving Nominatim geocoder as the map, then a client-side point-in-polygon test against two new boundary files, `assets/cobb-districts.geojson` (Cobb County GIS) and `assets/marietta-wards.geojson` (City of Marietta GIS), simplified and lazy-loaded on first use. Addresses outside a jurisdiction get a clear "outside city limits / not in a Cobb district" message. No address is stored. Tested end-to-end across all four districts and all seven wards.
+
+### Removed
+- Marietta card (and its meeting-countdown entry) from the "cities" grid, now that Marietta has full contacts and a ward lookup in its own subsection above.
 
 ## 2026-07-06
 

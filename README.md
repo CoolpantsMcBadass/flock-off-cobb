@@ -10,6 +10,8 @@ Plain HTML/CSS/JS — no build step, no dependencies.
 - `assets/deflockchicken.jpg` — hero art by @mind_invader_comics
 - `assets/img0.jpeg` — original campaign art by @mind_invader_comics, now in the footer
 - `assets/ga-alpr-cameras.geojson` — ALPR camera points for the map (northern half of GA)
+- `assets/cobb-districts.geojson` — Cobb commission district polygons (from Cobb County GIS)
+- `assets/marietta-wards.geojson` — Marietta ward polygons (from City of Marietta GIS)
 
 ## The map
 The "Cameras Are Already Here" section is a self-hosted Leaflet map centered on
@@ -33,6 +35,22 @@ const feats=d.elements.filter(e=>e.type==="node"&&e.lat!=null).map(e=>({type:"Fe
 fs.writeFileSync("assets/ga-alpr-cameras.geojson",JSON.stringify({type:"FeatureCollection",features:feats}));
 console.log(feats.length,"cameras");'
 ```
+
+## District / ward lookup
+The Reach Cobb Officials section has two address boxes that tell a resident which
+Cobb commission district (1–4) or Marietta ward (1–7) they're in, and highlight the
+matching contact card. It geocodes the address with OpenStreetMap Nominatim (the same
+forgiving lookup the map uses), then runs a client-side point-in-polygon test against
+`assets/cobb-districts.geojson` and `assets/marietta-wards.geojson`. No address is
+stored. To refresh the boundaries, re-query the source ArcGIS services (simplified with
+`maxAllowableOffset=0.0003`, `geometryPrecision=5`, `outSR=4326`, `f=geojson`):
+```
+# Cobb commission districts (layer 2; fields COMM_D, COMMISSION)
+curl -s "https://services.arcgis.com/HYLRafMc4Ux6DA8c/arcgis/rest/services/Commissioner_Districts/FeatureServer/2/query?where=1%3D1&outFields=COMM_D&outSR=4326&maxAllowableOffset=0.0003&geometryPrecision=5&f=geojson"
+# Marietta wards (MapServer layer 9; field WARD, split into subwards — drop the null-WARD sliver)
+curl -s "https://secure.mariettaga.gov/server/rest/services/HubContent/AGOL_OpenData/MapServer/9/query?where=1%3D1&outFields=WARD&outSR=4326&maxAllowableOffset=0.0003&geometryPrecision=5&f=geojson"
+```
+Then normalize each feature's property to `district` / `ward` (integers) before saving.
 
 ## Preview locally
 ```
