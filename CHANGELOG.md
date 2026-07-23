@@ -2,6 +2,11 @@
 
 All notable changes to the Flock Off Cobb site are recorded here.
 
+## 2026-07-23
+
+### Added
+- "Marietta City Council" subsection in Reach Cobb Officials, below the Cobb Board of Commissioners. Reuses the officials-card layout with a dark header band, an agendas button, and cards for the mayor plus all seven ward councilmembers (name, phone, email). Each entry verified against the member's individual mariettaga.gov profile page. Councilmembers share the main line (770) 794-5526; the mayor and Ward 7 (Goldstein) list their own direct numbers.
+
 ## 2026-07-06
 
 ### Changed
