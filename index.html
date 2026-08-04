@@ -444,7 +444,7 @@
     <input id="addrInput" type="text" name="address" placeholder="Type your address or ZIP…" aria-label="Your address" />
     <button type="submit">Show cameras near me</button>
   </form>
-  <p class="addr-status" id="addrStatus">Enter an address (or just click the map) to drop a pin and count the ALPR cameras within one mile. Your address isn&rsquo;t stored &mdash; lookups run through OpenStreetMap.</p>
+  <p class="addr-status" id="addrStatus">Enter an address (or just click the map) to drop a pin and count the ALPR cameras within one mile. Your address isn&rsquo;t stored. Lookups run through OpenStreetMap.</p>
   <div class="map-frame">
     <div id="cobbmap"></div>
   </div>
@@ -545,7 +545,7 @@
       <input id="cobbDistInput" type="text" name="address" placeholder="Not sure which district? Type your address…" aria-label="Your address" />
       <button type="submit">Find my district</button>
     </form>
-    <p class="addr-status" id="cobbDistStatus">Enter your address to find which Cobb Commission district you&rsquo;re in and who represents you. Your address isn&rsquo;t stored &mdash; lookups run through OpenStreetMap.</p>
+    <p class="addr-status" id="cobbDistStatus">Enter your address to find which Cobb Commission district you&rsquo;re in and who represents you. Your address isn&rsquo;t stored. Lookups run through OpenStreetMap.</p>
   </div>
   <div class="officials" id="cobb-officials">
     <div class="official">
@@ -878,7 +878,7 @@
       </details>
 
     </div>
-    <p class="cities-caveat">Countdowns are estimated from each council's regular meeting schedule. Meetings can be cancelled, moved, or specially called &mdash; always confirm the date via the agenda link before you show up. Acworth's aldermen meet on Thursdays but not on a fixed week of the month, so it has no countdown.</p>
+    <p class="cities-caveat">Countdowns are estimated from each council's regular meeting schedule. Meetings can be cancelled, moved, or specially called, so always confirm the date via the agenda link before you show up. Acworth's aldermen meet on Thursdays but not on a fixed week of the month, so it has no countdown.</p>
   </div>
 </section>
 
@@ -1015,7 +1015,7 @@
           return this._div;
         };
         readout.addTo(map);
-        readout._div.innerHTML = '<div class="ro-prompt">Enter your address &mdash; or click the map &mdash; to count the ALPR cameras within 1 mile.</div>';
+        readout._div.innerHTML = '<div class="ro-prompt">Enter your address, or click the map, to count the ALPR cameras within 1 mile.</div>';
 
         function update(latlng){
           ring.setLatLng(latlng);
@@ -1159,7 +1159,7 @@
     };
     const cache = {};
 
-    // Address cleanup + geocode — mirrors the map’s forgiving Nominatim lookup.
+    // Address cleanup + geocode: mirrors the map’s forgiving Nominatim lookup.
     const clean = s => s.replace(/\s+/g," ").replace(/\s*,\s*/g,", ").replace(/(?:,\s*){2,}/g,", ").replace(/^[\s,]+|[\s,]+$/g,"").trim();
     function variants(raw){
       const base = clean(raw);
@@ -1232,7 +1232,7 @@
           if(num == null){ highlight(kind, null); status.className = "addr-status err"; status.textContent = cfg.notFound; return; }
           highlight(kind, num);
           status.className = "addr-status";
-          status.innerHTML = "You’re in <strong>" + cfg.label + " " + num + "</strong> — " + NAMES[kind][num] + ". Their card is highlighted below.";
+          status.innerHTML = "You’re in <strong>" + cfg.label + " " + num + "</strong>: " + NAMES[kind][num] + ". Their card is highlighted below.";
         } catch (err) {
           highlight(kind, null);
           status.className = "addr-status err";
@@ -1291,7 +1291,7 @@
   }, {rootMargin:'-45% 0px -50% 0px'});
   sections.forEach(s => spy.observe(s));
 
-  /* City council meeting countdowns — computed live from each council's
+  /* City council meeting countdowns, computed live from each council's
      recurring rule. wd: 0=Sun..6=Sat. weeks: which nth-of-month occurrences.
      Powder Springs meets only the 3rd Monday in Jul–Sep (summer override). */
   (function(){

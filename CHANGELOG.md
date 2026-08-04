@@ -18,6 +18,7 @@ All notable changes to the Flock Off Cobb site are recorded here.
 - Smyrna's Ward 7 is Rickey N. Oglesby Jr. (elected 2024), corrected from a stale third-party listing that still named the previous councilmember.
 
 - Resources → Other Communities: [DeFlock Cherokee](https://deflockcherokee.com/), the resident campaign against ALPRs, cameras, audio, and drones in Cherokee County, the county directly north of Cobb.
+- Em-dashes removed from the copy again, having drifted back in since the June pass. Six were user-visible: the two "your address isn't stored" lines, the meeting-countdown caveat, the map readout prompt (which had two), and the ward/district lookup result that fires on every successful search. Two more were in source comments. Replaced with full stops, commas, or a colon. Deliberately kept: the en-dash in the "Flock Off – Cobb" wordmark, and the `Jul–Sep` range in a comment, since a range en-dash is correct typography rather than the tell.
 
 ### Notes
 - Acworth's Board of Aldermen meets Thursdays at 7 PM but not on a fixed week of the month, so it has no countdown. The caveat line under the accordions says this.
