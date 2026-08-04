@@ -2,7 +2,25 @@
 
 All notable changes to the Flock Off Cobb site are recorded here.
 
-## 2026-07-23
+## 2026-08-04
+
+### Added
+- Full councilmember contacts for every Cobb city. Acworth, Austell, Kennesaw, Mableton, Powder Springs, and Smyrna join Marietta with name, seat, direct phone, and email for the mayor and every councilmember — 40 newly added officials, 48 across all seven cities. Every entry was verified against the city's own site on the day of the change.
+- City councils are now click-to-expand panels. The old flat "cities" grid became a list of `<details>` accordions, one per city, alphabetical and all collapsed by default. The summary row keeps the city name, meeting schedule, and next-meeting countdown; expanding reveals an intro line, an agendas button, the address lookup where one applies, and the councilmember cards.
+- Ward/district address lookups for the four cities that elect by ward: Austell (wards 1–4), Mableton (districts 1–6), Powder Springs (wards 1–3), and Smyrna (wards 1–7). Same forgiving Nominatim geocoder and client-side point-in-polygon test as the Cobb and Marietta lookups, against four new boundary files: `assets/austell-wards.geojson`, `assets/mableton-districts.geojson`, `assets/powder-springs-wards.geojson`, and `assets/smyrna-wards.geojson`. Refresh recipes are in the README.
+- Marietta rejoined the meeting-countdown schedule (2nd Wednesday, 7 PM), since it now sits in the accordion list with the other cities.
+
+### Changed
+- Marietta folded into the accordion. Its standalone dark band, ward lookup, and eight always-visible cards became one panel matching the other six, so the whole section reads as a single consistent list.
+- Highlight targeting is now scoped per city. Cards use a single `data-seat` attribute and each lookup declares a `scope` container in `CFG`, so five ward-based lookups coexist without highlighting each other's councilmembers. Replaces the old global `data-district` / `data-ward` attribute lookup.
+- Acworth and Kennesaw get no address lookup and say so — both elect their entire council at large, so every member represents every resident. Kennesaw's panel also links the all-council address, kennesawcouncil@kennesaw-ga.gov.
+- The section intro no longer says council email lists are still being compiled, since they now are.
+- Smyrna's Ward 7 is Rickey N. Oglesby Jr. (elected 2024), corrected from a stale third-party listing that still named the previous councilmember.
+
+- Resources → Other Communities: [DeFlock Cherokee](https://deflockcherokee.com/), the resident campaign against ALPRs, cameras, audio, and drones in Cherokee County, the county directly north of Cobb.
+
+### Notes
+- Acworth's Board of Aldermen meets Thursdays at 7 PM but not on a fixed week of the month, so it has no countdown. The caveat line under the accordions says this.
 
 ### Added
 - "Marietta City Council" subsection in Reach Cobb Officials, below the Cobb Board of Commissioners. Reuses the officials-card layout with a dark header band, an agendas button, and cards for the mayor plus all seven ward councilmembers (name, phone, email). Each entry verified against the member's individual mariettaga.gov profile page. Councilmembers share the main line (770) 794-5526; the mayor and Ward 7 (Goldstein) list their own direct numbers.

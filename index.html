@@ -233,15 +233,43 @@
   @media(max-width:540px){.officials{grid-template-columns:1fr;}}
 
   .cities-note{margin-top:30px;border-left:6px solid var(--red);background:var(--paper-2);padding:18px 22px;}
-  .cities{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px;}
-  .city{border:2px solid var(--ink);padding:14px 16px;background:var(--paper);}
+  .cities{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+
+  /* Each city council is a click-to-expand <details> panel. */
+  .city{border:2px solid var(--ink);background:var(--paper);}
+  .city[open]{box-shadow:5px 5px 0 var(--ink);}
+  .city > summary{
+    display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;
+    padding:14px 16px;cursor:pointer;list-style:none;
+  }
+  .city > summary::-webkit-details-marker{display:none;}
+  .city > summary:hover{background:var(--paper-2);}
+  .city > summary:focus-visible{outline:3px solid var(--red);outline-offset:-3px;}
   .city b{font-family:"Anton",sans-serif;font-weight:400;letter-spacing:.02em;font-size:1.05rem;text-transform:uppercase;}
-  .city .meet{display:block;font-size:.86rem;color:var(--ink-soft);margin-top:4px;}
-  .city .countdown{display:block;margin-top:9px;padding-top:8px;border-top:1px dashed rgba(58,52,47,.4);font-family:"Space Mono",monospace;font-size:.76rem;color:var(--ink-soft);letter-spacing:.01em;}
+  .city .meet{font-size:.86rem;color:var(--ink-soft);}
+  .city .chev{
+    margin-left:auto;flex:none;width:13px;height:13px;
+    border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);
+    transform:rotate(45deg) translate(-3px,-3px);transition:transform .18s ease;
+  }
+  .city[open] > summary .chev{transform:rotate(225deg) translate(-3px,-3px);}
+  .city .countdown{display:block;flex-basis:100%;margin-top:3px;padding-top:8px;border-top:1px dashed rgba(58,52,47,.4);font-family:"Space Mono",monospace;font-size:.76rem;color:var(--ink-soft);letter-spacing:.01em;}
   .city .countdown .cd-label{text-transform:uppercase;font-size:.64rem;letter-spacing:.09em;color:var(--ink);margin-right:2px;}
   .city .countdown .cd-when{color:var(--red-deep);font-weight:700;white-space:nowrap;}
+  .city-body{padding:0 16px 18px;border-top:2px dashed rgba(22,19,17,.25);}
+  .city-body .rep-lookup{margin:16px 0 18px;}
+  .city-body .officials{grid-template-columns:repeat(4,1fr);gap:12px;}
+  .city-body .official{padding:13px;}
+  .city-body .official .name{font-size:1.05rem;margin:4px 0 9px;}
+  .city-body .official .contact{font-size:.78rem;gap:4px;}
+  .city-intro{margin:14px 0 0;font-size:.9rem;color:var(--ink-soft);max-width:62ch;}
+  .city-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 0;}
+  .city-actions .btn{font-size:.72rem;padding:9px 14px;box-shadow:3px 3px 0 var(--ink);}
   .cities-caveat{margin-top:16px;font-size:.78rem;font-style:italic;color:var(--ink-soft);line-height:1.5;}
-  @media(max-width:620px){.cities{grid-template-columns:1fr;}}
+  @media(max-width:980px){.city-body .officials{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:760px){.city-body .officials{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:460px){.city-body .officials{grid-template-columns:1fr;}}
+  @media(prefers-reduced-motion:reduce){.city .chev{transition:none;}}
 
   /* resources */
   .res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;}
@@ -519,104 +547,338 @@
     </form>
     <p class="addr-status" id="cobbDistStatus">Enter your address to find which Cobb Commission district you&rsquo;re in and who represents you. Your address isn&rsquo;t stored &mdash; lookups run through OpenStreetMap.</p>
   </div>
-  <div class="officials">
+  <div class="officials" id="cobb-officials">
     <div class="official">
       <span class="role">Commission Chairwoman</span>
       <div class="name">Lisa Cupid</div>
       <div class="contact"><a href="tel:+17705283305">(770) 528-3305</a><a href="mailto:lisa.cupid@cobbcounty.gov">lisa.cupid@cobbcounty.gov</a></div>
     </div>
-    <div class="official" data-district="1">
+    <div class="official" data-seat="1">
       <span class="role">District 1 Commissioner</span>
       <div class="name">Keli Gambrill</div>
       <div class="contact"><a href="tel:+17705283313">(770) 528-3313</a><a href="mailto:keli.gambrill@cobbcounty.gov">keli.gambrill@cobbcounty.gov</a></div>
     </div>
-    <div class="official" data-district="2">
+    <div class="official" data-seat="2">
       <span class="role">District 2 Commissioner</span>
       <div class="name">Erick Allen</div>
       <div class="contact"><a href="tel:+17705283315">(770) 528-3315</a><a href="mailto:erick.allen@cobbcounty.gov">erick.allen@cobbcounty.gov</a></div>
     </div>
-    <div class="official" data-district="3">
+    <div class="official" data-seat="3">
       <span class="role">District 3 Commissioner</span>
       <div class="name">JoAnn K. Birrell</div>
       <div class="contact"><a href="tel:+17705283317">(770) 528-3317</a><a href="mailto:joann.birrell@cobbcounty.gov">joann.birrell@cobbcounty.gov</a></div>
     </div>
-    <div class="official" data-district="4">
+    <div class="official" data-seat="4">
       <span class="role">District 4 Commissioner</span>
       <div class="name">Monique Sheffield</div>
       <div class="contact"><a href="tel:+17705283312">(770) 528-3312</a><a href="mailto:monique.sheffield@cobbcounty.gov">monique.sheffield@cobbcounty.gov</a></div>
     </div>
   </div>
 
-  <div class="gov-band" style="margin-top:34px;">
-    <div>
-      <h3>Marietta City Council</h3>
-      <p>The City of Marietta runs its own Flock contract, separate from the county. The mayor and seven ward councilmembers meet the 2nd Wednesday of each month at 7&nbsp;PM at City Hall, 205 Lawrence St. Ask them to end the city's Flock contract and take the cameras down.</p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <a class="btn btn-primary" href="https://www.mariettaga.gov/agendacenter">Meeting agendas →</a>
-    </div>
-  </div>
-  <div class="rep-lookup">
-    <form class="addr-tool" id="wardForm" autocomplete="off">
-      <input id="wardInput" type="text" name="address" placeholder="Which ward am I in? Type your Marietta address…" aria-label="Your Marietta address" />
-      <button type="submit">Find my ward</button>
-    </form>
-    <p class="addr-status" id="wardStatus">Enter a Marietta address to find your ward and councilmember. Only addresses inside Marietta city limits have a ward. Your address isn&rsquo;t stored.</p>
-  </div>
-  <div class="officials">
-    <div class="official">
-      <span class="role">Mayor</span>
-      <div class="name">Steve Tumlin</div>
-      <div class="contact"><a href="tel:+17707945501">(770) 794-5501</a><a href="mailto:stumlin@mariettaga.gov">stumlin@mariettaga.gov</a></div>
-    </div>
-    <div class="official" data-ward="1">
-      <span class="role">Ward 1 Councilmember</span>
-      <div class="name">Cheryl Richardson</div>
-      <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:crichardson@mariettaga.gov">crichardson@mariettaga.gov</a></div>
-    </div>
-    <div class="official" data-ward="2">
-      <span class="role">Ward 2 Councilmember</span>
-      <div class="name">Jason Waters</div>
-      <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:jwaters@mariettaga.gov">jwaters@mariettaga.gov</a></div>
-    </div>
-    <div class="official" data-ward="3">
-      <span class="role">Ward 3 Councilmember</span>
-      <div class="name">Daniel Gaddis</div>
-      <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:dgaddis@mariettaga.gov">dgaddis@mariettaga.gov</a></div>
-    </div>
-    <div class="official" data-ward="4">
-      <span class="role">Ward 4 Councilmember</span>
-      <div class="name">Byron Anderson</div>
-      <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:tanderson@mariettaga.gov">tanderson@mariettaga.gov</a></div>
-    </div>
-    <div class="official" data-ward="5">
-      <span class="role">Ward 5 Councilmember</span>
-      <div class="name">M. Carlyle Kent</div>
-      <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:mckent@mariettaga.gov">mckent@mariettaga.gov</a></div>
-    </div>
-    <div class="official" data-ward="6">
-      <span class="role">Ward 6 Councilmember</span>
-      <div class="name">Andre L. Sims</div>
-      <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:asims@mariettaga.gov">asims@mariettaga.gov</a></div>
-    </div>
-    <div class="official" data-ward="7">
-      <span class="role">Ward 7 Councilmember</span>
-      <div class="name">Joseph R. Goldstein</div>
-      <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="tel:+17708415959">(770) 841-5959</a><a href="mailto:jgoldstein@mariettaga.gov">jgoldstein@mariettaga.gov</a></div>
-    </div>
-  </div>
-
   <div class="cities-note">
-    <p style="margin:0 0 4px;"><strong>Several Cobb cities have their own contracts.</strong> We're still compiling council email lists, so for now, find your agenda below and show up. <span class="mono">Have a council contact to share? Email deflockcobb@proton.me</span></p>
+    <p style="margin:0 0 4px;"><strong>Seven Cobb cities run their own contracts, separate from the county.</strong> Click a city to see its councilmembers and, where the council is elected by ward, find out who represents your address. <span class="mono">Spot something out of date? Email deflockcobb@proton.me</span></p>
     <div class="cities">
-      <div class="city"><b>Acworth</b><span class="meet">Council meeting agendas · <a href="https://acworth-ga.gov/agenda/">acworth-ga.gov →</a></span></div>
-      <div class="city"><b>Austell</b><span class="meet">1st Monday, 7 PM · <a href="https://austell-ga.municodemeetings.com/">agendas →</a></span><span class="countdown" data-city="austell"></span></div>
-      <div class="city"><b>Kennesaw</b><span class="meet">1st &amp; 3rd Monday, 6:30 PM · <a href="https://kennesawga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="kennesaw"></span></div>
-      <div class="city"><b>Mableton</b><span class="meet">2nd &amp; 4th Wednesday, 6:30 PM · <a href="https://mabletonga.portal.civicclerk.com/">agendas →</a></span><span class="countdown" data-city="mableton"></span><span class="city-status">Newly incorporated, with no active Flock contract yet. Let's keep it that way and tell the council we don't want AI surveillance in our city.</span></div>
-      <div class="city"><b>Powder Springs</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.powderspringsga.gov/501/City-Council-Meeting-Dates">agendas →</a></span><span class="countdown" data-city="powder"></span></div>
-      <div class="city"><b>Smyrna</b><span class="meet">1st &amp; 3rd Monday, 7 PM · <a href="https://www.smyrnaga.gov/departments/office-of-the-city-clerk/upcoming-meetings-and-agendas-calendar">agendas →</a></span><span class="countdown" data-city="smyrna"></span></div>
+
+      <details class="city" id="cc-acworth">
+        <summary><b>Acworth</b><span class="meet">Board of Aldermen · Thursdays, 7 PM</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="city-body">
+          <p class="city-intro">Acworth's five aldermen are all elected at&nbsp;large, so every one of them represents you no matter where in the city you live. Write to the whole board.</p>
+          <div class="city-actions"><a class="btn btn-primary" href="https://acworth-ga.gov/agenda/">Meeting agendas →</a></div>
+          <div class="officials">
+            <div class="official">
+              <span class="role">Mayor</span><div class="name">Tommy Allegood</div>
+              <div class="contact"><a href="tel:+16788014024">(678) 801-4024</a><a href="mailto:tallegood@acworth-ga.gov">tallegood@acworth-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Alderman · Post 1</span><div class="name">Toby Carmichael</div>
+              <div class="contact"><a href="tel:+16788014008">(678) 801-4008</a><a href="mailto:tcarmichael@acworth-ga.gov">tcarmichael@acworth-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Alderman · Post 2</span><div class="name">Steve Prather</div>
+              <div class="contact"><a href="tel:+16788014004">(678) 801-4004</a><a href="mailto:sprather@acworth-ga.gov">sprather@acworth-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Alderman · Post 3</span><div class="name">Brett North</div>
+              <div class="contact"><a href="tel:+16788014006">(678) 801-4006</a><a href="mailto:bnorth@acworth-ga.gov">bnorth@acworth-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Alderman · Post 4</span><div class="name">Kimberly Haase</div>
+              <div class="contact"><a href="tel:+16788014009">(678) 801-4009</a><a href="mailto:khaase@acworth-ga.gov">khaase@acworth-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Alderman · Post 5</span><div class="name">Tim Houston</div>
+              <div class="contact"><a href="tel:+16785082801">(678) 508-2801</a><a href="mailto:thouston@acworth-ga.gov">thouston@acworth-ga.gov</a></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="city" id="cc-austell">
+        <summary><b>Austell</b><span class="meet">1st Monday, 7 PM</span><span class="chev" aria-hidden="true"></span><span class="countdown" data-city="austell"></span></summary>
+        <div class="city-body">
+          <p class="city-intro">Austell elects four councilmembers by ward plus two at&nbsp;large. Your ward councilmember and both at-large members all represent you.</p>
+          <div class="city-actions"><a class="btn btn-primary" href="https://austell-ga.municodemeetings.com/">Meeting agendas →</a></div>
+          <div class="rep-lookup">
+            <form class="addr-tool" id="austellForm" autocomplete="off">
+              <input id="austellInput" type="text" name="address" placeholder="Which ward am I in? Type your Austell address…" aria-label="Your Austell address" />
+              <button type="submit">Find my ward</button>
+            </form>
+            <p class="addr-status" id="austellStatus">Enter an Austell address to find your ward. Your address isn&rsquo;t stored.</p>
+          </div>
+          <div class="officials">
+            <div class="official">
+              <span class="role">Mayor</span><div class="name">Ollie Clemons Jr.</div>
+              <div class="contact"><a href="tel:+17709444328">(770) 944-4328</a><a href="mailto:mayor@austellga.gov">mayor@austellga.gov</a></div>
+            </div>
+            <div class="official" data-seat="1">
+              <span class="role">Ward 1 Councilmember</span><div class="name">Derek Caffe</div>
+              <div class="contact"><a href="tel:+14047804942">(404) 780-4942</a><a href="mailto:dcaffe@austellga.gov">dcaffe@austellga.gov</a></div>
+            </div>
+            <div class="official" data-seat="2">
+              <span class="role">Ward 2 · Mayor Pro Tem</span><div class="name">Devon D. Myrick</div>
+              <div class="contact"><a href="tel:+14709224632">(470) 922-4632</a><a href="mailto:dmyrick@austellga.gov">dmyrick@austellga.gov</a></div>
+            </div>
+            <div class="official" data-seat="3">
+              <span class="role">Ward 3 Councilmember</span><div class="name">Shawndra Williams</div>
+              <div class="contact"><a href="tel:+14047801642">(404) 780-1642</a><a href="mailto:shawndra73@gmail.com">shawndra73@gmail.com</a></div>
+            </div>
+            <div class="official" data-seat="4">
+              <span class="role">Ward 4 Councilmember</span><div class="name">Sandra Leverette</div>
+              <div class="contact"><a href="tel:+14707554590">(470) 755-4590</a><a href="mailto:sleverette@austellga.gov">sleverette@austellga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">At Large · Post 1</span><div class="name">Melanie Maria Elder</div>
+              <div class="contact"><a href="tel:+14709224631">(470) 922-4631</a><a href="mailto:melder@austellga.gov">melder@austellga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">At Large · Post 2</span><div class="name">Valerie Anderson</div>
+              <div class="contact"><a href="tel:+14707554589">(470) 755-4589</a><a href="mailto:vanderson@austellga.gov">vanderson@austellga.gov</a></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="city" id="cc-kennesaw">
+        <summary><b>Kennesaw</b><span class="meet">1st &amp; 3rd Monday, 6:30 PM</span><span class="chev" aria-hidden="true"></span><span class="countdown" data-city="kennesaw"></span></summary>
+        <div class="city-body">
+          <p class="city-intro">Kennesaw's five councilmembers are all elected at&nbsp;large, so every one of them represents you. You can also write the whole council at once at <a href="mailto:kennesawcouncil@kennesaw-ga.gov">kennesawcouncil@kennesaw-ga.gov</a>.</p>
+          <div class="city-actions"><a class="btn btn-primary" href="https://kennesawga.portal.civicclerk.com/">Meeting agendas →</a></div>
+          <div class="officials">
+            <div class="official">
+              <span class="role">Mayor</span><div class="name">Derek Easterling</div>
+              <div class="contact"><a href="tel:+14044962563">(404) 496-2563</a><a href="mailto:deasterling@kennesaw-ga.gov">deasterling@kennesaw-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Councilmember · Post 1</span><div class="name">Madelyn Orochena</div>
+              <div class="contact"><a href="tel:+14707868771">(470) 786-8771</a><a href="mailto:morochena@kennesaw-ga.gov">morochena@kennesaw-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Councilmember · Post 2</span><div class="name">Tracey Viars</div>
+              <div class="contact"><a href="tel:+14048228589">(404) 822-8589</a><a href="mailto:tviars@kennesaw-ga.gov">tviars@kennesaw-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Councilmember · Post 3</span><div class="name">Jonathon Bothers</div>
+              <div class="contact"><a href="tel:+14045995761">(404) 599-5761</a><a href="mailto:jbothers@kennesaw-ga.gov">jbothers@kennesaw-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Councilmember · Post 4</span><div class="name">Antonio Jones</div>
+              <div class="contact"><a href="tel:+14045996189">(404) 599-6189</a><a href="mailto:ajones@kennesaw-ga.gov">ajones@kennesaw-ga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">Councilmember · Post 5</span><div class="name">Anthony Gutierrez</div>
+              <div class="contact"><a href="tel:+14045996185">(404) 599-6185</a><a href="mailto:agutierrez@kennesaw-ga.gov">agutierrez@kennesaw-ga.gov</a></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="city" id="cc-mableton">
+        <summary><b>Mableton</b><span class="meet">2nd &amp; 4th Wednesday, 6:30 PM</span><span class="chev" aria-hidden="true"></span><span class="countdown" data-city="mableton"></span></summary>
+        <div class="city-body">
+          <p class="city-intro">Mableton elects all six councilmembers by district.</p>
+          <p class="city-status">Newly incorporated, with no active Flock contract yet. Let's keep it that way and tell the council we don't want AI surveillance in our city.</p>
+          <div class="city-actions"><a class="btn btn-primary" href="https://mabletonga.portal.civicclerk.com/">Meeting agendas →</a></div>
+          <div class="rep-lookup">
+            <form class="addr-tool" id="mabletonForm" autocomplete="off">
+              <input id="mabletonInput" type="text" name="address" placeholder="Which district am I in? Type your Mableton address…" aria-label="Your Mableton address" />
+              <button type="submit">Find my district</button>
+            </form>
+            <p class="addr-status" id="mabletonStatus">Enter a Mableton address to find your district. Your address isn&rsquo;t stored.</p>
+          </div>
+          <div class="officials">
+            <div class="official">
+              <span class="role">Mayor</span><div class="name">Michael Owens</div>
+              <div class="contact"><a href="tel:+14045902511">(404) 590-2511</a><a href="mailto:mayorsoffice@mableton.gov">mayorsoffice@mableton.gov</a></div>
+            </div>
+            <div class="official" data-seat="1">
+              <span class="role">District 1 Councilmember</span><div class="name">Ron Davis</div>
+              <div class="contact"><a href="tel:+14049279489">(404) 927-9489</a><a href="mailto:ron.davis@mableton.gov">ron.davis@mableton.gov</a></div>
+            </div>
+            <div class="official" data-seat="2">
+              <span class="role">District 2 Councilmember</span><div class="name">Michael McNeely</div>
+              <div class="contact"><a href="tel:+14706829068">(470) 682-9068</a><a href="mailto:michael.mcneely@mableton.gov">michael.mcneely@mableton.gov</a></div>
+            </div>
+            <div class="official" data-seat="3">
+              <span class="role">District 3 Councilmember</span><div class="name">Keisha Jeffcoat</div>
+              <div class="contact"><a href="tel:+14049279497">(404) 927-9497</a><a href="mailto:keisha.jeffcoat@mableton.gov">keisha.jeffcoat@mableton.gov</a></div>
+            </div>
+            <div class="official" data-seat="4">
+              <span class="role">District 4 Councilmember</span><div class="name">Cassandra Brown</div>
+              <div class="contact"><a href="tel:+14706873585">(470) 687-3585</a><a href="mailto:cassandra.brown@mableton.gov">cassandra.brown@mableton.gov</a></div>
+            </div>
+            <div class="official" data-seat="5">
+              <span class="role">District 5 Councilmember</span><div class="name">T.J. Ferguson</div>
+              <div class="contact"><a href="tel:+14049279508">(404) 927-9508</a><a href="mailto:tj.ferguson@mableton.gov">tj.ferguson@mableton.gov</a></div>
+            </div>
+            <div class="official" data-seat="6">
+              <span class="role">District 6 Councilmember</span><div class="name">Debora Herndon</div>
+              <div class="contact"><a href="tel:+14049279468">(404) 927-9468</a><a href="mailto:debora.herndon@mableton.gov">debora.herndon@mableton.gov</a></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="city" id="cc-marietta">
+        <summary><b>Marietta</b><span class="meet">2nd Wednesday, 7 PM</span><span class="chev" aria-hidden="true"></span><span class="countdown" data-city="marietta"></span></summary>
+        <div class="city-body">
+          <p class="city-intro">The county seat runs its own Flock contract. The mayor and seven ward councilmembers meet at City Hall, 205 Lawrence&nbsp;St. Ask them to end the city's contract and take the cameras down.</p>
+          <div class="city-actions"><a class="btn btn-primary" href="https://www.mariettaga.gov/agendacenter">Meeting agendas →</a></div>
+          <div class="rep-lookup">
+            <form class="addr-tool" id="wardForm" autocomplete="off">
+              <input id="wardInput" type="text" name="address" placeholder="Which ward am I in? Type your Marietta address…" aria-label="Your Marietta address" />
+              <button type="submit">Find my ward</button>
+            </form>
+            <p class="addr-status" id="wardStatus">Enter a Marietta address to find your ward and councilmember. Only addresses inside Marietta city limits have a ward. Your address isn&rsquo;t stored.</p>
+          </div>
+          <div class="officials">
+            <div class="official">
+              <span class="role">Mayor</span><div class="name">Steve Tumlin</div>
+              <div class="contact"><a href="tel:+17707945501">(770) 794-5501</a><a href="mailto:stumlin@mariettaga.gov">stumlin@mariettaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="1">
+              <span class="role">Ward 1 Councilmember</span><div class="name">Cheryl Richardson</div>
+              <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:crichardson@mariettaga.gov">crichardson@mariettaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="2">
+              <span class="role">Ward 2 Councilmember</span><div class="name">Jason Waters</div>
+              <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:jwaters@mariettaga.gov">jwaters@mariettaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="3">
+              <span class="role">Ward 3 Councilmember</span><div class="name">Daniel Gaddis</div>
+              <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:dgaddis@mariettaga.gov">dgaddis@mariettaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="4">
+              <span class="role">Ward 4 Councilmember</span><div class="name">Byron Anderson</div>
+              <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:tanderson@mariettaga.gov">tanderson@mariettaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="5">
+              <span class="role">Ward 5 Councilmember</span><div class="name">M. Carlyle Kent</div>
+              <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:mckent@mariettaga.gov">mckent@mariettaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="6">
+              <span class="role">Ward 6 Councilmember</span><div class="name">Andre L. Sims</div>
+              <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="mailto:asims@mariettaga.gov">asims@mariettaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="7">
+              <span class="role">Ward 7 Councilmember</span><div class="name">Joseph R. Goldstein</div>
+              <div class="contact"><a href="tel:+17707945526">(770) 794-5526</a><a href="tel:+17708415959">(770) 841-5959</a><a href="mailto:jgoldstein@mariettaga.gov">jgoldstein@mariettaga.gov</a></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="city" id="cc-powder">
+        <summary><b>Powder Springs</b><span class="meet">1st &amp; 3rd Monday, 7 PM</span><span class="chev" aria-hidden="true"></span><span class="countdown" data-city="powder"></span></summary>
+        <div class="city-body">
+          <p class="city-intro">Powder Springs elects three councilmembers by ward plus two at&nbsp;large. Council voicemail runs through City Hall extensions; the mayor and every member also have direct email.</p>
+          <div class="city-actions"><a class="btn btn-primary" href="https://www.powderspringsga.gov/501/City-Council-Meeting-Dates">Meeting agendas →</a></div>
+          <div class="rep-lookup">
+            <form class="addr-tool" id="powderForm" autocomplete="off">
+              <input id="powderInput" type="text" name="address" placeholder="Which ward am I in? Type your Powder Springs address…" aria-label="Your Powder Springs address" />
+              <button type="submit">Find my ward</button>
+            </form>
+            <p class="addr-status" id="powderStatus">Enter a Powder Springs address to find your ward. Your address isn&rsquo;t stored.</p>
+          </div>
+          <div class="officials">
+            <div class="official">
+              <span class="role">Mayor</span><div class="name">Al Thurman</div>
+              <div class="contact"><a href="tel:+17709431666;ext=309">(770) 943-1666 ext. 309</a><a href="mailto:athurman@powderspringsga.gov">athurman@powderspringsga.gov</a></div>
+            </div>
+            <div class="official" data-seat="1">
+              <span class="role">Ward 1 Councilmember</span><div class="name">Raja Antone</div>
+              <div class="contact"><a href="tel:+17709431666;ext=322">(770) 943-1666 ext. 322</a><a href="mailto:rantone@powderspringsga.gov">rantone@powderspringsga.gov</a></div>
+            </div>
+            <div class="official" data-seat="2">
+              <span class="role">Ward 2 Councilmember</span><div class="name">Doris Dawkins</div>
+              <div class="contact"><a href="tel:+17709431666;ext=323">(770) 943-1666 ext. 323</a><a href="mailto:ddawkins@powderspringsga.gov">ddawkins@powderspringsga.gov</a></div>
+            </div>
+            <div class="official" data-seat="3">
+              <span class="role">Ward 3 Councilmember</span><div class="name">Dwayne Green</div>
+              <div class="contact"><a href="tel:+17709431666;ext=324">(770) 943-1666 ext. 324</a><a href="mailto:dgreen@powderspringsga.gov">dgreen@powderspringsga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">At Large Post 1 · Mayor Pro Tem</span><div class="name">Dwight McMutry</div>
+              <div class="contact"><a href="tel:+17709431666;ext=321">(770) 943-1666 ext. 321</a><a href="mailto:dmcmutry@powderspringsga.gov">dmcmutry@powderspringsga.gov</a></div>
+            </div>
+            <div class="official">
+              <span class="role">At Large · Post 2</span><div class="name">Patricia Wisdom</div>
+              <div class="contact"><a href="tel:+17709431666;ext=320">(770) 943-1666 ext. 320</a><a href="mailto:pwisdom@powderspringsga.gov">pwisdom@powderspringsga.gov</a></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="city" id="cc-smyrna">
+        <summary><b>Smyrna</b><span class="meet">1st &amp; 3rd Monday, 7 PM</span><span class="chev" aria-hidden="true"></span><span class="countdown" data-city="smyrna"></span></summary>
+        <div class="city-body">
+          <p class="city-intro">Smyrna elects all seven councilmembers by ward.</p>
+          <div class="city-actions"><a class="btn btn-primary" href="https://www.smyrnaga.gov/departments/office-of-the-city-clerk/upcoming-meetings-and-agendas-calendar">Meeting agendas →</a></div>
+          <div class="rep-lookup">
+            <form class="addr-tool" id="smyrnaForm" autocomplete="off">
+              <input id="smyrnaInput" type="text" name="address" placeholder="Which ward am I in? Type your Smyrna address…" aria-label="Your Smyrna address" />
+              <button type="submit">Find my ward</button>
+            </form>
+            <p class="addr-status" id="smyrnaStatus">Enter a Smyrna address to find your ward and councilmember. Your address isn&rsquo;t stored.</p>
+          </div>
+          <div class="officials">
+            <div class="official">
+              <span class="role">Mayor</span><div class="name">Derek Norton</div>
+              <div class="contact"><a href="tel:+16786315302">(678) 631-5302</a><a href="mailto:dnorton@smyrnaga.gov">dnorton@smyrnaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="1">
+              <span class="role">Ward 1 Councilmember</span><div class="name">Glenn Pickens</div>
+              <div class="contact"><a href="tel:+16786315306">(678) 631-5306</a><a href="mailto:gpickens@smyrnaga.gov">gpickens@smyrnaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="2">
+              <span class="role">Ward 2 Councilmember</span><div class="name">Latonia P. Hines</div>
+              <div class="contact"><a href="tel:+16786315307">(678) 631-5307</a><a href="mailto:lphines@smyrnaga.gov">lphines@smyrnaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="3">
+              <span class="role">Ward 3 Councilmember</span><div class="name">Travis Lindley</div>
+              <div class="contact"><a href="tel:+16786315308">(678) 631-5308</a><a href="mailto:tlindley@smyrnaga.gov">tlindley@smyrnaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="4">
+              <span class="role">Ward 4 Councilmember</span><div class="name">Charles “Corkey” Welch</div>
+              <div class="contact"><a href="tel:+16786315309">(678) 631-5309</a><a href="mailto:cwelch@smyrnaga.gov">cwelch@smyrnaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="5">
+              <span class="role">Ward 5 Councilmember</span><div class="name">Susan Wilkinson</div>
+              <div class="contact"><a href="tel:+16786315310">(678) 631-5310</a><a href="mailto:swilkinson@smyrnaga.gov">swilkinson@smyrnaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="6">
+              <span class="role">Ward 6 · Mayor Pro Tem</span><div class="name">Tim Gould</div>
+              <div class="contact"><a href="tel:+16786315311">(678) 631-5311</a><a href="mailto:tgould@smyrnaga.gov">tgould@smyrnaga.gov</a></div>
+            </div>
+            <div class="official" data-seat="7">
+              <span class="role">Ward 7 Councilmember</span><div class="name">Rickey N. Oglesby Jr.</div>
+              <div class="contact"><a href="tel:+16786315312">(678) 631-5312</a><a href="mailto:roglesby@smyrnaga.gov">roglesby@smyrnaga.gov</a></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
     </div>
-    <p class="cities-caveat">Countdowns are estimated from each council's regular meeting schedule. Meetings can be cancelled, moved, or specially called &mdash; always confirm the date via the agenda link before you show up.</p>
+    <p class="cities-caveat">Countdowns are estimated from each council's regular meeting schedule. Meetings can be cancelled, moved, or specially called &mdash; always confirm the date via the agenda link before you show up. Acworth's aldermen meet on Thursdays but not on a fixed week of the month, so it has no countdown.</p>
   </div>
 </section>
 
@@ -651,6 +913,7 @@
       <h3>Other Communities</h3>
       <ul>
         <li><a href="https://deflockatlanta.org/">DeFlock Atlanta</a>, metro Atlanta organizing against ALPRs</li>
+        <li><a href="https://deflockcherokee.com/">DeFlock Cherokee</a>, the same fight one county north</li>
         <li><a href="https://ksualprs.com/">KSU ALPRs</a>, the Kennesaw State University campaign</li>
         <li><a href="https://noalprs.com/">National Week of Action</a>, demanding an end to all ALPRs</li>
         <li><a href="https://deflock.me/">DeFlock</a>, a crowdsourced national map of Flock camera locations</li>
@@ -870,13 +1133,29 @@
     const NAMES = {
       cobb: {1:"Keli Gambrill", 2:"Erick Allen", 3:"JoAnn K. Birrell", 4:"Monique Sheffield"},
       ward: {1:"Cheryl Richardson", 2:"Jason Waters", 3:"Daniel Gaddis", 4:"Byron Anderson",
-             5:"M. Carlyle Kent", 6:"Andre L. Sims", 7:"Joseph R. Goldstein"}
+             5:"M. Carlyle Kent", 6:"Andre L. Sims", 7:"Joseph R. Goldstein"},
+      austell:  {1:"Derek Caffe", 2:"Devon D. Myrick", 3:"Shawndra Williams", 4:"Sandra Leverette"},
+      mableton: {1:"Ron Davis", 2:"Michael McNeely", 3:"Keisha Jeffcoat", 4:"Cassandra Brown",
+                 5:"T.J. Ferguson", 6:"Debora Herndon"},
+      powder:   {1:"Raja Antone", 2:"Doris Dawkins", 3:"Dwayne Green"},
+      smyrna:   {1:"Glenn Pickens", 2:"Latonia P. Hines", 3:"Travis Lindley", 4:"Charles “Corkey” Welch",
+                 5:"Susan Wilkinson", 6:"Tim Gould", 7:"Rickey N. Oglesby Jr."}
     };
+    // scope = the container whose [data-seat] cards this lookup may highlight, so the
+    // several ward-based cities don’t highlight each other’s councilmembers.
     const CFG = {
-      cobb: {file:"assets/cobb-districts.geojson", prop:"district", label:"District", cardAttr:"data-district",
+      cobb: {file:"assets/cobb-districts.geojson", prop:"district", label:"District", scope:"#cobb-officials",
              notFound:"That address doesn’t fall inside a Cobb commission district. If you live inside a city, check your city council below."},
-      ward: {file:"assets/marietta-wards.geojson", prop:"ward", label:"Ward", cardAttr:"data-ward",
-             notFound:"That address is outside Marietta city limits, so it has no Marietta ward. Check the Cobb commissioners above, or your own city’s council."}
+      ward: {file:"assets/marietta-wards.geojson", prop:"ward", label:"Ward", scope:"#cc-marietta",
+             notFound:"That address is outside Marietta city limits, so it has no Marietta ward. Check the Cobb commissioners above, or your own city’s council."},
+      austell: {file:"assets/austell-wards.geojson", prop:"ward", label:"Ward", scope:"#cc-austell",
+             notFound:"That address is outside Austell city limits, so it has no Austell ward. Austell’s two at-large councilmembers still represent you."},
+      mableton: {file:"assets/mableton-districts.geojson", prop:"district", label:"District", scope:"#cc-mableton",
+             notFound:"That address is outside Mableton city limits, so it has no Mableton district. Check the Cobb commissioners above, or your own city’s council."},
+      powder: {file:"assets/powder-springs-wards.geojson", prop:"ward", label:"Ward", scope:"#cc-powder",
+             notFound:"That address is outside Powder Springs city limits, so it has no ward. Powder Springs’ two at-large councilmembers still represent you."},
+      smyrna: {file:"assets/smyrna-wards.geojson", prop:"ward", label:"Ward", scope:"#cc-smyrna",
+             notFound:"That address is outside Smyrna city limits, so it has no Smyrna ward. Check the Cobb commissioners above, or your own city’s council."}
     };
     const cache = {};
 
@@ -932,9 +1211,10 @@
       return null;
     }
     function highlight(kind, num){
-      const attr = CFG[kind].cardAttr;
-      document.querySelectorAll("[" + attr + "]").forEach(el =>
-        el.classList.toggle("match", num != null && String(el.getAttribute(attr)) === String(num)));
+      const root = document.querySelector(CFG[kind].scope);
+      if(!root) return;
+      root.querySelectorAll("[data-seat]").forEach(el =>
+        el.classList.toggle("match", num != null && String(el.dataset.seat) === String(num)));
     }
 
     function wire(kind, formId, inputId, statusId){
@@ -962,6 +1242,10 @@
     }
     wire("cobb", "cobbDistForm", "cobbDistInput", "cobbDistStatus");
     wire("ward", "wardForm", "wardInput", "wardStatus");
+    wire("austell",  "austellForm",  "austellInput",  "austellStatus");
+    wire("mableton", "mabletonForm", "mabletonInput", "mabletonStatus");
+    wire("powder",   "powderForm",   "powderInput",   "powderStatus");
+    wire("smyrna",   "smyrnaForm",   "smyrnaInput",   "smyrnaStatus");
   })();
 
   // mobile menu
@@ -1016,6 +1300,7 @@
       austell:  {wd:1, weeks:[1],   h:19, mi:0},
       kennesaw: {wd:1, weeks:[1,3], h:18, mi:30},
       mableton: {wd:3, weeks:[2,4], h:18, mi:30},
+      marietta: {wd:3, weeks:[2],   h:19, mi:0},
       powder:   {wd:1, weeks:[1,3], h:19, mi:0, summer:[3]},
       smyrna:   {wd:1, weeks:[1,3], h:19, mi:0}
     };
