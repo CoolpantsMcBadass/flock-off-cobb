@@ -128,6 +128,17 @@ else changes — the pop, the droplets, the dwell and the dismiss latch are clas
 work. `dev/no-d.html` renders that branch in Chrome; read the gotcha in it before
 trusting a measurement.
 
+The `:hover` halves of those fallback rules sit behind the same
+`@media(hover:hover) and (min-width:861px)` guard as the real open-state rules, and that
+is not decoration. iOS keeps `:hover` stuck on whatever was tapped last, so unguarded
+they matched a flyer that was closed — the sheet stayed shut, its own open rules being
+inside the media query, while the burst was pinned at opacity 0 and the empty window kept
+its frame, leaving a bordered box where the button should be on every tap after the
+first. **Anything keyed on `:hover` belongs behind that guard.** Real WebKit is the only
+thing that catches this; `npx playwright install webkit` and drive it with
+`playwright-core` at `devices['iPhone 13']`, which also reports `CSS.supports('d', …)`
+false and so exercises the fallback for real.
+
 The label is pinned to the rolled band rather than centred in the burst, or
 it would ride the middle of the sheet downward as the box grows; it fades in the first
 30%. It carries no shadow of its own on purpose: the old filter sat on the whole burst,

@@ -506,15 +506,28 @@
      the same here as anywhere. Test it by loading dev/no-d.html. */
   @supports not (d: path("M0,0 Z")){
     .flyer-window{clip-path:none;}
-    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-window,
+    .flyer-burst{transition:opacity calc(var(--dur) * .4) ease;}
     .flyer:not(.is-popping):has(:focus-visible) .flyer-window,
     .flyer:not(.is-popping).is-open .flyer-window{
       border-color:var(--ink);background:var(--paper);
     }
-    .flyer-burst{transition:opacity calc(var(--dur) * .4) ease;}
-    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst,
     .flyer:not(.is-popping):has(:focus-visible) .flyer-burst,
     .flyer:not(.is-popping).is-open .flyer-burst{height:var(--roll-h);opacity:0;}
+    /* The :hover halves belong behind the same guard the real open-state rules are
+       behind, and leaving them outside it broke the flyer on a phone after one tap.
+       iOS keeps :hover stuck on whatever was tapped last, so an unguarded rule here
+       matched a flyer that was closed: the sheet stayed shut (its own open rules are
+       inside the media query and correctly did not match) while the burst was held at
+       opacity 0 and the empty window kept its frame. What is left is an unexplained
+       bordered box where the button used to be — every tap after the first. */
+    @media(hover:hover) and (min-width:861px){
+      .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-window{
+        border-color:var(--ink);background:var(--paper);
+      }
+      .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst{
+        height:var(--roll-h);opacity:0;
+      }
+    }
   }
 
   @media(prefers-reduced-motion:reduce){
