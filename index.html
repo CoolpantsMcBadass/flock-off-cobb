@@ -141,7 +141,9 @@
   .flyer{
     --fw:clamp(190px,20vw,250px); --fw-open:clamp(330px,40vw,500px);
     --ar:.8; --roll-h:104px; --check:#35b34a;
-    position:absolute;top:34px;right:calc(42.5% + 26px);z-index:6;
+    /* Above the floating social cluster (90) so the flyer passes in front of it,
+       but under the sticky nav (100), which stays on top of everything. */
+    position:absolute;top:34px;right:calc(42.5% + 26px);z-index:95;
     transform:rotate(-2.2deg);transform-origin:100% 0;
     transition:transform .45s cubic-bezier(.22,.61,.36,1);
   }
@@ -225,7 +227,7 @@
      narrow desktop window should behave like the phone rather than opening on
      hover and leaving the sheet hanging off the bottom. */
   @media(hover:hover) and (min-width:861px){
-    .flyer:hover{--fw:var(--fw-open);transform:rotate(0deg);z-index:60;}
+    .flyer:hover{--fw:var(--fw-open);transform:rotate(0deg);}
     .flyer:hover .flyer-window{
       height:calc(var(--fw) / var(--ar));
       border-color:var(--ink);background:var(--paper);box-shadow:var(--shadow);
@@ -236,7 +238,7 @@
     .flyer:hover .flyer-hint{opacity:0;}
   }
   .flyer:focus-within,
-  .flyer.is-open{--fw:var(--fw-open);transform:rotate(0deg);z-index:60;}
+  .flyer.is-open{--fw:var(--fw-open);transform:rotate(0deg);}
   .flyer:focus-within .flyer-window,
   .flyer.is-open .flyer-window{
     height:calc(var(--fw) / var(--ar));
@@ -262,9 +264,13 @@
        only unrolls: there's no room to grow wider, so --fw-open matches --fw. */
     .flyer{
       --fw:min(320px,86vw); --fw-open:min(320px,86vw);
-      /* Negative margins pull back against the hero's 40px grid gap, which is most
+      /* Relative rather than static so the z-index above still applies and the flyer
+         passes in front of the social bar. top/right MUST be cleared with it: they
+         are live on a relative box and the desktop values drag it off the screen.
+         Negative margins pull back against the hero's 40px grid gap, which is most
          of the space above and below the burst. Halves both: 45px/66px to 22px/33px. */
-      position:static;transform:none;width:var(--fw);margin:-19px auto -7px;
+      position:relative;top:auto;right:auto;
+      transform:none;width:var(--fw);margin:-19px auto -7px;
     }
     .flyer-hint .hov{display:none;}
     .flyer-hint .tap{display:inline;}
