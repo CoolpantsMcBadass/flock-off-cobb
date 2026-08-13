@@ -1,0 +1,74 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>DeFlock Cobb — no CSS `d` (WebKit) preview</title>
+<style>
+ body{margin:0;padding:18px 20px 40px;background:#23201d;color:#f1ece0;
+   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+ h1{font-size:1rem;margin:0 0 6px;letter-spacing:.04em;text-transform:uppercase;}
+ p{font-size:.72rem;line-height:1.6;color:#b3aa99;margin:0 0 14px;max-width:96ch;}
+ b{color:#f5c518;}
+ .rack{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;}
+ .frame{border:10px solid #0d0c0b;border-radius:8px;background:#f1ece0;}
+ iframe{display:block;border:0;background:#f1ece0;}
+ .label{font-size:.62rem;letter-spacing:.1em;color:#8d857a;margin-top:6px;
+   text-transform:uppercase;}
+ code{color:#f1ece0;}
+</style>
+
+<h1>Flyer without the CSS <code>d</code> property</h1>
+<p>
+  WebKit does not implement the CSS <code>d</code> property, so on an iPhone the flyer
+  cannot morph and falls back to the <code>@supports not (d: path(…))</code> branch in
+  <code>index.html</code>. This page reproduces that branch in Chrome so it can actually
+  be looked at: it fetches the real page and rewrites two things — every
+  <code>d:path(…)</code> <em>declaration</em> is deleted (the <code>d="…"</code>
+  attributes in the markup stay, which is the whole point of them being there), and the
+  <code>@supports not</code> condition is swapped for one that is always true.
+  <br><br>
+  <b>What to check:</b> the burst has its shape at rest; the poster is visible and framed
+  when open; the burst fades rather than stretching into a giant star; and the pop still
+  throws its droplets. <b>What this can't show:</b> anything else WebKit differs on —
+  only a real device does that.
+  <br><br>
+  <b>Gotcha:</b> transitions in these iframes don't advance while the tab is throttled,
+  so a hero stuck at <code>opacity:0</code> or a sheet stuck at its rolled height is this
+  page not being painted, not the fallback failing. Click into the frame, or read a
+  <em>specified</em> value rather than a computed one — a computed value mid-transition is
+  the animated value, which is the start value when the clock never ran. For a reading
+  with no such doubt, generate a real file instead: swap the <code>@supports</code>
+  condition and strip the <code>d:path(…)</code> declarations with a script, write it to
+  the repo root so <code>assets/</code> still resolves, and open it directly.
+</p>
+
+<div class="rack" id="rack"></div>
+
+<script>
+const VIEWS = [
+  { name: 'Desktop — 900×760', w: 900, h: 760 },
+  { name: 'iPhone 14 — 390×760', w: 390, h: 760 },
+];
+
+// Order matters, and getting it wrong is quiet. The @supports condition contains the
+// literal "d: path(…)", so stripping declarations first ate the condition and the brace
+// after it, which unbalanced the stylesheet: the fallback rules still applied, the open
+// state silently didn't, and it read as a bug in the fallback rather than in this file.
+// Swap the condition first, then strip. The declaration match is also fenced to a single
+// declaration ([^;{}]) so it can never run past its own rule again.
+function stripD(html){
+  return html
+    .replace(/@supports not \(d: path\("M0,0 Z"\)\)/, '@supports (display: block)')
+    .replace(/(^|[{;\s])d\s*:\s*path\([^;{}]*\)\s*;/g, '$1');
+}
+
+(async () => {
+  const html = (await (await fetch('../index.html')).text())
+    .replace(/<head>/i, '<head><base href="../">');
+  const src = stripD(html);
+  document.getElementById('rack').innerHTML = VIEWS.map((v, i) => `<div>
+      <div class="frame"><iframe id="f${i}" width="${v.w}" height="${v.h}"
+        title="${v.name}"></iframe></div>
+      <div class="label">${v.name}</div>
+    </div>`).join('');
+  VIEWS.forEach((v, i) => { document.getElementById('f' + i).srcdoc = src; });
+})();
+</script>

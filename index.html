@@ -490,6 +490,33 @@
      .flyer-hint), or a caption would be left floating under an empty space. */
   .flyer.is-popping .flyer-burst{animation:flyerBack .22s ease .5s both;}
   .flyer.is-popping .flyer-hint{transition:opacity .22s ease .5s;}
+
+  /* ---- Where the CSS `d` property doesn't exist ----
+     Which is WebKit, so every browser on an iPhone. One path cannot be two shapes
+     there, so the morph is off the table entirely and the outline cannot be the
+     sheet's frame — it is stuck as a burst. This is the flyer as it was before the
+     morph: the window carries a real frame of its own, and the burst stays at its
+     rolled size and fades out as the sheet unrolls, rather than stretching into a
+     star the size of a poster. The clip goes with it; its only job was letting the
+     artwork come up early while the edge was still jagged, and there is no jagged
+     edge to hide behind now.
+     The frame is only painted open, or the rolled state would be a paper rectangle
+     sitting over the burst. Nothing else is touched: the pop, the droplets, the
+     dismiss latch and the dwell are all plain HTML and class work, and they behave
+     the same here as anywhere. Test it by loading dev/no-d.html. */
+  @supports not (d: path("M0,0 Z")){
+    .flyer-window{clip-path:none;}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-window,
+    .flyer:not(.is-popping):has(:focus-visible) .flyer-window,
+    .flyer:not(.is-popping).is-open .flyer-window{
+      border-color:var(--ink);background:var(--paper);
+    }
+    .flyer-burst{transition:opacity calc(var(--dur) * .4) ease;}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst,
+    .flyer:not(.is-popping):has(:focus-visible) .flyer-burst,
+    .flyer:not(.is-popping).is-open .flyer-burst{height:var(--roll-h);opacity:0;}
+  }
+
   @media(prefers-reduced-motion:reduce){
     .flyer,.flyer-btn,.flyer-window,.flyer-plate,
     .flyer-burst,.flyer-burst path,.flyer-burst .lbl,
@@ -761,9 +788,16 @@
        focus, or tap. Unhidden by script, and only until the week of action ends. -->
   <div class="flyer" id="weekFlyer" hidden>
     <!-- Lives inside .flyer so it inherits --open-dn and the open-state selectors reach
-         it. Clips the sheet to the same shape the outline is drawing (see .flyer-window). -->
+         it. Clips the sheet to the same shape the outline is drawing (see .flyer-window).
+         The rolled shape is on the element as a plain `d` attribute, here and on both
+         burst paths, and that is not redundant with the CSS: the CSS `d` property is
+         what the morph animates, WebKit does not implement it, and geometry declared
+         only in CSS is therefore no geometry at all in Safari. An empty clipPath clips
+         everything, so the poster vanished and the burst had no shape — the flyer was
+         one line of HTML text and a puff of droplets on an iPhone. The attribute is the
+         floor every browser gets; CSS only ever moves it. See the @supports rule. -->
     <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
-      <clipPath id="flyerEdge" clipPathUnits="objectBoundingBox"><path /></clipPath>
+      <clipPath id="flyerEdge" clipPathUnits="objectBoundingBox"><path d="M0.5000,-0.0428 L0.5775,0.0893 L0.7082,-0.0208 L0.7181,0.1523 L0.8741,0.1061 L0.8328,0.2540 L0.9770,0.2781 L0.8876,0.3956 L1.0338,0.4712 L0.9056,0.5498 L0.9739,0.6631 L0.8173,0.6778 L0.8628,0.8257 L0.7305,0.8079 L0.7051,0.9547 L0.5713,0.8205 L0.5000,1.0051 L0.4173,0.8781 L0.2954,0.9537 L0.2768,0.7974 L0.1357,0.8267 L0.1987,0.6684 L0.0106,0.6694 L0.1414,0.5404 L-0.0167,0.4712 L0.1300,0.3988 L0.0282,0.2802 L0.1739,0.2582 L0.1279,0.1072 L0.2685,0.1323 L0.2974,-0.0061 L0.4215,0.0841 Z" /></clipPath>
     </svg>
     <button type="button" class="flyer-btn" aria-expanded="false" aria-controls="flyerSheet">
       <span class="sr-only">National Week of Action, August 17 to 21. Show the full schedule.</span>
@@ -771,10 +805,10 @@
            it. One path: the burst while rolled, the sheet's frame when open. -->
       <span class="flyer-burst" aria-hidden="true">
         <svg class="sh" viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
-          <path vector-effect="non-scaling-stroke" />
+          <path vector-effect="non-scaling-stroke" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" />
         </svg>
         <svg class="fg" viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
-          <path vector-effect="non-scaling-stroke" />
+          <path vector-effect="non-scaling-stroke" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" />
         </svg>
         <span class="lbl">
           <span class="t">National<br/>Week of Action!</span>

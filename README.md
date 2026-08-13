@@ -112,6 +112,22 @@ viewBox maps onto, so the two register without fudging. It lives inside `.flyer`
 inherits `--open-dn` and the open-state selectors reach it — as a sibling it would get
 neither.
 
+**The rolled shape is also a plain `d` attribute on each of the three paths, and that is
+load-bearing.** WebKit does not implement the CSS `d` property, so geometry declared only
+in the stylesheet is no geometry at all on an iPhone: the burst had nothing to draw and
+the clipPath was empty, and an empty clipPath clips everything, so the poster went with
+it. All that survived was the burst's label and the droplets, both plain HTML — which is
+exactly what it looks like when someone reports "the flyer is gone on my phone". The
+attribute is the floor every browser gets; CSS only ever moves it.
+
+Where the property is missing, `@supports not (d: path(…))` puts the flyer back the way
+it was before the morph rather than leaving it half-drawn: a real frame on the window
+(painted only when open, or the rolled state is a paper rectangle over the burst), the
+burst pinned at its rolled size and fading out as the sheet unrolls, and no clip. Nothing
+else changes — the pop, the droplets, the dwell and the dismiss latch are class and HTML
+work. `dev/no-d.html` renders that branch in Chrome; read the gotcha in it before
+trusting a measurement.
+
 The label is pinned to the rolled band rather than centred in the burst, or
 it would ride the middle of the sheet downward as the box grows; it fades in the first
 30%. It carries no shadow of its own on purpose: the old filter sat on the whole burst,
