@@ -120,7 +120,26 @@ it. All that survived was the burst's label and the droplets, both plain HTML �
 exactly what it looks like when someone reports "the flyer is gone on my phone". The
 attribute is the floor every browser gets; CSS only ever moves it.
 
-Where the property is missing, `@supports not (d: path(…))` puts the flyer back the way
+**The morph itself is done in script where the property is missing**, so an iPhone gets
+the same thing everything else does. The two shapes carry the same 32 points in the same
+order — the condition that made them interpolable to CSS at all — so doing it by hand is
+that same arithmetic written out. Each path's rolled shape is read off its own `d`
+attribute and its open shape off the custom property the CSS rule would have used, so
+there is still exactly one definition of each and `dev/morph.py` stays the only thing
+that writes them. The loop sets `js-morph`, which undoes the fallback below.
+
+Worth understanding before touching it: **the loop reads its position back from the
+window's height each frame** instead of running a clock beside the stylesheet's. A height
+is a fact about what is on screen, not a prediction, so it cannot drift — the open, the
+quiet close, the pop with its 125ms hold, and reduced motion collapsing the lot are each
+only a different way for that height to move, and every one of them comes out right
+without being handled separately. Add a state and there is nothing to update here. The
+one derived value is the open height, taken as `plate.offsetWidth + 8` over `--ar`,
+because `--fw-open` can be a `min()` that computed style hands back unresolved while the
+plate is already laid out at exactly that width.
+
+Where the property is missing **and script never arrives**, `@supports not (d: path(…))`
+puts the flyer back the way
 it was before the morph rather than leaving it half-drawn: a real frame on the window
 (painted only when open, or the rolled state is a paper rectangle over the burst), the
 burst pinned at its rolled size and fading out as the sheet unrolls, and no clip. Nothing

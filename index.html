@@ -528,6 +528,31 @@
         height:var(--roll-h);opacity:0;
       }
     }
+
+    /* ...unless script can do what the property cannot, which it can: the two shapes
+       carry the same 32 points in the same order, which is what made them interpolable
+       to CSS in the first place and makes them just as interpolable by hand. When that
+       loop is running it sets .js-morph and this puts everything above back, so WebKit
+       gets the same morph as everything else — the outline becomes the frame, so the
+       window drops its own again, the burst follows the box rather than fading, and the
+       clip comes back. The rules above are what is left if script never arrives. */
+    .flyer.js-morph .flyer-window{clip-path:url(#flyerEdge);}
+    .flyer.js-morph:not(.is-popping):has(:focus-visible) .flyer-window,
+    .flyer.js-morph:not(.is-popping).is-open .flyer-window{
+      border-color:transparent;background:transparent;
+    }
+    .flyer.js-morph:not(.is-popping):has(:focus-visible) .flyer-burst,
+    .flyer.js-morph:not(.is-popping).is-open .flyer-burst{
+      height:calc(var(--fw) / var(--ar));opacity:1;
+    }
+    @media(hover:hover) and (min-width:861px){
+      .flyer.js-morph:not(.is-popping):not(.is-dismissed):hover .flyer-window{
+        border-color:transparent;background:transparent;
+      }
+      .flyer.js-morph:not(.is-popping):not(.is-dismissed):hover .flyer-burst{
+        height:calc(var(--fw) / var(--ar));opacity:1;
+      }
+    }
   }
 
   @media(prefers-reduced-motion:reduce){
@@ -2024,6 +2049,73 @@
     });
     flyer.addEventListener('focusin', markOpen);
     flyer.addEventListener('focusout', () => setTimeout(popShut, 0));
+
+    // ---- The morph, by hand, where the CSS `d` property doesn't exist ----
+    // WebKit, so every browser on an iPhone. The two shapes carry the same 32 points in
+    // the same order — the condition that made them interpolable to CSS in the first
+    // place — so interpolating them here is the same arithmetic, just written out.
+    //
+    // The interesting part is what drives it. Rather than a second clock racing the
+    // stylesheet's, the position is READ BACK from the window's height each frame and
+    // the shapes follow it. That is a fact about what is on screen, not a prediction, so
+    // it cannot drift: the open, the quiet close, the pop with its 125ms hold, reduced
+    // motion collapsing all of it to nothing — every one comes out right for free,
+    // because each is just a different way for that height to move.
+    if(!CSS.supports('d', 'path("M0,0 Z")')){
+      const win = flyer.querySelector('.flyer-window');
+      const plate = flyer.querySelector('.flyer-plate');
+      const nums = (s) => (s.match(/-?[\d.]+/g) || []).map(Number);
+      const cs = getComputedStyle(flyer);
+      const target = (name) => nums(cs.getPropertyValue(name).replace(/^"|"$/g, ''));
+
+      // Each path's rolled shape comes off its own `d` attribute and its open shape off
+      // the custom property the CSS rule would have used, so there is still exactly one
+      // definition of each and dev/morph.py remains the only thing that writes them.
+      const shapes = [...flyer.querySelectorAll('.flyer-burst path')]
+        .map(el => ({ el, from: nums(el.getAttribute('d')), to: target('--open-d'), dp: 1 }))
+        .concat([{ el: document.querySelector('#flyerEdge path'),
+                   from: nums(document.querySelector('#flyerEdge path').getAttribute('d')),
+                   to: target('--open-dn'), dp: 4 }])
+        .filter(s => s.from.length && s.from.length === s.to.length);
+
+      if(shapes.length){
+        flyer.classList.add('js-morph');
+        const draw = (s, t) => {
+          let d = '';
+          for(let i = 0; i < s.from.length; i += 2){
+            const x = (s.from[i] + (s.to[i] - s.from[i]) * t).toFixed(s.dp);
+            const y = (s.from[i+1] + (s.to[i+1] - s.from[i+1]) * t).toFixed(s.dp);
+            d += (i ? 'L' : 'M') + x + ',' + y + ' ';
+          }
+          s.el.setAttribute('d', d + 'Z');
+        };
+
+        // The open height is derived rather than parsed: --fw-open can be a min()/clamp()
+        // that computed style hands back unresolved, but the plate is already laid out at
+        // exactly --fw-open minus the 4px border either side, and offsetWidth is its
+        // layout width, before the scale transform.
+        const roll = parseFloat(cs.getPropertyValue('--roll-h')) || 104;
+        const ar = parseFloat(cs.getPropertyValue('--ar')) || .8;
+        const openH = () => (plate.offsetWidth + 8) / ar;
+
+        let raf = 0, last = -1, still = 0;
+        function frame(){
+          const span = openH() - roll;
+          const t = span > 0 ? Math.min(1, Math.max(0, (win.getBoundingClientRect().height - roll) / span)) : 0;
+          if(Math.abs(t - last) > .0005){ shapes.forEach(s => draw(s, t)); last = t; still = 0; }
+          else still++;
+          // Idle out after ~12 still frames rather than running forever, and any of the
+          // events below starts it again. A transition that has not begun yet — the pop
+          // holds the height for 125ms — is still frames, hence not stopping on the first.
+          raf = still < 12 ? requestAnimationFrame(frame) : 0;
+        }
+        const kick = () => { still = 0; if(!raf) raf = requestAnimationFrame(frame); };
+        ['click','mouseenter','mouseleave','focusin','focusout','transitionstart']
+          .forEach(e => flyer.addEventListener(e, kick, true));
+        addEventListener('resize', kick);
+        kick();
+      }
+    }
 
     // Cross each day off the flyer once it is over. A day's tick lands at midnight
     // ET on the following morning, so Monday's appears the moment Tuesday starts.
