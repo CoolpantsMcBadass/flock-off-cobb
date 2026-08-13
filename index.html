@@ -131,9 +131,141 @@
     display:block;width:100%;height:auto;
   }
   .art-credit{margin-top:10px;text-align:right;color:var(--ink-soft);}
+
+  /* ---------- WEEK OF ACTION FLYER (rolled poster in the hero) ----------
+     --fw is the poster width, --ar its width/height ratio, and --roll-h the
+     height of the paper band wrapped around it while it's rolled up. The band is
+     its own label rather than a crop of the flyer, because the flyer's title and
+     its wordmark overlap horizontally and no clean crop separates them.
+     Hidden until the script unhides it, and it stays hidden once the week ends. */
+  .flyer{
+    --fw:clamp(190px,20vw,250px); --fw-open:clamp(330px,40vw,500px);
+    --ar:.8; --roll-h:104px; --check:#35b34a;
+    position:absolute;top:34px;right:calc(42.5% + 26px);z-index:6;
+    transform:rotate(-2.2deg);transform-origin:100% 0;
+    transition:transform .45s cubic-bezier(.22,.61,.36,1);
+  }
+  .flyer[hidden]{display:none;}
+  .flyer-btn{
+    display:block;position:relative;width:var(--fw);padding:0;border:0;background:none;
+    font:inherit;color:inherit;cursor:pointer;text-align:left;
+    transition:width .6s cubic-bezier(.22,.61,.36,1);
+  }
+  /* Rolled, the sheet carries no frame at all: the burst on top is the silhouette,
+     so a rectangle of border and shadow around it would give the shape away. The
+     frame and the sheet itself fade in as it unrolls. */
+  .flyer-window{
+    display:block;position:relative;overflow:hidden;height:var(--roll-h);
+    border:4px solid transparent;background:transparent;
+    transition:height .6s cubic-bezier(.22,.61,.36,1), box-shadow .4s ease,
+               border-color .4s ease, background-color .4s ease;
+  }
+  /* The sheet and its check marks travel together, in a wrapper that keeps the
+     image's own height whatever the window above is clipping it to. Percentages
+     inside it therefore stay true to the artwork mid-unroll. */
+  .flyer-plate{display:block;position:relative;opacity:0;transition:opacity .35s ease;}
+  .flyer-window img{display:block;width:100%;height:auto;}
+
+  /* One green marker tick per day, struck over that day's tab once the day is
+     done. Tab centres sit at 33.56% and every 12% after, measured off the
+     artwork; the tick is deliberately larger than the tab so it reads as a
+     marker stroke rather than a checkbox. */
+  .flyer-check{
+    position:absolute;left:15.1%;width:18%;pointer-events:none;
+    opacity:0;transform:translateY(-50%) rotate(-6deg) scale(.4);
+    transition:opacity .25s ease, transform .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .flyer-check.done{opacity:1;transform:translateY(-50%) rotate(-6deg) scale(1);}
+  .flyer-check svg{display:block;width:100%;height:auto;overflow:visible;}
+  .flyer-check path{fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .flyer-check .edge{stroke:var(--ink);stroke-width:25;}
+  .flyer-check .tick{stroke:var(--check);stroke-width:13;}
+  @media(prefers-reduced-motion:reduce){
+    .flyer-check{transition:none;transform:translateY(-50%) rotate(-6deg) scale(1);}
+  }
+  /* The rolled state is a comic exclamation burst sitting over the closed sheet. It
+     lives outside .flyer-window so its spikes are not clipped, and it pops outward
+     as the flyer unrolls behind it. The window itself carries no frame while rolled
+     (see the .flyer-window rules below), so the burst is the whole silhouette. */
+  .flyer-burst{
+    position:absolute;z-index:3;pointer-events:none;
+    top:-11px;left:-13px;right:-13px;height:calc(var(--roll-h) + 16px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    filter:drop-shadow(5px 5px 0 var(--ink));
+    transition:opacity .3s ease, transform .45s cubic-bezier(.34,1.4,.64,1);
+  }
+  .flyer-burst svg{position:absolute;inset:0;width:100%;height:100%;}
+  .flyer-burst path{fill:var(--yellow);stroke:var(--ink);stroke-width:3;stroke-linejoin:round;}
+  .flyer-burst .t{
+    position:relative;font-family:"Anton",Impact,sans-serif;font-size:17px;line-height:1.06;
+    color:var(--ink);letter-spacing:.03em;text-align:center;text-transform:uppercase;
+  }
+  .flyer-burst .d{
+    position:relative;font-family:"Space Mono",monospace;font-weight:700;
+    font-size:10px;letter-spacing:.1em;color:var(--red-deep);
+  }
+  /* The paper curl under the sheet, only once there is a sheet to curl. */
+  .flyer-curl{
+    display:block;height:0;opacity:0;border:0 solid var(--ink);border-radius:0 0 7px 7px;
+    background:linear-gradient(180deg,#fffdf6,var(--paper) 30%,var(--paper-2) 62%,#b3aa93);
+    transition:height .6s cubic-bezier(.22,.61,.36,1), opacity .35s ease, border-width .4s ease;
+  }
+  .flyer-hint{
+    display:block;margin-top:9px;text-align:center;font-size:.6rem;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+    transition:opacity .3s ease;
+  }
+  .flyer-hint .tap{display:none;}
+  /* Unrolled state. The sheet grows as well as unrolls, since the flyer is
+     unreadable at its rolled width. Bumping --fw drives both the button width
+     and the window height, so the two animate together.
+     Triggers: hover (only where hovering exists), keyboard focus, or a tap. */
+  /* Wide screens with a real pointer only. At the mobile layout the caption reads
+     "Tap for info" and opening is meant to scroll the sheet into view, so a
+     narrow desktop window should behave like the phone rather than opening on
+     hover and leaving the sheet hanging off the bottom. */
+  @media(hover:hover) and (min-width:861px){
+    .flyer:hover{--fw:var(--fw-open);transform:rotate(0deg);z-index:60;}
+    .flyer:hover .flyer-window{
+      height:calc(var(--fw) / var(--ar));
+      border-color:var(--ink);background:var(--paper);box-shadow:var(--shadow);
+    }
+    .flyer:hover .flyer-plate{opacity:1;}
+    .flyer:hover .flyer-burst{opacity:0;transform:scale(1.35);}
+    .flyer:hover .flyer-curl{height:10px;opacity:1;border-width:0 4px 4px;}
+    .flyer:hover .flyer-hint{opacity:0;}
+  }
+  .flyer:focus-within,
+  .flyer.is-open{--fw:var(--fw-open);transform:rotate(0deg);z-index:60;}
+  .flyer:focus-within .flyer-window,
+  .flyer.is-open .flyer-window{
+    height:calc(var(--fw) / var(--ar));
+    border-color:var(--ink);background:var(--paper);box-shadow:var(--shadow);
+  }
+  .flyer:focus-within .flyer-plate,
+  .flyer.is-open .flyer-plate{opacity:1;}
+  .flyer:focus-within .flyer-burst,
+  .flyer.is-open .flyer-burst{opacity:0;transform:scale(1.35);}
+  .flyer:focus-within .flyer-curl,
+  .flyer.is-open .flyer-curl{height:10px;opacity:1;border-width:0 4px 4px;}
+  .flyer:focus-within .flyer-hint,
+  .flyer.is-open .flyer-hint{opacity:0;}
+  .flyer-btn:focus-visible .flyer-window{outline:3px solid var(--teal);outline-offset:3px;}
+  @media(prefers-reduced-motion:reduce){
+    .flyer,.flyer-window,.flyer-curl{transition:none;}
+  }
+
   @media(max-width:860px){
     .hero{grid-template-columns:1fr;padding-top:30px;}
     .hero-art{order:-1;max-width:340px;}
+    /* In the single-column hero it sits above the copy as a normal block, and it
+       only unrolls: there's no room to grow wider, so --fw-open matches --fw. */
+    .flyer{
+      --fw:min(320px,86vw); --fw-open:min(320px,86vw);
+        position:static;transform:none;width:var(--fw);margin:4px auto 26px;
+    }
+    .flyer-hint .hov{display:none;}
+    .flyer-hint .tap{display:inline;}
   }
 
   /* ---------- TICKER ---------- */
@@ -300,6 +432,10 @@
   }
 
   /* reveal on load / scroll */
+  .sr-only{
+    position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
   .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
   .reveal.in{opacity:1;transform:none;}
   @media(prefers-reduced-motion:reduce){
@@ -369,6 +505,38 @@
 <a id="top"></a>
 <div class="hero viewfinder reveal">
   <span class="vf-tr"></span><span class="vf-br"></span>
+
+  <!-- Rolled-up flyer: shows its header strip, unrolls to the full sheet on hover,
+       focus, or tap. Unhidden by script, and only until the week of action ends. -->
+  <div class="flyer" id="weekFlyer" hidden>
+    <button type="button" class="flyer-btn" aria-expanded="false" aria-controls="flyerSheet">
+      <span class="sr-only">National Week of Action, August 17 to 21. Show the full schedule.</span>
+      <span class="flyer-window" id="flyerSheet">
+        <span class="flyer-plate">
+          <img src="assets/week-of-action.jpg" width="1080" height="1350"
+               alt="National Week of Action flyer, August 17 to 21. Monday: Flock Safety 101, South Cobb Library, 6:30 to 8 PM. Tuesday: Smyrna City Council at A. Max Bacon City Hall, 2800 King Street, 7 to 9 PM. Wednesday: share the video list from our bio, email your local council, join DeFlock Cobb. Thursday: pre-protest sign-making party at Schoolhouse Brewing, 6 to 8 PM, and post signage in front of cameras where permitted. Friday: protest at the corner of North Marietta Parkway and Polk Street, 6 to 8 PM; consider leaving phones at home or on airplane mode." />
+          <span class="flyer-check" style="top:33.56%" aria-hidden="true"><svg viewBox="0 0 100 78" focusable="false"><path class="edge" d="M9 41 L38 70 L91 8"/><path class="tick" d="M9 41 L38 70 L91 8"/></svg></span>
+          <span class="flyer-check" style="top:45.56%" aria-hidden="true"><svg viewBox="0 0 100 78" focusable="false"><path class="edge" d="M9 41 L38 70 L91 8"/><path class="tick" d="M9 41 L38 70 L91 8"/></svg></span>
+          <span class="flyer-check" style="top:57.56%" aria-hidden="true"><svg viewBox="0 0 100 78" focusable="false"><path class="edge" d="M9 41 L38 70 L91 8"/><path class="tick" d="M9 41 L38 70 L91 8"/></svg></span>
+          <span class="flyer-check" style="top:69.56%" aria-hidden="true"><svg viewBox="0 0 100 78" focusable="false"><path class="edge" d="M9 41 L38 70 L91 8"/><path class="tick" d="M9 41 L38 70 L91 8"/></svg></span>
+          <span class="flyer-check" style="top:81.56%" aria-hidden="true"><svg viewBox="0 0 100 78" focusable="false"><path class="edge" d="M9 41 L38 70 L91 8"/><path class="tick" d="M9 41 L38 70 L91 8"/></svg></span>
+        </span>
+      </span>
+      <span class="sr-only flyer-status"></span>
+      <span class="flyer-curl" aria-hidden="true"></span>
+      <span class="flyer-burst" aria-hidden="true">
+        <svg viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
+          <path vector-effect="non-scaling-stroke" d="M110.0,6.0 L125.0,18.6 L150.3,8.1 L152.2,24.6 L182.4,20.2 L174.4,34.3 L202.3,36.6 L185.0,47.8 L213.3,55.0 L188.5,62.5 L201.7,73.3 L171.4,74.7 L180.2,88.8 L154.6,87.1 L149.7,101.1 L123.8,88.3 L110.0,105.9 L94.0,93.8 L70.4,101.0 L66.8,86.1 L39.5,88.9 L51.7,73.8 L15.3,73.9 L40.6,61.6 L10.0,55.0 L38.4,48.1 L18.7,36.8 L46.9,34.7 L38.0,20.3 L65.2,22.7 L70.8,9.5 L94.8,18.1 Z" />
+        </svg>
+        <span class="t">National<br/>Week of Action!</span>
+        <span class="d">Aug 17 – 21</span>
+      </span>
+      <span class="flyer-hint mono" aria-hidden="true">
+        <span class="hov">▼ Hover for info</span><span class="tap">▼ Tap for info</span>
+      </span>
+    </button>
+  </div>
+
   <div class="hero-copy">
     <span class="eyebrow mono"><span class="rec">●&nbsp;REC</span>&nbsp;Cobb County, Georgia</span>
     <h1 class="title"><span class="l1">Flock</span><span class="l2">Off – Cobb</span></h1>
@@ -1347,6 +1515,92 @@
       const date = t.toLocaleString('en-US',{timeZone:TZ,weekday:'short',month:'short',day:'numeric'});
       const time = t.toLocaleString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
       el.innerHTML = '<span class="cd-label">Next</span>' + date + ' · ' + time + ' <span class="cd-when">' + rel(t - now) + '</span>';
+    });
+  })();
+
+  // ---- Week of Action flyer: unroll on tap, and retire itself once the week is over ----
+  (function(){
+    const flyer = document.getElementById('weekFlyer');
+    if(!flyer) return;
+    // 11:59 PM ET on Sunday 23 Aug 2026 (EDT is UTC-4), so the finished flyer, all
+    // five days crossed off, stays up over the weekend after the week of action.
+    // Past that the flyer never unhides and the hero goes back to normal on its own.
+    const ENDS = Date.UTC(2026, 7, 24, 3, 59, 0);
+    if(Date.now() >= ENDS) return;
+    flyer.hidden = false;
+
+    const btn = flyer.querySelector('.flyer-btn');
+    const win = flyer.querySelector('.flyer-window');
+    const nav = document.querySelector('header.nav');
+
+    // A tap opens a sheet several times the height of the rolled band, which on a
+    // phone would unroll straight off the bottom of the screen. Bring it into view:
+    // centred if it fits, top-aligned under the nav if it doesn't. The open height
+    // is worked out up front (sheet width over its aspect ratio) so the scroll runs
+    // alongside the unroll instead of waiting for it. Width is already final on
+    // phones, where --fw-open matches --fw.
+    function bringIntoView(){
+      const ar = parseFloat(getComputedStyle(flyer).getPropertyValue('--ar')) || 0.8;
+      const flyerBox = flyer.getBoundingClientRect();
+      const winBox = win.getBoundingClientRect();
+      const openH = winBox.width / ar + (flyerBox.height - winBox.height);
+      const navH = nav ? nav.getBoundingClientRect().height : 0;
+      const room = window.innerHeight - navH;
+      if(flyerBox.top >= navH && flyerBox.top + openH <= window.innerHeight) return;
+      const top = flyerBox.top + window.scrollY - navH;
+      const target = openH + 24 > room ? top - 12 : top - (room - openH) / 2;
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: Math.max(0, target), behavior: reduce ? 'auto' : 'smooth' });
+    }
+
+    btn.addEventListener('click', () => {
+      const open = flyer.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if(open) bringIntoView();
+    });
+
+    // Cross each day off the flyer once it is over. A day's tick lands at midnight
+    // ET on the following morning, so Monday's appears the moment Tuesday starts.
+    // EDT is UTC-4 for the whole week, so the boundaries are fixed instants.
+    const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+    const DONE_AT = [
+      Date.UTC(2026, 7, 18, 4), Date.UTC(2026, 7, 19, 4), Date.UTC(2026, 7, 20, 4),
+      Date.UTC(2026, 7, 21, 4), Date.UTC(2026, 7, 22, 4)
+    ];
+    const checks = flyer.querySelectorAll('.flyer-check');
+    const status = flyer.querySelector('.flyer-status');
+
+    function crossOff(){
+      const now = Date.now();
+      const done = [];
+      DONE_AT.forEach((when, i) => {
+        if(now >= when){ checks[i].classList.add('done'); done.push(DAYS[i]); }
+        else if(!checks[i].dataset.armed){
+          // tick over on its own if someone leaves the page open past midnight
+          checks[i].dataset.armed = '1';
+          setTimeout(crossOff, when - now + 400);
+        }
+      });
+      status.textContent = done.length
+        ? done.join(', ') + (done.length > 1 ? ' are' : ' is') + ' done.'
+        : '';
+    }
+    crossOff();
+
+    // Retire the flyer on the same schedule if the page is still open by then.
+    setTimeout(() => { flyer.hidden = true; }, ENDS - Date.now());
+    // Escape closes it, and hovering elsewhere shouldn't leave it pinned open.
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape' && flyer.classList.contains('is-open')){
+        flyer.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('click', e => {
+      if(!flyer.contains(e.target) && flyer.classList.contains('is-open')){
+        flyer.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
     });
   })();
 </script>

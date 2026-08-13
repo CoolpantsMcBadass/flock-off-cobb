@@ -16,6 +16,63 @@ Plain HTML/CSS/JS — no build step, no dependencies.
 - `assets/mableton-districts.geojson` — Mableton council district polygons (districts 1–6)
 - `assets/powder-springs-wards.geojson` — Powder Springs ward polygons (wards 1–3)
 - `assets/smyrna-wards.geojson` — Smyrna ward polygons (wards 1–7)
+- `assets/week-of-action.jpg` — the Week of Action flyer shown in the hero
+
+## The hero flyer
+The empty space in the hero holds the Week of Action flyer. Closed, it is a comic
+exclamation burst naming the event; hovering (on a wide screen), tapping, or tabbing to
+it pops the burst and unrolls the whole sheet. It is a `<button>`, so it works from the
+keyboard, and the schedule is spelled out in the image `alt` text for screen readers.
+
+The burst (`.flyer-burst`) is its own element rather than a crop of the flyer's own
+header. A crop was the obvious approach and it does not work: on this flyer "WEEK OF
+ACTION" ends at x790 and the "deflock Cobb" wordmark starts at x770, so no vertical cut
+separates the title from the logo and the megaphone. Keeping it separate also means the
+closed state can say whatever the next action needs.
+
+It sits outside `.flyer-window`, which clips, so its spikes are not cut off. While
+closed the window carries no border, shadow or image at all, since a rectangle of frame
+around the burst would give the shape away; the frame and the sheet fade in together as
+it opens. The burst shape is a plain `<path>` with `preserveAspectRatio="none"` so it
+stretches to the button, plus `vector-effect="non-scaling-stroke"` so the outline stays
+an even weight while it stretches.
+
+Everything lives in the `.flyer` rules in the `<style>` block and one short IIFE at the
+end of the first `<script>`. Four CSS variables on `.flyer` do the work:
+
+| variable | meaning |
+| --- | --- |
+| `--ar` | the flyer image's width ÷ height (1080×1350 → `.8`) |
+| `--roll-h` | height of the burst, and of the closed window behind it |
+| `--fw` | closed width |
+| `--fw-open` | unrolled width |
+
+To swap in a different flyer, drop the image at `assets/week-of-action.jpg`, set `--ar`
+to its ratio, and edit the two lines of text inside `.flyer-burst`. Update the `alt`
+text to describe the new schedule too, since that text is the only version a screen
+reader gets.
+
+The flyer hides itself once the week is over: the IIFE compares the clock against
+`ENDS`, set to 11:59 PM ET on the Sunday after the week, and simply never unhides it
+after that. To run it again for a later action, change `ENDS` and the image.
+
+### Crossing the days off
+Each day gets a green marker tick once it is over, at midnight ET the following
+morning, from the `DONE_AT` instants in the same IIFE. Ticks already earned are drawn
+on load; any still to come get a `setTimeout`, so a page left open overnight crosses
+the day off by itself.
+
+The ticks are positioned as percentages of the artwork, so they hold at any size. The
+day tabs were measured off the image: 264px wide starting at x128, 136px tall, the
+first at y385 and one every 162px. In percentages that is `left:15.1%` with tab centres
+at `33.56%` and every 12% after. They live in `.flyer-plate` alongside the image rather
+than in `.flyer-window`, because the window's height is animated and clipping, so
+percentages against it would drift as the sheet unrolls.
+
+Re-measure if the artwork changes. The tabs are hard to find by colour alone (the white
+day names break each tab into pieces, and "Wednesday" is wide enough to reach the strip
+of tab left of the text) so the reliable route is to find the first two tabs, take the
+pitch between them, and step down.
 
 ## The map
 The "Cameras Are Already Here" section is a self-hosted Leaflet map centered on
