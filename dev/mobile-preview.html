@@ -1,0 +1,96 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>DeFlock Cobb — mobile preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+ :root{--paper:#f1ece0;--ink:#161311;--red:#d6233a;--yellow:#f5c518;}
+ *{box-sizing:border-box;}
+ body{margin:0;padding:22px 20px 60px;background:#23201d;color:var(--paper);
+   font-family:"Space Mono",monospace;}
+ h1{font-family:"Anton",Impact,sans-serif;font-size:1.3rem;margin:0 0 4px;
+   letter-spacing:.03em;text-transform:uppercase;color:var(--paper);}
+ p.note{font-size:.72rem;line-height:1.6;color:#b3aa99;margin:0 0 16px;max-width:80ch;}
+ p.note b{color:var(--yellow);}
+ .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+ button{font:inherit;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+   background:none;color:var(--paper);border:2px solid #4d4740;padding:7px 11px;cursor:pointer;}
+ button.on{background:var(--red);border-color:var(--red);}
+ .rack{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;}
+ .scaler{position:relative;}
+ .sep{display:inline-block;width:1px;height:26px;background:#4d4740;margin:0 4px;}
+ .phone{display:flex;flex-direction:column;align-items:center;gap:8px;}
+ .bezel{border:12px solid #0d0c0b;border-radius:34px;background:#0d0c0b;
+   box-shadow:0 14px 40px rgba(0,0,0,.55);overflow:hidden;
+   position:absolute;top:0;left:0;transform-origin:top left;}
+ iframe{display:block;border:0;background:var(--paper);}
+ .label{font-size:.64rem;letter-spacing:.12em;color:#8d857a;text-transform:uppercase;}
+</style>
+
+<h1>DeFlock Cobb — mobile preview</h1>
+<p class="note">
+  The site in a phone-width frame. Media queries inside an iframe measure the iframe, so this
+  is the real mobile layout, not a scaled screenshot — the flyer picks up its
+  <code>max-width:860px</code> rules and the caption reads "Tap for info".
+  <b>Tap the burst to open it</b>: below 861px the hover path is switched off by design, so the
+  flyer opens on tap and closes on a tap outside. Everything else about the pop is the same.
+  <br><br>
+  <b>What this can't show:</b> real touch (these are mouse clicks), the iOS/Android URL bar
+  eating vertical space, and system font rendering. For those, open
+  <b><code id="lan">http://192.168.40.37:8123</code></b> on a phone on the same wi-fi —
+  <code>python3 -m http.server</code> listens on every interface, so it just works. That IP
+  is whatever the Mac had when this file was written; re-check with
+  <code>ipconfig getifaddr en0</code> if it has moved.
+</p>
+
+<div class="bar" id="bar"></div>
+<div class="rack" id="rack"></div>
+
+<script>
+// Relative, so the frames are same-origin with whatever port is serving this. Point a
+// static server at the repo root and open /dev/mobile-preview.html from the same one.
+const SRC = '../index.html';
+const SIZES = [
+  { name: 'iPhone 14 / 15',   w: 390, h: 844 },
+  { name: 'Android (common)', w: 360, h: 800 },
+  { name: 'iPhone Pro Max',   w: 430, h: 932 },
+  { name: 'iPhone SE',        w: 375, h: 667 },
+  { name: 'Small / 320',      w: 320, h: 568 },
+];
+let shown = 0;                 // one at a time
+let zoom = 0.78;               // see the note: 100% is physically larger than the phone
+
+const ZOOMS = [
+  { label: 'Life size', z: 0.78 },
+  { label: '90%',       z: 0.9  },
+  { label: '100%',      z: 1    },
+];
+
+function render(){
+  document.getElementById('bar').innerHTML =
+    SIZES.map((s,i)=>`<button data-i="${i}" class="${shown===i?'on':''}">${s.name} · ${s.w}</button>`).join('')
+    + '<span class="sep"></span>'
+    + ZOOMS.map(z=>`<button data-z="${z.z}" class="${zoom===z.z?'on':''}">${z.label}</button>`).join('')
+    + '<button id="reload">↻ Reload</button>';
+
+  const s = SIZES[shown];
+  // The iframe stays a true 390x844 so media queries still measure a phone; the scale is
+  // only how big it is drawn. A Mac CSS pixel is physically bigger than a phone's, which
+  // is why 100% looks oversized next to the real device.
+  document.getElementById('rack').innerHTML = `<div class="phone">
+      <div class="scaler" style="width:${Math.round((s.w+24)*zoom)}px;height:${Math.round((s.h+24)*zoom)}px">
+        <div class="bezel" style="transform:scale(${zoom})">
+          <iframe src="${SRC}" width="${s.w}" height="${s.h}" title="${s.name}"></iframe>
+        </div>
+      </div>
+      <span class="label">${s.name} — ${s.w}×${s.h} css @ ${Math.round(zoom*100)}%</span>
+    </div>`;
+
+  document.querySelectorAll('[data-i]').forEach(b=>b.addEventListener('click',()=>{
+    shown = +b.dataset.i; render(); }));
+  document.querySelectorAll('[data-z]').forEach(b=>b.addEventListener('click',()=>{
+    zoom = +b.dataset.z; render(); }));
+  document.getElementById('reload').addEventListener('click',()=>
+    document.querySelectorAll('iframe').forEach(f=>f.src=f.src));
+}
+render();
+</script>

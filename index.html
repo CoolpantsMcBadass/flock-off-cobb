@@ -139,33 +139,95 @@
      its wordmark overlap horizontally and no clean crop separates them.
      Hidden until the script unhides it, and it stays hidden once the week ends. */
   .flyer{
-    --fw:clamp(190px,20vw,250px); --fw-open:clamp(330px,40vw,500px);
+    --fw-roll:clamp(190px,20vw,250px);
+    --fw:var(--fw-roll); --fw-open:clamp(330px,40vw,500px);
     --ar:.8; --roll-h:104px; --check:#35b34a;
+    /* One clock and one curve for the whole unroll, so the width, the sheet and the
+       burst travel together instead of each running on its own timer. Which direction
+       reads which is set out where the open-state transitions are declared, below;
+       this value is the fallback for anything not named explicitly there. */
+    --ease:cubic-bezier(.22,.61,.36,1); --dur:.14s;
+    /* The sheet is laid out at its open size and scaled down while rolled, rather
+       than laid out at the rolled size and grown. Same picture either way, but this
+       way the 1080px artwork is rastered once and the compositor scales it, instead
+       of the browser re-scaling a 1.4MP bitmap on every frame of the unroll.
+       8px is the window's two 4px borders, which the sheet sits inside; taking them
+       off both ends keeps the scaled sheet flush with the window all the way. */
+    --plate-w:calc(var(--fw-open) - 8px);
+    --plate-s:calc((var(--fw) - 8px) / var(--plate-w));
+    /* The open shape of the outline, twice: the viewBox rectangle for the path itself,
+       and the same shape in objectBoundingBox units for the clip that keeps the artwork
+       inside it. Both carry the same 32 points in the same order as the rolled burst,
+       which is what lets them interpolate. Regenerate together with dev/morph.py. */
+    --open-dn:"M0.5000,0.0000 L0.5956,0.0000 L0.6994,0.0000 L0.8222,0.0000 L1.0000,0.0000 L1.0000,0.1449 L1.0000,0.2688 L1.0000,0.3737 L1.0000,0.4712 L1.0000,0.5681 L1.0000,0.6737 L1.0000,0.7968 L1.0000,1.0000 L0.8620,1.0000 L0.7244,1.0000 L0.6080,1.0000 L0.5000,1.0000 L0.3926,1.0000 L0.2757,1.0000 L0.1381,1.0000 L0.0000,1.0000 L0.0000,0.7984 L0.0000,0.6737 L0.0000,0.5677 L0.0000,0.4712 L0.0000,0.3733 L0.0000,0.2688 L0.0000,0.1446 L0.0000,0.0000 L0.1781,0.0000 L0.3000,0.0000 L0.4044,0.0000 Z";
+    --open-d:"M110.0,0.0 L131.0,0.0 L153.9,0.0 L180.9,0.0 L220.0,0.0 L220.0,15.9 L220.0,29.6 L220.0,41.1 L220.0,51.8 L220.0,62.5 L220.0,74.1 L220.0,87.6 L220.0,110.0 L189.6,110.0 L159.4,110.0 L133.8,110.0 L110.0,110.0 L86.4,110.0 L60.7,110.0 L30.4,110.0 L0.0,110.0 L0.0,87.8 L0.0,74.1 L0.0,62.4 L0.0,51.8 L0.0,41.1 L-0.0,29.6 L0.0,15.9 L0.0,0.0 L39.2,0.0 L66.0,0.0 L89.0,0.0 Z";
     /* Above the floating social cluster (90) so the flyer passes in front of it,
        but under the sticky nav (100), which stays on top of everything. */
     position:absolute;top:34px;right:calc(42.5% + 26px);z-index:95;
-    transform:rotate(-2.2deg);transform-origin:100% 0;
-    transition:transform .45s cubic-bezier(.22,.61,.36,1);
   }
   .flyer[hidden]{display:none;}
+  /* A hover target that never changes shape.
+     The flyer's box growing on open is harmless: it only ever gets bigger, in the same
+     two directions, so a point that hovers while closed still hovers while open. The
+     tilt is not harmless. Rotating the closed box about its top-right corner swings the
+     right edge ~5px further right than the open box ever reaches, so a cursor parked in
+     that sliver hovers while closed and misses once open — which opens it, which closes
+     it, which opens it. Hence the tilt living on the button rather than here, and this
+     unrolled pad, always larger than the rotated button in either state, being what
+     actually decides :hover. Any spurious enter/leave also cancels a pop mid-flight and
+     drops it back to the plain transitions, so this is two bugs with one cause. */
+  .flyer::before{content:"";position:absolute;inset:-12px;}
   .flyer-btn{
     display:block;position:relative;width:var(--fw);padding:0;border:0;background:none;
     font:inherit;color:inherit;cursor:pointer;text-align:left;
-    transition:width .6s cubic-bezier(.22,.61,.36,1);
+    transform:rotate(-2.2deg);transform-origin:100% 0;
+    /* Width recedes on the same .25s as the height above, after the same 125ms beat and
+       for the same reason; the tilt eases back alongside it. All of it happens under the
+       pop with nothing but droplets on screen, and is home by 385ms — comfortably before
+       the burst fades back in at 500ms. */
+    transition:width .25s var(--ease) .125s, transform .26s var(--ease) .125s;
   }
-  /* Rolled, the sheet carries no frame at all: the burst on top is the silhouette,
-     so a rectangle of border and shadow around it would give the shape away. The
-     frame and the sheet itself fade in as it unrolls. */
+  /* The window never draws a frame in either state. The burst behind it is the one
+     and only outline, in both the rolled and the open shape (see .flyer-burst), so
+     the border here is a transparent 4px spacer and nothing more: it is what insets
+     the sheet off the outline. A real border would double the frame at the end of
+     the unroll and give away that two different things had been drawn. */
   .flyer-window{
     display:block;position:relative;overflow:hidden;height:var(--roll-h);
     border:4px solid transparent;background:transparent;
-    transition:height .6s cubic-bezier(.22,.61,.36,1), box-shadow .4s ease,
-               border-color .4s ease, background-color .4s ease;
+    /* Clipped to the very shape the outline is drawing, so the artwork can come up
+       while the edge is still jagged without spilling past the spikes. Without this
+       the artwork has to wait for the shape to be nearly rectangular before it dares
+       fade in, which is what made it arrive so late. objectBoundingBox units against
+       the border box, which is exactly the box the outline's viewBox maps onto. */
+    clip-path:url(#flyerEdge);
+    /* Closing, this box is empty — no frame, no background, and its artwork is already
+       at opacity 0 — so its height is pure occupied space. Collapsing that over .25s
+       rather than in one frame is what keeps the pop anchored: on a phone the flyer is
+       in the document flow, so an instant collapse yanks everything below it up ~300px
+       while the droplets are still tracing the sheet's outline, leaving the mist
+       stranded over whatever slid into its place. Nothing visible shrinks.
+       The 125ms delay in front of it is a held breath: the sheet is already gone on the
+       frame it closes, so for that beat the droplets trace an outline around a space
+       that is still open. The page starting to close up the instant the sheet vanished
+       read as the surroundings being in a hurry to get on with it; letting the gap sit
+       for an eighth of a second first is what makes the space feel vacated rather than
+       reclaimed. Soft close overrides this (see .is-soft-close) — a quiet close has no
+       droplets to wait for and shouldn't hesitate. */
+    transition:height .25s var(--ease) .125s;
   }
-  /* The sheet and its check marks travel together, in a wrapper that keeps the
-     image's own height whatever the window above is clipping it to. Percentages
-     inside it therefore stay true to the artwork mid-unroll. */
-  .flyer-plate{display:block;position:relative;opacity:0;transition:opacity .35s ease;}
+  #flyerEdge path{
+    d:path("M0.5000,-0.0428 L0.5775,0.0893 L0.7082,-0.0208 L0.7181,0.1523 L0.8741,0.1061 L0.8328,0.2540 L0.9770,0.2781 L0.8876,0.3956 L1.0338,0.4712 L0.9056,0.5498 L0.9739,0.6631 L0.8173,0.6778 L0.8628,0.8257 L0.7305,0.8079 L0.7051,0.9547 L0.5713,0.8205 L0.5000,1.0051 L0.4173,0.8781 L0.2954,0.9537 L0.2768,0.7974 L0.1357,0.8267 L0.1987,0.6684 L0.0106,0.6694 L0.1414,0.5404 L-0.0167,0.4712 L0.1300,0.3988 L0.0282,0.2802 L0.1739,0.2582 L0.1279,0.1072 L0.2685,0.1323 L0.2974,-0.0061 L0.4215,0.0841 Z");
+  }
+  /* The sheet and its check marks travel together, in a wrapper held at the open
+     width and scaled (see --plate-s), so percentages inside it stay true to the
+     artwork mid-unroll and the image itself never re-lays out. */
+  .flyer-plate{
+    display:block;position:relative;width:var(--plate-w);
+    transform:scale(var(--plate-s));transform-origin:0 0;
+    opacity:0;will-change:transform,opacity;
+    transition:none;
+  }
   .flyer-window img{display:block;width:100%;height:auto;}
 
   /* One green marker tick per day, struck over that day's tab once the day is
@@ -185,19 +247,46 @@
   @media(prefers-reduced-motion:reduce){
     .flyer-check{transition:none;transform:translateY(-50%) rotate(-6deg) scale(1);}
   }
-  /* The rolled state is a comic exclamation burst sitting over the closed sheet. It
-     lives outside .flyer-window so its spikes are not clipped, and it pops outward
-     as the flyer unrolls behind it. The window itself carries no frame while rolled
-     (see the .flyer-window rules below), so the burst is the whole silhouette. */
+  /* ---- The outline, in both shapes ----
+     One path draws the flyer's edge the whole way through: a comic exclamation burst
+     while rolled, the sheet's own rectangular frame when open, and every frame in
+     between. It is not two shapes cross-fading — the spikes retract along their own
+     rays into the four edges — because a burst dissolving while a rectangle appears
+     underneath is exactly the jarring bit this replaces.
+     Two things make that possible. The box is the window's box (not an oversized one
+     of its own), so the viewBox maps onto the sheet exactly and the open path is
+     simply the viewBox rectangle; the spikes overhang by leaving the viewBox, which
+     `overflow:visible` renders. And both paths carry the same 32 points in the same
+     order, which is what lets `d` interpolate at all.
+     It sits BEFORE the window in the DOM so the window and its artwork paint over it.
+     Regenerate the pair with dev/morph.py if the rolled shape ever changes. */
   .flyer-burst{
-    position:absolute;z-index:3;pointer-events:none;
-    top:-11px;left:-13px;right:-13px;height:calc(var(--roll-h) + 16px);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-    filter:drop-shadow(5px 5px 0 var(--ink));
-    transition:opacity .3s ease, transform .45s cubic-bezier(.34,1.4,.64,1);
+    position:absolute;pointer-events:none;
+    left:0;top:0;width:100%;height:var(--roll-h);
   }
-  .flyer-burst svg{position:absolute;inset:0;width:100%;height:100%;}
-  .flyer-burst path{fill:var(--yellow);stroke:var(--ink);stroke-width:3;stroke-linejoin:round;}
+  .flyer-burst svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+  /* The offset shadow is a second copy of the path painted behind, not a drop-shadow
+     filter on the burst. The shape is now redrawn on every frame of the morph, and a
+     filter over the whole open sheet is the one thing on this element expensive
+     enough to make that stutter. Offsetting in CSS px rather than user units also
+     keeps it at a true 6px, matching --shadow, instead of being squeezed by the
+     non-uniform stretch as the box goes from a wide band to a tall sheet. */
+  .flyer-burst .sh{transform:translate(6px,6px);}
+  .flyer-burst .sh path{fill:var(--ink);stroke:var(--ink);}
+  .flyer-burst .fg path{fill:var(--yellow);stroke:var(--ink);}
+  .flyer-burst path{
+    stroke-width:4;stroke-linejoin:round;
+    d:path("M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z");
+  }
+  /* The label is pinned to the rolled band rather than centred in the burst, or it
+     would ride the middle of the sheet downward as the box grows. It goes early.
+     No shadow on it: the old drop-shadow filter sat on the whole burst, where the
+     opaque star was the silhouette casting it and the text inside contributed
+     nothing. Put the same filter on the text alone and every glyph casts its own. */
+  .flyer-burst .lbl{
+    position:absolute;left:0;top:0;width:100%;height:var(--roll-h);z-index:1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  }
   .flyer-burst .t{
     position:relative;font-family:"Anton",Impact,sans-serif;font-size:17px;line-height:1.06;
     color:var(--ink);letter-spacing:.03em;text-align:center;text-transform:uppercase;
@@ -206,18 +295,80 @@
     position:relative;font-family:"Space Mono",monospace;font-weight:700;
     font-size:10px;letter-spacing:.1em;color:var(--red-deep);
   }
-  /* The paper curl under the sheet, only once there is a sheet to curl. */
-  .flyer-curl{
-    display:block;height:0;opacity:0;border:0 solid var(--ink);border-radius:0 0 7px 7px;
-    background:linear-gradient(180deg,#fffdf6,var(--paper) 30%,var(--paper-2) 62%,#b3aa93);
-    transition:height .6s cubic-bezier(.22,.61,.36,1), opacity .35s ease, border-width .4s ease;
-  }
+  /* There is no curled bottom edge. There used to be a 10px shaded strip under the
+     sheet, from when opening was a literal unroll and it stood in for the paper
+     curling where it had unwound from. Opening is a morph now — the burst's outline
+     becomes the frame — so there is nothing to have unrolled from, and the strip read
+     as a bar stuck to the bottom. Four replacements were tried (dev/curl-options.html:
+     a proper barrel-shaded roll, peeling corners, a hanging wave along the bottom
+     edge) and the sheet is better off simply stopping square. */
   .flyer-hint{
     display:block;margin-top:9px;text-align:center;font-size:.6rem;
     letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
-    transition:opacity .3s ease;
+    /* Closing timing. Prompt by default, which is what a close too quick to have earned
+       a pop gets: the burst is back at once there, so its caption should be too. The
+       pop's own half-second wait is added by .is-popping below. */
+    transition:opacity .18s ease;
   }
   .flyer-hint .tap{display:none;}
+
+  /* ---- Which direction owns which timings ----
+     A transition reads its timing from the state it is heading INTO, so the closed
+     rules above are the closing behaviour and these are the opening one. That split
+     is the point: closing is the pop, and the pop's whole trick — everything fading
+     at full size, the geometry snapping home at 100ms behind that cover, nothing
+     ever seen getting smaller — now lives in the resting state, where a close reads
+     it unconditionally.
+     It used to hang off `.is-popping` instead, which meant the class had to be added
+     before the first style flush after :hover dropped, or the close fell back to the
+     ordinary transitions and the sheet visibly shrank. Leaving the flyer downward
+     onto the hero buttons did exactly that, reproducibly, and chasing which listener
+     was flushing style first was the wrong fix: the timings simply shouldn't have
+     depended on a class arriving in time. Now the class only adds the droplets. */
+  .flyer:not(.is-popping):hover .flyer-btn,
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-btn,
+  .flyer:not(.is-popping).is-open .flyer-btn{
+    transition:width var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .flyer:not(.is-popping):hover .flyer-window,
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-window,
+  .flyer:not(.is-popping).is-open .flyer-window{transition:height var(--dur) var(--ease);}
+  /* The artwork used to wait until the shape was nearly rectangular before daring to
+     fade in — it began at 260ms of a 500ms open and was not full until 470ms — because
+     it is a rectangle and would otherwise sit outside the spikes. The clip on
+     .flyer-window removes that constraint entirely, so this is now free to be early:
+     in at 60ms, full by 250ms, revealed through the burst as the spikes retract. */
+  .flyer:not(.is-popping):hover .flyer-plate,
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-plate,
+  .flyer:not(.is-popping).is-open .flyer-plate{
+    transition:opacity calc(var(--dur) * .38) ease calc(var(--dur) * .12),
+               transform var(--dur) var(--ease);
+  }
+  .flyer:not(.is-popping):hover .flyer-burst,
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst,
+  .flyer:not(.is-popping).is-open .flyer-burst{transition:height var(--dur) var(--ease);}
+  .flyer:not(.is-popping):hover .flyer-burst path,
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst path,
+  .flyer:not(.is-popping).is-open .flyer-burst path{transition:d var(--dur) var(--ease);}
+  .flyer:not(.is-popping):hover .flyer-burst .fg path,
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst .fg path,
+  .flyer:not(.is-popping).is-open .flyer-burst .fg path{
+    transition:d var(--dur) var(--ease), fill var(--dur) var(--ease);
+  }
+  .flyer:not(.is-popping):hover .flyer-burst .lbl,
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst .lbl,
+  .flyer:not(.is-popping).is-open .flyer-burst .lbl{transition:opacity calc(var(--dur) * .3) ease;}
+  .flyer:not(.is-popping):hover #flyerEdge path,
+  .flyer:not(.is-popping):has(:focus-visible) #flyerEdge path,
+  .flyer:not(.is-popping).is-open #flyerEdge path{
+    d:path(var(--open-dn));transition:d var(--dur) var(--ease);
+  }
+  /* Opening, the hint just goes — without this it would inherit the closing rule's
+     .5s delay and sit over the sheet for most of the unroll. */
+  .flyer:not(.is-popping):hover .flyer-hint,
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-hint,
+  .flyer:not(.is-popping).is-open .flyer-hint{transition:opacity calc(var(--dur) * .3) ease;}
+
   /* Unrolled state. The sheet grows as well as unrolls, since the flyer is
      unreadable at its rolled width. Bumping --fw drives both the button width
      and the window height, so the two animate together.
@@ -226,35 +377,126 @@
      "Tap for info" and opening is meant to scroll the sheet into view, so a
      narrow desktop window should behave like the phone rather than opening on
      hover and leaving the sheet hanging off the bottom. */
+  /* .is-dismissed is what makes clicking it shut on a desktop stick. The pointer is
+     still on the flyer after that click, so :hover alone would hold the sheet open
+     through the pop and spring it back the instant .is-popping lifts — the click would
+     read as doing nothing. The latch takes the hover path out until the pointer
+     actually leaves, which is the natural way to say "yes, I meant it". Only these
+     rules are gated: keyboard focus still opens a dismissed flyer, deliberately, since
+     a latch that swallowed Tab as well would be a trap. The transition rules above are
+     left ungated because nothing on a dismissed flyer is animating anyway. */
   @media(hover:hover) and (min-width:861px){
-    .flyer:hover{--fw:var(--fw-open);transform:rotate(0deg);}
-    .flyer:hover .flyer-window{
-      height:calc(var(--fw) / var(--ar));
-      border-color:var(--ink);background:var(--paper);box-shadow:var(--shadow);
-    }
-    .flyer:hover .flyer-plate{opacity:1;}
-    .flyer:hover .flyer-burst{opacity:0;transform:scale(1.35);}
-    .flyer:hover .flyer-curl{height:10px;opacity:1;border-width:0 4px 4px;}
-    .flyer:hover .flyer-hint{opacity:0;}
+    .flyer:not(.is-popping):not(.is-dismissed):hover{--fw:var(--fw-open);--dur:.5s;}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-btn{transform:rotate(0deg);}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-window{height:calc(var(--fw) / var(--ar));}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-plate{opacity:1;}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst{height:calc(var(--fw) / var(--ar));}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst path{d:path(var(--open-d));}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst .fg path{fill:var(--paper);}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst .lbl{opacity:0;}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-hint{opacity:0;}
   }
-  .flyer:focus-within,
-  .flyer.is-open{--fw:var(--fw-open);transform:rotate(0deg);}
-  .flyer:focus-within .flyer-window,
-  .flyer.is-open .flyer-window{
-    height:calc(var(--fw) / var(--ar));
-    border-color:var(--ink);background:var(--paper);box-shadow:var(--shadow);
-  }
-  .flyer:focus-within .flyer-plate,
-  .flyer.is-open .flyer-plate{opacity:1;}
-  .flyer:focus-within .flyer-burst,
-  .flyer.is-open .flyer-burst{opacity:0;transform:scale(1.35);}
-  .flyer:focus-within .flyer-curl,
-  .flyer.is-open .flyer-curl{height:10px;opacity:1;border-width:0 4px 4px;}
-  .flyer:focus-within .flyer-hint,
-  .flyer.is-open .flyer-hint{opacity:0;}
+  .flyer:not(.is-popping):has(:focus-visible),
+  .flyer:not(.is-popping).is-open{--fw:var(--fw-open);--dur:.5s;}
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-btn,
+  .flyer:not(.is-popping).is-open .flyer-btn{transform:rotate(0deg);}
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-window,
+  .flyer:not(.is-popping).is-open .flyer-window{height:calc(var(--fw) / var(--ar));}
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-plate,
+  .flyer:not(.is-popping).is-open .flyer-plate{opacity:1;}
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst,
+  .flyer:not(.is-popping).is-open .flyer-burst{height:calc(var(--fw) / var(--ar));}
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst path,
+  .flyer:not(.is-popping).is-open .flyer-burst path{d:path(var(--open-d));}
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst .fg path,
+  .flyer:not(.is-popping).is-open .flyer-burst .fg path{fill:var(--paper);}
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst .lbl,
+  .flyer:not(.is-popping).is-open .flyer-burst .lbl{opacity:0;}
+  .flyer:not(.is-popping):has(:focus-visible) .flyer-hint,
+  .flyer:not(.is-popping).is-open .flyer-hint{opacity:0;}
   .flyer-btn:focus-visible .flyer-window{outline:3px solid var(--teal);outline-offset:3px;}
+  /* ---- Closing quietly: the unroll simply run backwards ----
+     For a close too quick to have earned a pop (see DWELL in the script). The sheet
+     rolls itself back up over .25s — the rectangle returning to a burst, the artwork
+     fading, the label coming back — rather than blinking out, because a brush past
+     deserves a soft exit and there are no droplets here to cover a hard cut.
+     This is the one place a class carries closing timings, and it is safe in the
+     direction that matters: the resting state is still the instant vanish, so if this
+     class ever fails to land before the style flush the close is merely abrupt. The
+     reverse arrangement — timings on the pop class, gentle by default — is what used
+     to leave the sheet shrinking in view behind the droplets. */
+  .flyer.is-soft-close .flyer-btn{
+    transition:width .25s var(--ease), transform .25s var(--ease);
+  }
+  .flyer.is-soft-close .flyer-window,
+  .flyer.is-soft-close .flyer-burst{transition:height .25s var(--ease);}
+  .flyer.is-soft-close .flyer-burst path,
+  .flyer.is-soft-close #flyerEdge path{transition:d .25s var(--ease);}
+  .flyer.is-soft-close .flyer-burst .fg path{
+    transition:d .25s var(--ease), fill .25s var(--ease);
+  }
+  .flyer.is-soft-close .flyer-plate{
+    transition:opacity .12s ease, transform .25s var(--ease);
+  }
+  .flyer.is-soft-close .flyer-burst .lbl{transition:opacity .16s ease .09s;}
+
+  /* ---- Closing: the sheet pops like a bubble ----
+     Not the unroll in reverse, not an explosion, and nothing that shrinks. The sheet
+     is simply gone — artwork, frame and shadow all leave on the same frame it closes,
+     which is why every closing transition above is `none` — leaving a fine mist of
+     droplets off its perimeter that flicks outward and is gone, and the rolled burst
+     back underneath. The sheet is never part of the pop; the droplets play over the
+     space it occupied. It briefly used to fade over 90ms instead, and a poster hanging
+     around for the first third of its own pop reads as a fade, not a burst.
+     The droplet layer is what keeps the mist registered to where the sheet was: it is
+     anchored to the right edge (which doesn't move) and sized off --fw-open, so it
+     stays put while the button underneath snaps back to the rolled width.
+     All of it hangs off a class put on by script (see the flyer block at the foot of
+     the page), because a bare closed state can't tell "just closed" from "never
+     opened" and would fire this on page load. */
+  .flyer-pop{
+    /* Holds the open sheet's box. Anchored right, which is the edge that stays put
+       while the button collapses (the flyer is positioned by its right edge), and
+       sized off --fw-open so it doesn't budge while --fw runs home. */
+    position:absolute;z-index:4;pointer-events:none;opacity:0;
+    right:0;top:0;width:var(--fw-open);height:calc(var(--fw-open) / var(--ar));
+  }
+  /* Droplets, placed as percentages of the sheet so they ride whatever width the
+     clamp lands on, each flicking a fixed distance outward along its edge's normal
+     (diagonally at the corners). --d is the diameter, --dx/--dy the flick; .s marks
+     the lighter half. Generated — the recipe is in the README. */
+  .flyer-pop i{
+    position:absolute;display:block;width:var(--d);height:var(--d);
+    border-radius:50%;background:var(--ink);
+  }
+  .flyer-pop i.s{background:var(--ink-soft);}
+  /* They pop into being just off the edge rather than fading up in place: out to a
+     quarter of their travel at full size in the first 60ms, then away and gone. */
+  @keyframes flyerDrop{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}
+    18%{opacity:.85;transform:translate(calc(-50% + var(--dx) * .28),calc(-50% + var(--dy) * .28)) scale(1);}
+    100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.3);}
+  }
+  @keyframes flyerBack{from{opacity:0;}to{opacity:1;}}
+  .flyer.is-popping .flyer-pop{opacity:1;}
+  .flyer.is-popping .flyer-pop i{animation:flyerDrop .32s cubic-bezier(.18,.72,.3,1) both;}
+  /* The class adds nothing to the timings any more — those are in the closed state,
+     where a close reads them whether this arrives on time or not. It only holds back
+     the rolled burst until well after the sheet has gone, which needs an animation
+     rather than a transition because the burst is opacity 1 in both resting states.
+     The half second of nothing is deliberate: droplets clear by ~345ms, and
+     letting the space sit empty for a beat before the button reforms is what stops the
+     pop reading as a blink. The hint below it waits on the same clock (see
+     .flyer-hint), or a caption would be left floating under an empty space. */
+  .flyer.is-popping .flyer-burst{animation:flyerBack .22s ease .5s both;}
+  .flyer.is-popping .flyer-hint{transition:opacity .22s ease .5s;}
   @media(prefers-reduced-motion:reduce){
-    .flyer,.flyer-window,.flyer-curl{transition:none;}
+    .flyer,.flyer-btn,.flyer-window,.flyer-plate,
+    .flyer-burst,.flyer-burst path,.flyer-burst .lbl,
+    #flyerEdge path{transition:none;}
+    .flyer.is-popping .flyer-pop{opacity:0;}
+    .flyer.is-popping .flyer-pop i,
+    .flyer.is-popping .flyer-burst{animation:none;}
   }
 
   @media(max-width:860px){
@@ -263,15 +505,16 @@
     /* In the single-column hero it sits above the copy as a normal block, and it
        only unrolls: there's no room to grow wider, so --fw-open matches --fw. */
     .flyer{
-      --fw:min(320px,86vw); --fw-open:min(320px,86vw);
+      --fw-roll:min(320px,86vw); --fw-open:min(320px,86vw);
       /* Relative rather than static so the z-index above still applies and the flyer
          passes in front of the social bar. top/right MUST be cleared with it: they
          are live on a relative box and the desktop values drag it off the screen.
          Negative margins pull back against the hero's 40px grid gap, which is most
          of the space above and below the burst. Halves both: 45px/66px to 22px/33px. */
       position:relative;top:auto;right:auto;
-      transform:none;width:var(--fw);margin:-19px auto -7px;
+      width:var(--fw);margin:-19px auto -7px;
     }
+    .flyer-btn{transform:none;}
     .flyer-hint .hov{display:none;}
     .flyer-hint .tap{display:inline;}
   }
@@ -517,8 +760,27 @@
   <!-- Rolled-up flyer: shows its header strip, unrolls to the full sheet on hover,
        focus, or tap. Unhidden by script, and only until the week of action ends. -->
   <div class="flyer" id="weekFlyer" hidden>
+    <!-- Lives inside .flyer so it inherits --open-dn and the open-state selectors reach
+         it. Clips the sheet to the same shape the outline is drawing (see .flyer-window). -->
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+      <clipPath id="flyerEdge" clipPathUnits="objectBoundingBox"><path /></clipPath>
+    </svg>
     <button type="button" class="flyer-btn" aria-expanded="false" aria-controls="flyerSheet">
       <span class="sr-only">National Week of Action, August 17 to 21. Show the full schedule.</span>
+      <!-- The outline, drawn before the window so the sheet and its artwork paint over
+           it. One path: the burst while rolled, the sheet's frame when open. -->
+      <span class="flyer-burst" aria-hidden="true">
+        <svg class="sh" viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
+          <path vector-effect="non-scaling-stroke" />
+        </svg>
+        <svg class="fg" viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
+          <path vector-effect="non-scaling-stroke" />
+        </svg>
+        <span class="lbl">
+          <span class="t">National<br/>Week of Action!</span>
+          <span class="d">Aug 17 – 21</span>
+        </span>
+      </span>
       <span class="flyer-window" id="flyerSheet">
         <span class="flyer-plate">
           <img src="assets/week-of-action.jpg" width="1080" height="1350"
@@ -531,13 +793,33 @@
         </span>
       </span>
       <span class="sr-only flyer-status"></span>
-      <span class="flyer-curl" aria-hidden="true"></span>
-      <span class="flyer-burst" aria-hidden="true">
-        <svg viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
-          <path vector-effect="non-scaling-stroke" d="M110.0,6.0 L125.0,18.6 L150.3,8.1 L152.2,24.6 L182.4,20.2 L174.4,34.3 L202.3,36.6 L185.0,47.8 L213.3,55.0 L188.5,62.5 L201.7,73.3 L171.4,74.7 L180.2,88.8 L154.6,87.1 L149.7,101.1 L123.8,88.3 L110.0,105.9 L94.0,93.8 L70.4,101.0 L66.8,86.1 L39.5,88.9 L51.7,73.8 L15.3,73.9 L40.6,61.6 L10.0,55.0 L38.4,48.1 L18.7,36.8 L46.9,34.7 L38.0,20.3 L65.2,22.7 L70.8,9.5 L94.8,18.1 Z" />
-        </svg>
-        <span class="t">National<br/>Week of Action!</span>
-        <span class="d">Aug 17 – 21</span>
+      <span class="flyer-pop" aria-hidden="true">
+        <i style="left:0%;top:0.94%;--d:9.2px;--dx:-23.5px;--dy:-27.3px;animation-delay:7ms"></i>
+        <i style="left:16.39%;top:0%;--d:6px;--dx:-2.1px;--dy:-22.6px;animation-delay:17ms"></i>
+        <i style="left:30.86%;top:0%;--d:6.4px;--dx:1.5px;--dy:-36px;animation-delay:13ms"></i>
+        <i style="left:49.89%;top:0%;--d:9.6px;--dx:5.3px;--dy:-35.8px;animation-delay:5ms"></i>
+        <i style="left:68.83%;top:0%;--d:7px;--dx:-2.9px;--dy:-14.7px;animation-delay:16ms"></i>
+        <i style="left:93.32%;top:0%;--d:9.1px;--dx:12.4px;--dy:-16.5px;animation-delay:34ms"></i>
+        <i class="s" style="left:100%;top:8.2%;--d:4px;--dx:8.1px;--dy:-11.8px;animation-delay:24ms"></i>
+        <i class="s" style="left:100%;top:14.79%;--d:8.9px;--dx:19.9px;--dy:4.7px;animation-delay:36ms"></i>
+        <i class="s" style="left:100%;top:29.98%;--d:10.4px;--dx:19.5px;--dy:-2.5px;animation-delay:3ms"></i>
+        <i class="s" style="left:100%;top:48.44%;--d:8.9px;--dx:33.4px;--dy:3.7px;animation-delay:13ms"></i>
+        <i class="s" style="left:100%;top:54.15%;--d:5.3px;--dx:24.7px;--dy:3.5px;animation-delay:15ms"></i>
+        <i class="s" style="left:100%;top:70.1%;--d:4.9px;--dx:26.9px;--dy:-1.4px;animation-delay:22ms"></i>
+        <i style="left:100%;top:87.72%;--d:10px;--dx:16.5px;--dy:15.2px;animation-delay:13ms"></i>
+        <i style="left:100%;top:97.79%;--d:5.1px;--dx:18.2px;--dy:25.5px;animation-delay:37ms"></i>
+        <i class="s" style="left:89.67%;top:100%;--d:6.9px;--dx:9.4px;--dy:11.3px;animation-delay:27ms"></i>
+        <i class="s" style="left:58.18%;top:100%;--d:4px;--dx:-2.3px;--dy:30.6px;animation-delay:20ms"></i>
+        <i class="s" style="left:53.16%;top:100%;--d:9.5px;--dx:-0.9px;--dy:18.7px;animation-delay:19ms"></i>
+        <i style="left:29.83%;top:100%;--d:8px;--dx:8.6px;--dy:35.5px;animation-delay:16ms"></i>
+        <i style="left:7.87%;top:100%;--d:8.8px;--dx:-23.3px;--dy:17.1px;animation-delay:26ms"></i>
+        <i class="s" style="left:3.92%;top:100%;--d:9.4px;--dx:-20.9px;--dy:14.7px;animation-delay:2ms"></i>
+        <i class="s" style="left:0%;top:83.23%;--d:5.1px;--dx:-19.2px;--dy:-1.5px;animation-delay:29ms"></i>
+        <i style="left:0%;top:72.96%;--d:6.5px;--dx:-36.8px;--dy:3.8px;animation-delay:17ms"></i>
+        <i class="s" style="left:0%;top:54.7%;--d:4.5px;--dx:-21.4px;--dy:-0.7px;animation-delay:17ms"></i>
+        <i style="left:0%;top:42.01%;--d:4.2px;--dx:-17.8px;--dy:-3.3px;animation-delay:25ms"></i>
+        <i class="s" style="left:0%;top:33.26%;--d:9.9px;--dx:-24.2px;--dy:-0.3px;animation-delay:16ms"></i>
+        <i class="s" style="left:0%;top:11.51%;--d:4.8px;--dx:-13.4px;--dy:-15.9px;animation-delay:24ms"></i>
       </span>
       <span class="flyer-hint mono" aria-hidden="true">
         <span class="hov">▼ Hover for info</span><span class="tap">▼ Tap for info</span>
@@ -1561,11 +1843,140 @@
       window.scrollTo({ top: Math.max(0, target), behavior: reduce ? 'auto' : 'smooth' });
     }
 
+    // Closing is a pop rather than a roll-up, which a stylesheet can't do by itself:
+    // the collapsed state is also the state the page loads in, so a bare rule would
+    // fire the burst on every load. Hence a class, added only when something that was
+    // open has just closed. Three things can hold it open at once, so check all of
+    // them before calling it closed.
+    //
+    // Focus counts as "still open" only when it is a KEYBOARD focus. Tapping a <button>
+    // focuses it too, so the old activeElement test meant that on a phone the second tap
+    // removed .is-open while :focus-within silently held the sheet open — nothing moved
+    // and nothing popped. :focus-visible is the distinction the platform already draws.
+    //
+    // Hover is tracked with a flag rather than read back with matches(':hover') because
+    // that call flushes style, and the soft-close class has to be on the element before
+    // the closing transitions start.
+    const burst = flyer.querySelector('.flyer-burst');
+    const hoverable = matchMedia('(hover:hover) and (min-width:861px)');
+    let hovering = false;
+    // Clicked shut while the pointer is still on it (desktop only). Hover no longer
+    // counts as holding it open until the pointer has left and come back — see
+    // .is-dismissed in the CSS, which takes the hover rules out for the same span.
+    let dismissed = false;
+    const undismiss = () => { dismissed = false; flyer.classList.remove('is-dismissed'); };
+    const stillOpen = () =>
+      flyer.classList.contains('is-open') ||
+      btn.matches(':focus-visible') ||       // keyboard only; a tap focuses too
+      (hoverable.matches && hovering && !dismissed);
+
+    // While the class is on, the flyer is inert: every open-state selector in the CSS is
+    // gated on :not(.is-popping). For that half second the button is not on screen yet,
+    // and without this, sweeping back over the space it will occupy springs the whole
+    // sheet open out of nothing. It becomes live again the moment the button is back.
+    // A brush past on the way to something else shouldn't fire the whole performance, so
+    // the sheet has to have been open a moment before closing counts as a pop. Under
+    // that it rolls itself quietly back up over .25s instead, with no droplets and with
+    // the burst back straight away rather than after the half-second wait. Measured from
+    // when it started opening, since that is the span the reader actually spent on it.
+    const DWELL = 250, SOFT = 250;
+    let openedAt = 0, softTimer;
+    const markOpen = () => { openedAt = performance.now(); };
+    const unsoften = () => { clearTimeout(softTimer); flyer.classList.remove('is-soft-close'); };
+    function softClose(){
+      unsoften();
+      flyer.classList.add('is-soft-close');
+      // Carries closing timings, so it must be on before the style flush — same rule as
+      // the pop class. Cleared generously late; it only ever affects a close.
+      softTimer = setTimeout(unsoften, SOFT + 150);
+    }
+
+    let popTimer;
+    const popping = () => flyer.classList.contains('is-popping');
+    const unpop = () => { clearTimeout(popTimer); flyer.classList.remove('is-popping'); };
+    // `deliberate` skips the dwell test, and only a click passes it. The dwell is there
+    // to keep a pointer sweeping through the hero from firing the whole performance —
+    // it is a guard against an accident, and a click is not one. It also has to be
+    // skipped for the click path to work at all, for the same reason a tap didn't work
+    // on a phone until it was fixed: clicking a <button> focuses it, focusin fires
+    // before click and calls markOpen(), so the very click that closes the flyer resets
+    // the dwell clock to zero a moment before the handler reads it. Measured 250ms of
+    // hover then a click, and it soft-closed every time. (Aiming straight at the flyer
+    // and clicking on arrival would be under the dwell honestly, too.)
+    function popShut(deliberate){
+      if(stillOpen() || popping()) return;   // one pop per opening, and never a replay
+      // Nothing was open, so there is nothing to close. This matters now that a click
+      // can shut the flyer with the pointer still on it: the mouseleave that follows,
+      // whenever it comes, would otherwise find a stale openedAt and fire a second pop
+      // over an empty space. Clearing it below is what makes a close one-shot.
+      if(!openedAt && !deliberate) return;
+      const held = performance.now() - openedAt;
+      openedAt = 0;
+      if(!deliberate && held < DWELL){ softClose(); return; }
+      unsoften();                            // never both at once
+      clearTimeout(popTimer);
+      flyer.classList.add('is-popping');
+      // The animation fills forwards, so a tab hidden mid-pop (where animationend may
+      // never arrive) would leave the burst pinned solid and unable to fade out again.
+      // Must outlast the whole sequence — the burst waits .5s before reforming and then
+      // takes .22s, so anything under ~750ms here cuts the button off mid-return.
+      popTimer = setTimeout(unpop, 2200);
+    }
+    burst.addEventListener('animationend', unpop);
+
+    // A click pops it on the desktop too, not only a tap on a phone. The catch is that
+    // hover has usually already opened the sheet by the time the click lands, so what
+    // counts as "open" here can't just be the is-open class: without the hover half of
+    // this test the first click would only set a class that changed nothing on screen,
+    // and it would take a second click to pop. On a phone hoverable is false and this
+    // is the plain toggle it always was.
     btn.addEventListener('click', () => {
-      const open = flyer.classList.toggle('is-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if(open) bringIntoView();
+      if(popping()) return;                  // a tap on the space where the button isn't
+      const open = flyer.classList.contains('is-open') ||
+                   (hoverable.matches && hovering && !dismissed);
+      if(!open){
+        undismiss();
+        flyer.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        markOpen(); bringIntoView();
+        return;
+      }
+      flyer.classList.remove('is-open');
+      btn.setAttribute('aria-expanded', 'false');
+      // Latched before popShut, not after: both land in the same recalc, so the hover
+      // rules are already out by the time the closing transitions are read. Only when
+      // the pointer is genuinely on it — Enter on a focused button is a click too, and
+      // latching then would leave hover switched off until some later pointer happened
+      // to enter and leave again.
+      const byPointer = hoverable.matches && hovering;
+      if(byPointer){ dismissed = true; flyer.classList.add('is-dismissed'); }
+      // Deliberate only on the desktop path. A tap is both the open and the close on a
+      // phone, so a fumbled double-tap there should still take the quiet close, and
+      // that path doesn't need the exemption anyway: the opening tap has already
+      // focused the button, so the closing one fires no second focusin to reset the
+      // clock. On the desktop the open is a hover and the click is a separate act.
+      popShut(byPointer);
     });
+
+    // Coming back mid-pop no longer cancels it — it just means the flyer opens on its
+    // own the instant the class lifts, since the pointer is already over it.
+    // focusout runs before activeElement has moved on, so let it land first.
+    // markOpen only where hovering is what opens it. A tap fires mouseover/mouseenter
+    // just before click — on real touch hardware as well as here — so marking on every
+    // enter meant the tap that closes the flyer reset the dwell clock to zero a moment
+    // before the click handler read it. Tapping could then never pop, only soft-close.
+    flyer.addEventListener('mouseenter', () => {
+      hovering = true; unsoften();
+      if(hoverable.matches) markOpen();
+    });
+    // Leaving is what releases the latch: the pointer has to go before hover can open
+    // the flyer again. popShut after it, so a flyer already clicked shut just falls
+    // through on the cleared openedAt rather than popping a second time.
+    flyer.addEventListener('mouseleave', () => {
+      hovering = false; undismiss(); popShut();
+    });
+    flyer.addEventListener('focusin', markOpen);
+    flyer.addEventListener('focusout', () => setTimeout(popShut, 0));
 
     // Cross each day off the flyer once it is over. A day's tick lands at midnight
     // ET on the following morning, so Monday's appears the moment Tuesday starts.
@@ -1597,17 +2008,22 @@
 
     // Retire the flyer on the same schedule if the page is still open by then.
     setTimeout(() => { flyer.hidden = true; }, ENDS - Date.now());
-    // Escape closes it, and hovering elsewhere shouldn't leave it pinned open.
+    // Escape and a tap outside both dismiss it, but neither pops it. The pop belongs to
+    // the flyer itself being let go of — the pointer leaving it, or a tap on it — not to
+    // an unrelated tap somewhere else on the page, where a burst of droplets across the
+    // hero reads as something misfiring. Those get the quiet .25s close instead.
     document.addEventListener('keydown', e => {
       if(e.key === 'Escape' && flyer.classList.contains('is-open')){
         flyer.classList.remove('is-open');
         btn.setAttribute('aria-expanded', 'false');
+        softClose();
       }
     });
     document.addEventListener('click', e => {
       if(!flyer.contains(e.target) && flyer.classList.contains('is-open')){
         flyer.classList.remove('is-open');
         btn.setAttribute('aria-expanded', 'false');
+        softClose();
       }
     });
   })();

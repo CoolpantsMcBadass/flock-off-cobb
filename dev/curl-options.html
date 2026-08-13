@@ -1,0 +1,165 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Flyer bottom edge — options</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+<style>
+ :root{
+   --paper:#f1ece0; --paper-2:#e7e0cf; --ink:#161311; --ink-soft:#3a342f;
+   --red:#d6233a; --yellow:#f5c518; --teal:#1f6f8b; --shadow:6px 6px 0 var(--ink);
+   --ease:cubic-bezier(.22,.61,.36,1);
+ }
+ *{box-sizing:border-box;}
+ body{
+   margin:0;padding:28px 24px 80px;background:var(--paper);color:var(--ink);
+   font-family:"Spectral",Georgia,serif;
+   background-image:radial-gradient(var(--paper-2) 1px, transparent 1px);
+   background-size:14px 14px;
+ }
+ h1{font-family:"Anton",Impact,sans-serif;font-size:1.5rem;margin:0 0 4px;text-transform:uppercase;letter-spacing:.02em;}
+ .lede{font-size:.9rem;color:var(--ink-soft);margin:0 0 6px;max-width:76ch;}
+ .lede b{color:var(--ink);}
+ .bar{display:flex;gap:10px;align-items:center;margin:18px 0 24px;flex-wrap:wrap;}
+ button.ctl{font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+   background:var(--ink);color:var(--paper);border:0;padding:9px 14px;cursor:pointer;}
+ button.ctl.alt{background:var(--paper);color:var(--ink);border:2px solid var(--ink);}
+ label.speed{font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;}
+
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:26px;max-width:1100px;}
+ .cell{background:var(--paper-2);border:3px solid var(--ink);padding:14px;}
+ .cell h2{font-family:"Anton",Impact,sans-serif;font-size:1.02rem;margin:0 0 2px;text-transform:uppercase;}
+ .cell p{font-size:.78rem;color:var(--ink-soft);margin:0;min-height:4.4em;line-height:1.45;}
+ .cell .go{font-family:"Space Mono",monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+   background:none;border:2px solid var(--ink);padding:6px 10px;cursor:pointer;margin-top:10px;}
+
+ /* ---- mock flyer: same .8 ratio as the real sheet, unrolls downward ---- */
+ .stage{position:relative;height:300px;padding-top:8px;display:flex;justify-content:center;}
+ .wrap{position:relative;width:200px;height:max-content;}
+ .sheet{
+   position:relative;width:200px;height:56px;overflow:hidden;
+   border:4px solid var(--ink);background:var(--paper);box-shadow:var(--shadow);
+   transition:height calc(var(--t) * 1ms) var(--ease);
+ }
+ .open .sheet{height:250px;}
+ .art{position:absolute;inset:0;background:
+   linear-gradient(180deg,#2a2523 0 22%, var(--yellow) 22% 100%);}
+ .art b{position:absolute;left:9%;width:34%;height:8%;background:var(--red);border:2px solid rgba(0,0,0,.3);}
+ .art i{position:absolute;left:48%;width:44%;height:8%;background:#fbeaa8;border:2px solid rgba(0,0,0,.22);}
+ .curl{position:relative;width:200px;}
+
+ /* ============ A — current ============ */
+ .a .curl{
+   height:0;opacity:0;border:0 solid var(--ink);border-radius:0 0 7px 7px;
+   background:linear-gradient(180deg,#fffdf6,var(--paper) 30%,var(--paper-2) 62%,#b3aa93);
+   transition:height calc(var(--t) * 1ms) var(--ease), opacity calc(var(--t) * 1ms) ease,
+              border-width calc(var(--t) * 1ms) ease;
+ }
+ .a.open .curl{height:10px;opacity:1;border-width:0 4px 4px;}
+
+ /* ============ B — the roll it unrolls from ============ */
+ .b .curl{
+   height:0;opacity:0;overflow:hidden;
+   border:0 solid var(--ink);border-radius:0 0 11px 11px;
+   background:linear-gradient(180deg,
+     #cdc4ab 0, #fffdf6 14%, var(--paper) 34%, var(--paper-2) 52%,
+     #9c9280 74%, #5f594a 92%, #433e34 100%);
+   transition:height calc(var(--t) * 1ms) var(--ease), opacity calc(var(--t) * .35ms) ease,
+              border-width calc(var(--t) * 1ms) ease;
+ }
+ .b.open .curl{height:22px;opacity:1;border-width:0 4px 4px;}
+ .b .curl::after{                       /* the specular line along the barrel */
+   content:"";position:absolute;left:8px;right:8px;top:5px;height:2px;
+   background:rgba(255,255,255,.75);border-radius:2px;
+ }
+
+ /* ============ C — curled corners ============ */
+ .c .sheet{border-radius:0 0 44% 44% / 0 0 20px 20px;}
+ .c .curl{height:26px;pointer-events:none;}
+ .c .curl::before,.c .curl::after{
+   content:"";position:absolute;top:-16px;width:44px;height:26px;opacity:0;
+   background:linear-gradient(150deg,var(--paper) 0 40%, var(--paper-2) 62%, #a99f88 100%);
+   border:3px solid var(--ink);
+   transition:opacity calc(var(--t) * .5ms) ease calc(var(--t) * .5ms),
+              transform calc(var(--t) * 1ms) var(--ease);
+ }
+ .c .curl::before{left:-2px;border-radius:0 0 0 22px;transform:rotate(0deg) translateY(-8px);}
+ .c .curl::after{right:-2px;border-radius:0 0 22px 0;transform:rotate(0deg) translateY(-8px);}
+ .c.open .curl::before{opacity:1;transform:rotate(-9deg) translateY(0);}
+ .c.open .curl::after{opacity:1;transform:rotate(9deg) translateY(0);}
+
+ /* ============ D — hanging wave ============ */
+ .d .sheet{border-bottom:0;}
+ .d .curl{height:24px;margin-top:-1px;}
+ .d .curl svg{display:block;width:200px;height:24px;overflow:visible;}
+ .d .curl path{
+   fill:var(--paper);stroke:var(--ink);stroke-width:4;stroke-linejoin:round;
+   opacity:0;transition:opacity calc(var(--t) * .4ms) ease calc(var(--t) * .55ms);
+ }
+ .d.open .curl path{opacity:1;}
+
+ /* ============ E — none ============ */
+ .e .curl{height:0;}
+</style>
+
+<h1>Flyer bottom edge — five treatments</h1>
+<p class="lede">The strip under the sheet is meant to read as the paper curling where it unrolled from.
+Click a card to unroll it. <b>Judge it in motion</b> — the bar is only convincing while it is moving.</p>
+<p class="lede">Worth knowing: this was designed when opening was a literal unroll. The shape now morphs from
+the comic burst straight into the sheet's frame, so the unroll metaphor is weaker than it was — which is
+why <b>E (none)</b> is on the list. If the answer is "it never reads right", removing it is a real answer.</p>
+
+<div class="bar">
+  <button class="ctl" id="all">▶ Unroll all</button>
+  <label class="speed"><input type="radio" name="t" value="500" checked> 1×</label>
+  <label class="speed"><input type="radio" name="t" value="1500"> 3× slow</label>
+  <label class="speed"><input type="radio" name="t" value="3000"> 6× slow</label>
+  <button class="ctl alt" id="reset">Roll back up</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const ART = '<div class="art">' +
+  [0,1,2,3,4].map(i => '<b style="top:' + (30 + i*12) + '%"></b><i style="top:' + (30 + i*12) + '%"></i>').join('') +
+  '</div>';
+
+const OPTS = [
+  { id:'a', name:'A · Current',
+    note:'A 10px gradient strip with the frame carried round it. Flat, and at this height it reads as a bar stuck to the bottom rather than paper.' },
+  { id:'b', name:'B · The roll',
+    note:'The same idea taken seriously: 22px, barrel-shaded dark at both edges with a specular line, so it reads as the roll the sheet is unwinding off. Fades in early and travels down.' },
+  { id:'c', name:'C · Curled corners',
+    note:'No bar. The sheet\'s bottom edge bows, and the two corners peel up and outward as it opens, each with its own shading — the way a poster actually sits.' },
+  { id:'d', name:'D · Hanging wave',
+    note:'Also no bar. The bottom edge itself becomes a loose S-curve, as if the paper is hanging rather than cut square. Would be baked into the morph target, not a separate element.',
+    extra:'<svg viewBox="0 0 200 24" preserveAspectRatio="none"><path d="M-2,0 C 30,26 62,-8 100,10 C 140,29 172,-4 202,8 L202,-6 L-2,-6 Z"/></svg>' },
+  { id:'e', name:'E · None',
+    note:'The sheet stops square, with only its offset shadow. Tests whether the curl is earning its place now that opening is a morph rather than an unroll.' },
+];
+
+document.getElementById('grid').innerHTML = OPTS.map(o => `
+  <div class="cell">
+    <h2>${o.name}</h2>
+    <p>${o.note}</p>
+    <div class="stage">
+      <div class="wrap ${o.id}">
+        <div class="sheet">${ART}</div>
+        <div class="curl">${o.extra || ''}</div>
+      </div>
+    </div>
+    <button class="go" data-play="${o.id}">▶ Unroll</button>
+  </div>`).join('');
+
+let T = 500;
+document.body.style.setProperty('--t', T);
+document.querySelectorAll('input[name=t]').forEach(r =>
+  r.addEventListener('change', e => { T = +e.target.value; document.body.style.setProperty('--t', T); }));
+
+const toggle = id => document.querySelector('.wrap.' + id).classList.toggle('open');
+document.querySelectorAll('[data-play]').forEach(b => b.addEventListener('click', () => toggle(b.dataset.play)));
+document.querySelectorAll('.stage').forEach(s =>
+  s.addEventListener('click', () => s.querySelector('.wrap').classList.toggle('open')));
+document.getElementById('all').addEventListener('click', () =>
+  document.querySelectorAll('.wrap').forEach(w => w.classList.add('open')));
+document.getElementById('reset').addEventListener('click', () =>
+  document.querySelectorAll('.wrap').forEach(w => w.classList.remove('open')));
+</script>
