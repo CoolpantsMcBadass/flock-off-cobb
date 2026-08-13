@@ -262,7 +262,9 @@
        only unrolls: there's no room to grow wider, so --fw-open matches --fw. */
     .flyer{
       --fw:min(320px,86vw); --fw-open:min(320px,86vw);
-        position:static;transform:none;width:var(--fw);margin:4px auto 26px;
+      /* Negative margins pull back against the hero's 40px grid gap, which is most
+         of the space above and below the burst. Halves both: 45px/66px to 22px/33px. */
+      position:static;transform:none;width:var(--fw);margin:-19px auto -7px;
     }
     .flyer-hint .hov{display:none;}
     .flyer-hint .tap{display:inline;}

@@ -18,6 +18,7 @@ All notable changes to the Flock Off Cobb site are recorded here.
 - The rolled band is its own element rather than a crop of the flyer's header, because the flyer's title and its wordmark overlap horizontally: "WEEK OF ACTION" ends at x790 and "deflock Cobb" starts at x770, so no vertical cut separates the title from the logo and the megaphone. Keeping it separate also lets the rolled state say whatever a future action needs.
 - Proportions are driven by four CSS variables on `.flyer`: `--ar` (the sheet's width/height ratio), `--roll-h` (the band's height), and `--fw` / `--fw-open` (rolled and unrolled widths). A different flyer needs `--ar` retuned and the band's two lines of text edited, and nothing else.
 - On narrow screens the flyer leaves the absolute position and becomes a centered block above the headline, where it only unrolls rather than growing, since there is no width to grow into.
+- Its spacing there is set with negative margins, because most of the room above and below it is the hero grid's own 40px gap rather than anything on the flyer. Pulling back against that gap halves both, from 45px above and 66px below to 22px and 33px.
 - Hover opening is gated on `(hover:hover) and (min-width:861px)`, not on pointer type alone. A narrow desktop window gets the phone layout, whose caption reads "Tap for info" and whose opening is meant to scroll the sheet into view; letting hover open it there skipped the scroll and left the sheet hanging off the bottom.
 
 ## 2026-08-04
