@@ -236,7 +236,7 @@ around a space that is still open. Beginning the instant the sheet vanished read
 surroundings being in a hurry to get on with it; an eighth of a second of nothing first
 makes the gap feel vacated rather than reclaimed. The button's width and tilt wait on the
 same beat, which puts the geometry home at 385ms — still comfortably ahead of the burst
-fading back in at 500ms, and that ordering is the constraint to preserve if either number
+fading back in at 600ms, and that ordering is the constraint to preserve if either number
 is ever changed. `.is-soft-close` overrides the delay: a quiet close has no droplets to
 wait for and shouldn't hesitate.
 
@@ -317,7 +317,7 @@ Both of these made tapping on a phone fail to pop, and neither shows up on deskt
 to something else shouldn't fire the whole performance. Under that dwell the flyer takes
 `.is-soft-close` instead and simply runs the unroll backwards over .25s — the rectangle
 returning to a burst, the artwork fading, the label coming back — with no droplets and
-the button back at once rather than after the half-second wait. The clock starts when it
+the button back at once rather than after the pop's wait. The clock starts when it
 began opening, that being the span the reader actually spent on it. This is also why the
 hint's delayed return sits on `.is-popping` rather than in the closed state: a quiet close
 needs its caption back with the button, not half a second later.
@@ -338,7 +338,7 @@ pointer is over it, so nothing is lost. `popShut()` also refuses to run while a 
 already going: waving the cursor across the gap used to replay the droplets over a sheet
 that had already left.
 
-**The button waits .5s before reforming.** The droplets are clear by ~345ms, and the
+**The button waits .6s before reforming, then fades in over 160ms.** The droplets are clear by ~345ms, and the
 space then sits empty for a beat before the burst fades back in over .22s. That pause is
 the point: without it the whole thing is over in a third of a second and reads as a blink
 rather than as something having popped. The hint below it waits on the same clock, or a
@@ -347,7 +347,7 @@ button returns immediately, so the wait never costs responsiveness.
 
 Two things are pinned to that pause and will break quietly if it changes: the safety
 timeout in `popShut()` has to outlast the whole sequence (it removes the class, so
-anything under ~750ms cuts the button off mid-return), and the hint needs its *opening*
+anything under ~800ms cuts the button off mid-return), and the hint needs its *opening*
 transition declared separately in the open-state rules or it inherits the .5s delay and
 sits over the sheet for most of the unroll.
 

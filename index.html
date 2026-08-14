@@ -184,7 +184,7 @@
     /* Width recedes on the same .25s as the height above, after the same 125ms beat and
        for the same reason; the tilt eases back alongside it. All of it happens under the
        pop with nothing but droplets on screen, and is home by 385ms — comfortably before
-       the burst fades back in at 500ms. */
+       the burst fades back in at 600ms. */
     transition:width .25s var(--ease) .125s, transform .26s var(--ease) .125s;
   }
   /* The window never draws a frame in either state. The burst behind it is the one
@@ -484,12 +484,17 @@
      where a close reads them whether this arrives on time or not. It only holds back
      the rolled burst until well after the sheet has gone, which needs an animation
      rather than a transition because the burst is opacity 1 in both resting states.
-     The half second of nothing is deliberate: droplets clear by ~345ms, and
-     letting the space sit empty for a beat before the button reforms is what stops the
-     pop reading as a blink. The hint below it waits on the same clock (see
-     .flyer-hint), or a caption would be left floating under an empty space. */
-  .flyer.is-popping .flyer-burst{animation:flyerBack .22s ease .5s both;}
-  .flyer.is-popping .flyer-hint{transition:opacity .22s ease .5s;}
+     The .6s of nothing is deliberate: droplets clear by ~345ms, and letting the space
+     sit empty for a beat before the button reforms is what stops the pop reading as a
+     blink. It was .5s, which was long enough to work but still felt like the button was
+     chasing the droplets out. The hint below it waits on the same clock (see
+     .flyer-hint), or a caption would be left floating under an empty space.
+     It arrives on a quick fade rather than simply appearing — 160ms, ease-out, so it is
+     most of the way there immediately and settles rather than blinking on. Anything
+     slower starts to read as a second animation in its own right, which is the opposite
+     of the point: the burst is meant to have been there all along. */
+  .flyer.is-popping .flyer-burst{animation:flyerBack .16s ease-out .6s both;}
+  .flyer.is-popping .flyer-hint{transition:opacity .16s ease-out .6s;}
 
   /* ---- Where the CSS `d` property doesn't exist ----
      Which is WebKit, so every browser on an iPhone. One path cannot be two shapes
@@ -1990,8 +1995,8 @@
       flyer.classList.add('is-popping');
       // The animation fills forwards, so a tab hidden mid-pop (where animationend may
       // never arrive) would leave the burst pinned solid and unable to fade out again.
-      // Must outlast the whole sequence — the burst waits .5s before reforming and then
-      // takes .22s, so anything under ~750ms here cuts the button off mid-return.
+      // Must outlast the whole sequence — the burst waits .6s before reforming and then
+      // takes .16s, so anything under ~800ms here cuts the button off mid-return.
       popTimer = setTimeout(unpop, 2200);
     }
     burst.addEventListener('animationend', unpop);
