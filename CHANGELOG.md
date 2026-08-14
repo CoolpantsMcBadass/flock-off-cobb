@@ -2,6 +2,13 @@
 
 All notable changes to the Flock Off Cobb site are recorded here.
 
+## 2026-08-14
+
+### Added
+- The flyer arrives a second after the page rather than being part of the hero from the first frame, and it arrives the same way it comes back after a pop: a dot, then the spikes out of it into the burst. Something that only exists for one week should read as having landed. `startReform()` now takes its delay and its finisher as arguments, since the shape's own motion is identical either way and only what surrounds it differs — the arrival is the pop's 180ms morph with the pop's .6s of deliberately empty space taken off the front, so the shape starts 80ms into the burst's fade and the label follows at 140ms, matching .68s and .74s there. The fades are animations rather than transitions because there is no earlier state to come from.
+- While it waits, the flyer is `visibility:hidden` rather than `[hidden]`. The hero is laid out around it from the first paint, so nothing shifts when it lands — on a phone the flyer is in the document flow and appearing a second later would shove the page down under whoever was already reading — and hidden visibility keeps it out of hit-testing and out of the tab order for that beat, which `display:none` had been doing for free. The clock starts when the script runs rather than on `load`, which waits on 800KB of hero artwork and would drift by seconds on a phone; by then the hero is parsed and laid out, which is the moment a reader would call the site loaded.
+- Anything aimed at the flyer during the 260ms it takes to land ends the arrival on the spot, because the open it is about to trigger owns the burst's shape from that frame on and two things writing the same path fight for a quarter of a second. Under reduced motion the button is simply there when the wait is up, as it simply comes back after a pop. Verified in both engines, including a tap and a hover landing mid-arrival.
+
 ## 2026-08-13
 
 ### Added

@@ -363,6 +363,29 @@ anything under ~800ms cuts the button off mid-return), and the hint needs its *o
 transition declared separately in the open-state rules or it inherits the .5s delay and
 sits over the sheet for most of the unroll.
 
+**The flyer arrives a second after the page does, out of that same dot.** It is not part of
+the hero when the page opens; it lands, which is the honest thing for something that only
+exists for one week. A second is the wait: long enough for the hero to have settled and
+be read as finished, short enough that it still belongs to the page opening rather than
+arriving out of nowhere later. `startReform()` takes the delay and the finisher as arguments for
+exactly this reason: the shape's own motion is identical to the pop's and only what
+surrounds it differs, so the arrival is the same 180ms morph with the pop's .6s of
+deliberately empty space taken out of the front. Offsets are the pop's, less that .6s —
+the shape starts 80ms into the burst's fade and the label follows at 140ms, matching .68s
+and .74s there. The fades are animations rather than transitions because there is no
+earlier state to come from.
+
+Two things about the waiting: the flyer is `visibility:hidden` (`.is-spawning`), never
+`[hidden]`, so the hero is laid out around it from the first paint — on a phone it is in
+the flow and appearing a second later would shove the page down under the reader — and
+hidden visibility keeps it out of hit-testing and out of the tab order for that beat,
+which `display:none` was doing for free. The clock starts when the script runs, not on `load`,
+which waits on 800KB of hero artwork and would drift by seconds on a phone. Anything
+aimed at the flyer during the 260ms it takes to land ends the arrival on the spot: the
+open it is about to trigger owns the burst's shape from that frame on, and two things
+writing the same path fight for a quarter of a second. Under reduced motion it is simply
+there at 1.5s, as the pop's return is.
+
 Otherwise `.is-popping` does one job: hold the rolled burst back, and add the droplets. It is still a class rather than a bare CSS rule because the
 collapsed state is also the state the page loads in, and a bare rule would fire the
 droplets on every page load. Three separate things can hold the flyer open (hover,

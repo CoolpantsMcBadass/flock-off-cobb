@@ -510,6 +510,24 @@
      property and reads the attribute instead; script writes both every frame. */
   .flyer.is-reforming .flyer-burst path{d:path(var(--burst-d));}
 
+  /* ---- Arriving: the same reform, run once on load ----
+     The button is not simply there when the page opens. It lands a second in, out of the
+     same dot the pop reforms from, so it reads as arriving rather than as having always
+     been part of the hero — which is the whole point of a flyer that only exists for one
+     week. Until then it is visibility:hidden rather than [hidden]: the hero is laid out
+     around it from the first paint, so nothing shifts when it lands (on a phone the flyer
+     is in the flow and [hidden] until then would shove the page down under the reader),
+     and hidden visibility also keeps it out of hit-testing and out of the tab order for
+     that beat, which display:none was doing for free.
+     The offsets are the pop's own, less its .6s of deliberately empty space: the shape
+     starts 80ms into the burst's fade and the label follows at 140ms, exactly as at .68s
+     and .74s there. Fades are animations rather than transitions because there is no
+     earlier state to come from — the element has only just appeared. */
+  .flyer.is-spawning{visibility:hidden;}
+  .flyer.is-spawn .flyer-burst{animation:flyerBack .12s ease-out both;}
+  .flyer.is-spawn .flyer-burst .lbl{animation:flyerBack .1s ease-out .14s both;}
+  .flyer.is-spawn .flyer-hint{animation:flyerBack .1s ease-out .14s both;}
+
   /* ---- Where the CSS `d` property doesn't exist ----
      Which is WebKit, so every browser on an iPhone. One path cannot be two shapes
      there, so the morph is off the table entirely and the outline cannot be the
@@ -1912,6 +1930,9 @@
     const ENDS = Date.UTC(2026, 7, 24, 3, 59, 0);
     if(Date.now() >= ENDS) return;
     flyer.hidden = false;
+    // Unhidden but not yet on screen: the space is held from the first paint and the
+    // spawn below is what puts the button in it. See .is-spawning in the stylesheet.
+    flyer.classList.add('is-spawning');
 
     const btn = flyer.querySelector('.flyer-btn');
     const win = flyer.querySelector('.flyer-window');
@@ -2046,12 +2067,18 @@
     const popping = () => flyer.classList.contains('is-popping');
     const unpop = () => { clearTimeout(popTimer); endReform(); flyer.classList.remove('is-popping'); };
 
-    // Returns whether it has taken ownership of ending the pop. It has to say so: the
-    // reform is what calls unpop() when the shape is home, so if it declines to run then
-    // nothing else is going to, and the flyer sits inert — every open-state selector is
-    // gated on :not(.is-popping) — until the safety timer fires. Under reduced motion
-    // that was over two seconds of taps doing nothing, which reads as simply broken.
-    function startReform(){
+    // Two callers: the pop, which runs it after its .6s of empty space, and the spawn,
+    // which runs the same thing on arrival with almost no wait in front of it. Hence the
+    // delay and the finisher being arguments rather than constants — the shape's own
+    // motion is identical either way, and only what surrounds it differs.
+    //
+    // Returns whether it has taken ownership of ending the sequence. It has to say so:
+    // the reform is what calls done() when the shape is home, so if it declines to run
+    // then nothing else is going to, and after a pop the flyer sits inert — every
+    // open-state selector is gated on :not(.is-popping) — until the safety timer fires.
+    // Under reduced motion that was over two seconds of taps doing nothing, which reads
+    // as simply broken.
+    function startReform(delay, done){
       // Nothing to grow from under reduced motion, where the burst is simply back.
       if(quiet.matches || rolled.length < 4) return false;
       const dot = dotOf(rolled);
@@ -2064,14 +2091,45 @@
           const e = 1 - Math.pow(1 - u, 3);    // ease-out, to match the fade it follows
           writeBurst(dot.map((v, i) => v + (rolled[i] - v) * e), e);
           if(u < 1){ reformRaf = requestAnimationFrame(step); return; }
-          // The shape is home, so hand the burst back to the stylesheet and end the pop
-          // here rather than on an animationend — several animations finish around now
-          // and only this one means the sequence is over.
-          unpop();
+          // The shape is home, so hand the burst back to the stylesheet and end the
+          // sequence here rather than on an animationend — several animations finish
+          // around now and only this one means it is over.
+          done();
         })();
-      }, REFORM_IN);
+      }, delay);
       return true;
     }
+
+    // ---- Arriving ----
+    // A second after the page is up the button lands, the same way it comes back after a
+    // pop: a dot, then the spikes out of it. The clock starts here rather than on the
+    // load event, which waits on the hero artwork — 800KB of it — and would drift by
+    // seconds on a phone. By the time this script runs the hero is parsed and laid out,
+    // which is the moment a reader would call the site loaded.
+    const SPAWN_WAIT = 1000, SPAWN_IN = 80;
+    let spawnTimer = 0;
+    const spawning = () => flyer.classList.contains('is-spawn');
+    function endSpawn(){
+      clearTimeout(spawnTimer); spawnTimer = 0;
+      flyer.classList.remove('is-spawn');
+      endReform();
+    }
+    setTimeout(() => {
+      flyer.classList.remove('is-spawning');
+      // Under reduced motion it is simply there, which is what a pop does too.
+      if(quiet.matches) return;
+      flyer.classList.add('is-spawn');
+      if(!startReform(SPAWN_IN, endSpawn)){ flyer.classList.remove('is-spawn'); return; }
+      // Backstop, for a tab that spends its arrival in the background: rAF is frozen
+      // there and the shape would stay a dot until the tab came back. Same job as
+      // popTimer, and it has to outlast the sequence, which is home at 260ms.
+      spawnTimer = setTimeout(endSpawn, SPAWN_IN + REFORM_DUR + 700);
+    }, SPAWN_WAIT);
+    // Anything aimed at the flyer during those 260ms ends the arrival on the spot. The
+    // open it is about to trigger owns the burst's shape from that frame on, and the
+    // reform writing over it would fight the unroll for a quarter of a second.
+    ['pointerenter','pointerdown','touchstart','focusin'].forEach(t =>
+      flyer.addEventListener(t, () => { if(spawning()) endSpawn(); }, true));
     // `deliberate` skips the dwell test, and only a click passes it. The dwell is there
     // to keep a pointer sweeping through the hero from firing the whole performance —
     // it is a guard against an accident, and a click is not one. It also has to be
@@ -2094,7 +2152,7 @@
       unsoften();                            // never both at once
       clearTimeout(popTimer);
       flyer.classList.add('is-popping');
-      const reforming = startReform();
+      const reforming = startReform(REFORM_IN, unpop);
       // Backstop. The reform normally ends the pop, so this only matters when rAF is
       // stalled — a hidden tab — where the animation's forwards fill would otherwise
       // leave the burst pinned and the flyer inert. It has to outlast the sequence,
