@@ -338,7 +338,9 @@ pointer is over it, so nothing is lost. `popShut()` also refuses to run while a 
 already going: waving the cursor across the gap used to replay the droplets over a sheet
 that had already left.
 
-**The button waits .6s before reforming, then fades in over 160ms.** The droplets are clear by ~345ms, and the
+**The button waits .6s before reforming, then assembles itself.** A dot fades in over 120ms where it will be, and the spikes grow out of it into the burst over 180ms — the opening morph again, from a point rather than a band and in a fifth of the time. The dot is derived rather than drawn: every point of the rolled shape pulled back onto a small ellipse about its centre *along its own ray*, the same projection that flattens the spikes onto the rectangle on the way open. That is what makes them appear to shoot out of the dot rather than the shape unfolding, and it means there is no third shape to maintain — it falls out of the first two. The radii differ (6 and 7.4) only to cancel the box's stretch, so the dot reads round. The label and caption hold until the shape is home at .86s, or the container's fade carries two lines of display type in over a full stop. Its shadow offset rides the same clock, because 6px on a 17px dot is a second dot rather than a shadow.
+
+The reform is driven from script in **both** engines, unlike the open, and routed through a custom property to get there: where the CSS `d` property exists it beats the element's attribute, so the driven shape has to re-enter through the stylesheet as `--burst-d`; WebKit has no such property and reads the attribute. Script writes both every frame, so there is one implementation rather than two. It also ends the pop — several animations finish around then and only the shape being home means the sequence is over. The droplets are clear by ~345ms, and the
 space then sits empty for a beat before the burst fades back in over .22s. That pause is
 the point: without it the whole thing is over in a third of a second and reads as a blink
 rather than as something having popped. The hint below it waits on the same clock, or a

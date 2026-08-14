@@ -271,7 +271,11 @@
      enough to make that stutter. Offsetting in CSS px rather than user units also
      keeps it at a true 6px, matching --shadow, instead of being squeezed by the
      non-uniform stretch as the box goes from a wide band to a tall sheet. */
-  .flyer-burst .sh{transform:translate(6px,6px);}
+  /* The offset is a variable so the reform can drive it: at 6px on a 17px dot the
+     shadow reads as a second dot sitting beside the first rather than as a shadow, so
+     it starts tight and opens out as the shape does. Six is the resting value and the
+     fallback, which is what every other state gets. */
+  .flyer-burst .sh{transform:translate(var(--sh-off,6px),var(--sh-off,6px));}
   .flyer-burst .sh path{fill:var(--ink);stroke:var(--ink);}
   .flyer-burst .fg path{fill:var(--yellow);stroke:var(--ink);}
   .flyer-burst path{
@@ -489,12 +493,22 @@
      blink. It was .5s, which was long enough to work but still felt like the button was
      chasing the droplets out. The hint below it waits on the same clock (see
      .flyer-hint), or a caption would be left floating under an empty space.
-     It arrives on a quick fade rather than simply appearing — 160ms, ease-out, so it is
-     most of the way there immediately and settles rather than blinking on. Anything
-     slower starts to read as a second animation in its own right, which is the opposite
-     of the point: the burst is meant to have been there all along. */
-  .flyer.is-popping .flyer-burst{animation:flyerBack .16s ease-out .6s both;}
-  .flyer.is-popping .flyer-hint{transition:opacity .16s ease-out .6s;}
+     It does not simply appear, and it does not simply fade either: a dot fades in over
+     120ms where the button will be, then the spikes grow out of it into the burst over
+     180ms — the open morph's own trick, run from a point rather than a band and in a
+     fifth of the time. Only the fade is here; the shape is driven from script, because
+     the geometry is the same arithmetic in both engines and only one of them has a `d`
+     property to animate. See startReform().
+     The label waits for the shape to be home at .86s. It is inside the burst, so the
+     container's fade would otherwise carry it in over the dot, leaving two lines of
+     display type floating on a full stop. The caption below waits with it. */
+  .flyer.is-popping .flyer-burst{animation:flyerBack .12s ease-out .6s both;}
+  .flyer.is-popping .flyer-burst .lbl{animation:flyerBack .1s ease-out .74s both;}
+  .flyer.is-popping .flyer-hint{transition:opacity .1s ease-out .74s;}
+  /* Where the CSS `d` property exists it beats the element's attribute, so the driven
+     shape has to come back in through the stylesheet to be seen. WebKit has no such
+     property and reads the attribute instead; script writes both every frame. */
+  .flyer.is-reforming .flyer-burst path{d:path(var(--burst-d));}
 
   /* ---- Where the CSS `d` property doesn't exist ----
      Which is WebKit, so every browser on an iPhone. One path cannot be two shapes
@@ -565,6 +579,9 @@
     .flyer-burst,.flyer-burst path,.flyer-burst .lbl,
     #flyerEdge path{transition:none;}
     .flyer.is-popping .flyer-pop{opacity:0;}
+    /* startReform() also bails here, so nothing is driving the shape and the label
+       must not be held back waiting for a morph that is never going to run. */
+    .flyer.is-popping .flyer-burst .lbl{animation:none;}
     .flyer.is-popping .flyer-pop i,
     .flyer.is-popping .flyer-burst{animation:none;}
   }
@@ -1968,9 +1985,87 @@
       softTimer = setTimeout(unsoften, SOFT + 150);
     }
 
+    // ---- Reforming: a dot, and the edges grow out of it ----
+    // The button does not simply fade back. A dot fades in where it will be, then the
+    // spikes shoot out of it into the burst — the open morph's trick again, run from a
+    // point instead of from a band, and over a fifth of the time.
+    //
+    // The dot is derived rather than drawn: every point of the rolled shape is pulled
+    // back onto a small ellipse about its centre ALONG ITS OWN RAY, the same projection
+    // that flattens the spikes onto the rectangle when it opens. That is what makes the
+    // spikes appear to grow straight out of the dot rather than the shape unfolding. It
+    // also means there is no third shape to keep in step: it falls out of the first two,
+    // so dev/morph.py is still the only thing that defines geometry.
+    //
+    // One implementation covers both engines, which is the point of routing it through a
+    // custom property: browsers with the CSS `d` property read --burst-d (the attribute
+    // would lose to the stylesheet there), WebKit has no such property and reads the
+    // attribute (where the custom property means nothing). Both are written every frame.
+    const nums = (s) => (s.match(/-?[\d.]+/g) || []).map(Number);
+    const burstPaths = [...flyer.querySelectorAll('.flyer-burst path')];
+    const rolledD = burstPaths.length ? burstPaths[0].getAttribute('d') : '';
+    const rolled = nums(rolledD);
+    const quiet = matchMedia('(prefers-reduced-motion:reduce)');
+    const REFORM_IN = 680, REFORM_DUR = 180;   // starts under the tail of the dot's fade
+    let reformRaf = 0, reformTimer = 0;
+
+    function dotOf(pts){
+      const xs = [], ys = [];
+      for(let i = 0; i < pts.length; i += 2){ xs.push(pts[i]); ys.push(pts[i+1]); }
+      const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+      const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+      // Radii differ because the viewBox is stretched to the box (preserveAspectRatio
+      // is none), so a circle in user units would render as an ellipse. These are the
+      // compensation, not a design choice: they make the dot read round.
+      const RX = 6, RY = 7.4, out = [];
+      for(let i = 0; i < pts.length; i += 2){
+        const dx = pts[i] - cx, dy = pts[i+1] - cy, m = Math.hypot(dx, dy) || 1;
+        out.push(cx + dx / m * RX, cy + dy / m * RY);
+      }
+      return out;
+    }
+    function writeBurst(pts, e){
+      let d = '';
+      for(let i = 0; i < pts.length; i += 2)
+        d += (i ? 'L' : 'M') + pts[i].toFixed(1) + ',' + pts[i+1].toFixed(1) + ' ';
+      d += 'Z';
+      flyer.style.setProperty('--burst-d', '"' + d + '"');
+      flyer.style.setProperty('--sh-off', (1 + 5 * e).toFixed(2) + 'px');
+      burstPaths.forEach(p => p.setAttribute('d', d));
+    }
+    function endReform(){
+      cancelAnimationFrame(reformRaf); reformRaf = 0;
+      clearTimeout(reformTimer); reformTimer = 0;
+      flyer.classList.remove('is-reforming');
+      flyer.style.removeProperty('--burst-d');
+      flyer.style.removeProperty('--sh-off');
+      if(rolledD) burstPaths.forEach(p => p.setAttribute('d', rolledD));
+    }
+
     let popTimer;
     const popping = () => flyer.classList.contains('is-popping');
-    const unpop = () => { clearTimeout(popTimer); flyer.classList.remove('is-popping'); };
+    const unpop = () => { clearTimeout(popTimer); endReform(); flyer.classList.remove('is-popping'); };
+
+    function startReform(){
+      // Nothing to grow from under reduced motion, where the burst is simply back.
+      if(quiet.matches || rolled.length < 4) return;
+      const dot = dotOf(rolled);
+      flyer.classList.add('is-reforming');
+      writeBurst(dot, 0);         // in place from the first frame, while still invisible
+      reformTimer = setTimeout(() => {
+        const t0 = performance.now();
+        (function step(){
+          const u = Math.min(1, (performance.now() - t0) / REFORM_DUR);
+          const e = 1 - Math.pow(1 - u, 3);    // ease-out, to match the fade it follows
+          writeBurst(dot.map((v, i) => v + (rolled[i] - v) * e), e);
+          if(u < 1){ reformRaf = requestAnimationFrame(step); return; }
+          // The shape is home, so hand the burst back to the stylesheet and end the pop
+          // here rather than on an animationend — several animations finish around now
+          // and only this one means the sequence is over.
+          unpop();
+        })();
+      }, REFORM_IN);
+    }
     // `deliberate` skips the dwell test, and only a click passes it. The dwell is there
     // to keep a pointer sweeping through the hero from firing the whole performance —
     // it is a guard against an accident, and a click is not one. It also has to be
@@ -1993,13 +2088,14 @@
       unsoften();                            // never both at once
       clearTimeout(popTimer);
       flyer.classList.add('is-popping');
-      // The animation fills forwards, so a tab hidden mid-pop (where animationend may
-      // never arrive) would leave the burst pinned solid and unable to fade out again.
-      // Must outlast the whole sequence — the burst waits .6s before reforming and then
-      // takes .16s, so anything under ~800ms here cuts the button off mid-return.
+      startReform();
+      // The animation fills forwards, so a tab hidden mid-pop would leave the burst
+      // pinned solid and unable to fade out again — and with rAF stalled there too, the
+      // reform that normally ends the pop never finishes. This is the only thing that
+      // gets it back. Must outlast the whole sequence: the dot fades in at .6s and the
+      // shape is home at .86s, so anything under ~900ms cuts the button off mid-return.
       popTimer = setTimeout(unpop, 2200);
     }
-    burst.addEventListener('animationend', unpop);
 
     // A click pops it on the desktop too, not only a tap on a phone. The catch is that
     // hover has usually already opened the sheet by the time the click lands, so what
@@ -2069,7 +2165,6 @@
     if(!CSS.supports('d', 'path("M0,0 Z")')){
       const win = flyer.querySelector('.flyer-window');
       const plate = flyer.querySelector('.flyer-plate');
-      const nums = (s) => (s.match(/-?[\d.]+/g) || []).map(Number);
       const cs = getComputedStyle(flyer);
       const target = (name) => nums(cs.getPropertyValue(name).replace(/^"|"$/g, ''));
 
@@ -2105,6 +2200,10 @@
 
         let raf = 0, last = -1, still = 0;
         function frame(){
+          // The reform owns the burst's shape while it runs, so stay off it. Handing the
+          // dot back to a height of 0 would overwrite it with the rolled shape on the
+          // very next frame and there would be no dot to see.
+          if(flyer.classList.contains('is-reforming')){ raf = requestAnimationFrame(frame); return; }
           const span = openH() - roll;
           const t = span > 0 ? Math.min(1, Math.max(0, (win.getBoundingClientRect().height - roll) / span)) : 0;
           if(Math.abs(t - last) > .0005){ shapes.forEach(s => draw(s, t)); last = t; still = 0; }
