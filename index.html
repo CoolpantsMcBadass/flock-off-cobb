@@ -2046,9 +2046,14 @@
     const popping = () => flyer.classList.contains('is-popping');
     const unpop = () => { clearTimeout(popTimer); endReform(); flyer.classList.remove('is-popping'); };
 
+    // Returns whether it has taken ownership of ending the pop. It has to say so: the
+    // reform is what calls unpop() when the shape is home, so if it declines to run then
+    // nothing else is going to, and the flyer sits inert — every open-state selector is
+    // gated on :not(.is-popping) — until the safety timer fires. Under reduced motion
+    // that was over two seconds of taps doing nothing, which reads as simply broken.
     function startReform(){
       // Nothing to grow from under reduced motion, where the burst is simply back.
-      if(quiet.matches || rolled.length < 4) return;
+      if(quiet.matches || rolled.length < 4) return false;
       const dot = dotOf(rolled);
       flyer.classList.add('is-reforming');
       writeBurst(dot, 0);         // in place from the first frame, while still invisible
@@ -2065,6 +2070,7 @@
           unpop();
         })();
       }, REFORM_IN);
+      return true;
     }
     // `deliberate` skips the dwell test, and only a click passes it. The dwell is there
     // to keep a pointer sweeping through the hero from firing the whole performance —
@@ -2088,13 +2094,15 @@
       unsoften();                            // never both at once
       clearTimeout(popTimer);
       flyer.classList.add('is-popping');
-      startReform();
-      // The animation fills forwards, so a tab hidden mid-pop would leave the burst
-      // pinned solid and unable to fade out again — and with rAF stalled there too, the
-      // reform that normally ends the pop never finishes. This is the only thing that
-      // gets it back. Must outlast the whole sequence: the dot fades in at .6s and the
-      // shape is home at .86s, so anything under ~900ms cuts the button off mid-return.
-      popTimer = setTimeout(unpop, 2200);
+      const reforming = startReform();
+      // Backstop. The reform normally ends the pop, so this only matters when rAF is
+      // stalled — a hidden tab — where the animation's forwards fill would otherwise
+      // leave the burst pinned and the flyer inert. It has to outlast the sequence,
+      // which ends at .86s, hence 1.4s; it used to be 2.2s, from when an animationend
+      // ended the pop and the margin had to cover the whole animation. When the reform
+      // declined to run there is nothing to wait for at all, so end it promptly rather
+      // than leaving the flyer dead to the touch for over a second.
+      popTimer = setTimeout(unpop, reforming ? 1400 : 220);
     }
 
     // A click pops it on the desktop too, not only a tap on a phone. The catch is that
