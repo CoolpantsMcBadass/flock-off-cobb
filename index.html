@@ -330,12 +330,12 @@
      was flushing style first was the wrong fix: the timings simply shouldn't have
      depended on a class arriving in time. Now the class only adds the droplets. */
   .flyer:not(.is-popping):hover .flyer-btn,
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-btn,
+  .flyer:not(.is-popping).is-key .flyer-btn,
   .flyer:not(.is-popping).is-open .flyer-btn{
     transition:width var(--dur) var(--ease), transform var(--dur) var(--ease);
   }
   .flyer:not(.is-popping):hover .flyer-window,
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-window,
+  .flyer:not(.is-popping).is-key .flyer-window,
   .flyer:not(.is-popping).is-open .flyer-window{transition:height var(--dur) var(--ease);}
   /* The artwork used to wait until the shape was nearly rectangular before daring to
      fade in — it began at 260ms of a 500ms open and was not full until 470ms — because
@@ -343,34 +343,34 @@
      .flyer-window removes that constraint entirely, so this is now free to be early:
      in at 60ms, full by 250ms, revealed through the burst as the spikes retract. */
   .flyer:not(.is-popping):hover .flyer-plate,
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-plate,
+  .flyer:not(.is-popping).is-key .flyer-plate,
   .flyer:not(.is-popping).is-open .flyer-plate{
     transition:opacity calc(var(--dur) * .38) ease calc(var(--dur) * .12),
                transform var(--dur) var(--ease);
   }
   .flyer:not(.is-popping):hover .flyer-burst,
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst,
+  .flyer:not(.is-popping).is-key .flyer-burst,
   .flyer:not(.is-popping).is-open .flyer-burst{transition:height var(--dur) var(--ease);}
   .flyer:not(.is-popping):hover .flyer-burst path,
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst path,
+  .flyer:not(.is-popping).is-key .flyer-burst path,
   .flyer:not(.is-popping).is-open .flyer-burst path{transition:d var(--dur) var(--ease);}
   .flyer:not(.is-popping):hover .flyer-burst .fg path,
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst .fg path,
+  .flyer:not(.is-popping).is-key .flyer-burst .fg path,
   .flyer:not(.is-popping).is-open .flyer-burst .fg path{
     transition:d var(--dur) var(--ease), fill var(--dur) var(--ease);
   }
   .flyer:not(.is-popping):hover .flyer-burst .lbl,
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst .lbl,
+  .flyer:not(.is-popping).is-key .flyer-burst .lbl,
   .flyer:not(.is-popping).is-open .flyer-burst .lbl{transition:opacity calc(var(--dur) * .3) ease;}
   .flyer:not(.is-popping):hover #flyerEdge path,
-  .flyer:not(.is-popping):has(:focus-visible) #flyerEdge path,
+  .flyer:not(.is-popping).is-key #flyerEdge path,
   .flyer:not(.is-popping).is-open #flyerEdge path{
     d:path(var(--open-dn));transition:d var(--dur) var(--ease);
   }
   /* Opening, the hint just goes — without this it would inherit the closing rule's
      .5s delay and sit over the sheet for most of the unroll. */
   .flyer:not(.is-popping):hover .flyer-hint,
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-hint,
+  .flyer:not(.is-popping).is-key .flyer-hint,
   .flyer:not(.is-popping).is-open .flyer-hint{transition:opacity calc(var(--dur) * .3) ease;}
 
   /* Unrolled state. The sheet grows as well as unrolls, since the flyer is
@@ -400,23 +400,23 @@
     .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst .lbl{opacity:0;}
     .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-hint{opacity:0;}
   }
-  .flyer:not(.is-popping):has(:focus-visible),
+  .flyer:not(.is-popping).is-key,
   .flyer:not(.is-popping).is-open{--fw:var(--fw-open);--dur:.5s;}
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-btn,
+  .flyer:not(.is-popping).is-key .flyer-btn,
   .flyer:not(.is-popping).is-open .flyer-btn{transform:rotate(0deg);}
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-window,
+  .flyer:not(.is-popping).is-key .flyer-window,
   .flyer:not(.is-popping).is-open .flyer-window{height:calc(var(--fw) / var(--ar));}
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-plate,
+  .flyer:not(.is-popping).is-key .flyer-plate,
   .flyer:not(.is-popping).is-open .flyer-plate{opacity:1;}
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst,
+  .flyer:not(.is-popping).is-key .flyer-burst,
   .flyer:not(.is-popping).is-open .flyer-burst{height:calc(var(--fw) / var(--ar));}
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst path,
+  .flyer:not(.is-popping).is-key .flyer-burst path,
   .flyer:not(.is-popping).is-open .flyer-burst path{d:path(var(--open-d));}
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst .fg path,
+  .flyer:not(.is-popping).is-key .flyer-burst .fg path,
   .flyer:not(.is-popping).is-open .flyer-burst .fg path{fill:var(--paper);}
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-burst .lbl,
+  .flyer:not(.is-popping).is-key .flyer-burst .lbl,
   .flyer:not(.is-popping).is-open .flyer-burst .lbl{opacity:0;}
-  .flyer:not(.is-popping):has(:focus-visible) .flyer-hint,
+  .flyer:not(.is-popping).is-key .flyer-hint,
   .flyer:not(.is-popping).is-open .flyer-hint{opacity:0;}
   .flyer-btn:focus-visible .flyer-window{outline:3px solid var(--teal);outline-offset:3px;}
   /* ---- Closing quietly: the unroll simply run backwards ----
@@ -526,11 +526,11 @@
   @supports not (d: path("M0,0 Z")){
     .flyer-window{clip-path:none;}
     .flyer-burst{transition:opacity calc(var(--dur) * .4) ease;}
-    .flyer:not(.is-popping):has(:focus-visible) .flyer-window,
+    .flyer:not(.is-popping).is-key .flyer-window,
     .flyer:not(.is-popping).is-open .flyer-window{
       border-color:var(--ink);background:var(--paper);
     }
-    .flyer:not(.is-popping):has(:focus-visible) .flyer-burst,
+    .flyer:not(.is-popping).is-key .flyer-burst,
     .flyer:not(.is-popping).is-open .flyer-burst{height:var(--roll-h);opacity:0;}
     /* The :hover halves belong behind the same guard the real open-state rules are
        behind, and leaving them outside it broke the flyer on a phone after one tap.
@@ -556,11 +556,11 @@
        window drops its own again, the burst follows the box rather than fading, and the
        clip comes back. The rules above are what is left if script never arrives. */
     .flyer.js-morph .flyer-window{clip-path:url(#flyerEdge);}
-    .flyer.js-morph:not(.is-popping):has(:focus-visible) .flyer-window,
+    .flyer.js-morph:not(.is-popping).is-key .flyer-window,
     .flyer.js-morph:not(.is-popping).is-open .flyer-window{
       border-color:transparent;background:transparent;
     }
-    .flyer.js-morph:not(.is-popping):has(:focus-visible) .flyer-burst,
+    .flyer.js-morph:not(.is-popping).is-key .flyer-burst,
     .flyer.js-morph:not(.is-popping).is-open .flyer-burst{
       height:calc(var(--fw) / var(--ar));opacity:1;
     }
@@ -1961,7 +1961,7 @@
     const undismiss = () => { dismissed = false; flyer.classList.remove('is-dismissed'); };
     const stillOpen = () =>
       flyer.classList.contains('is-open') ||
-      btn.matches(':focus-visible') ||       // keyboard only; a tap focuses too
+      flyer.classList.contains('is-key') ||  // keyboard only; a tap focuses too
       (hoverable.matches && hovering && !dismissed);
 
     // While the class is on, the flyer is inert: every open-state selector in the CSS is
@@ -2156,8 +2156,34 @@
     flyer.addEventListener('mouseleave', () => {
       hovering = false; undismiss(); popShut();
     });
-    flyer.addEventListener('focusin', markOpen);
-    flyer.addEventListener('focusout', () => setTimeout(popShut, 0));
+    // Only a KEYBOARD focus holds the flyer open, and the browser is no longer asked
+    // which kind it was. `:focus-visible` is the platform's own answer to that question
+    // and the engines disagree: WebKit matches it after a tap on a button, Chrome does
+    // not. On an iPhone that made the closing tap hold the sheet open — it would start
+    // to shrink, the focus rule would reassert, and it would sit back open, with no pop,
+    // because stillOpen() agreed with the stylesheet that it was still open. The whole
+    // bug arrived twice: `:focus-within` did the same thing, and `:focus-visible` was
+    // the fix, verified in Chrome, where the difference cannot show.
+    //
+    // So track the modality here instead. The last input before the focus decides it,
+    // which is the same heuristic the property is meant to implement, and it gives one
+    // answer everywhere. Capture phase, on the document, so it is already recorded by
+    // the time focusin runs.
+    let keyNav = false;
+    addEventListener('keydown', (e) => {
+      if(e.key === 'Tab' || e.key === 'Enter' || e.key === ' ' || e.key.startsWith('Arrow')) keyNav = true;
+    }, true);
+    ['pointerdown','mousedown','touchstart'].forEach(t =>
+      addEventListener(t, () => { keyNav = false; }, true));
+
+    flyer.addEventListener('focusin', () => {
+      if(keyNav) flyer.classList.add('is-key');
+      markOpen();
+    });
+    flyer.addEventListener('focusout', () => {
+      flyer.classList.remove('is-key');   // before popShut reads it, on the same tick
+      setTimeout(popShut, 0);
+    });
 
     // ---- The morph, by hand, where the CSS `d` property doesn't exist ----
     // WebKit, so every browser on an iPhone. The two shapes carry the same 32 points in

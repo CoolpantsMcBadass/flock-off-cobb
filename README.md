@@ -300,12 +300,22 @@ added at all gives identical timings to closing with it.
 ### Two things a tap does that a hover doesn't
 Both of these made tapping on a phone fail to pop, and neither shows up on desktop.
 
-- **A tap focuses the button.** `:focus-within` was therefore true after any tap, which
-  held the sheet open and made `stillOpen()` refuse to pop — the second tap removed
-  `is-open` and *nothing moved*. The open state now keys off `:has(:focus-visible)` and
-  the script off `btn.matches(':focus-visible')`, which is the distinction the platform
-  already draws: keyboard focus is focus-visible, a pointer tap is not. Same specificity,
-  since `:has()` takes its most specific argument, so nothing else shifted.
+- **A tap focuses the button**, and only a *keyboard* focus should hold the flyer open.
+  This one bug has now arrived three times in three costumes, so it is worth stating
+  plainly. First `activeElement`, then `:focus-within` — both true after any tap, so the
+  sheet stayed open and `stillOpen()` refused to pop: the closing tap removed `is-open`
+  and nothing moved. Then `:focus-visible`, which is the platform's own answer to the
+  question and *should* have been right, but **WebKit matches it after a tap on a button
+  and Chrome does not**. On an iPhone the closing tap made the sheet start to shrink and
+  then sit back open, with no pop, because the focus rule reasserted the open state a
+  moment after the class came off. Every one of those fixes was verified in Chrome, where
+  the difference cannot show.
+  **The browser is no longer asked.** The last input event before a focus decides whether
+  it counts as keyboard — the same heuristic `:focus-visible` implements — recorded in
+  capture phase on the document, and the open state keys off an `is-key` class. One
+  answer in every engine. Specificity is unchanged: `:has()` took it from its single
+  class-level argument and `is-key` is a single class, so nothing else in the cascade
+  shifted. **Do not reach for a focus pseudo-class here again.**
 - **A tap fires `mouseover`/`mouseenter` immediately before `click`.** Real touch hardware
   does this too, not just the preview. `mouseenter` was calling `markOpen()`, so the tap
   that closes the flyer reset the dwell clock to zero a moment before the click handler
