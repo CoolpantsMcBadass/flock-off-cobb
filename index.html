@@ -227,7 +227,10 @@
     height:0;overflow:hidden;
     transition:height .5s cubic-bezier(.22,.61,.36,1);
   }
-  .ebar-poster{display:flex;justify-content:center;}
+  /* The 6px of bottom padding is the shadow's room. The panel clips, and its height is
+     taken from this box, so without it the sheet's own drop shadow would be cut off flush
+     at the bottom edge and only two of its three sides would show. */
+  .ebar-poster{display:flex;justify-content:center;padding-bottom:6px;}
   /* The sheet is what the links are pinned to, so they ride the poster at any width.
      It drops rather than fades: held one full sheet-height above at rest and travelling
      down to nothing on the same clock as the panel's height. Both run the same duration
@@ -241,7 +244,13 @@
     transition:transform .5s cubic-bezier(.22,.61,.36,1);
   }
   .ebar.is-open .ebar-sheet{transform:translateY(0);}
-  .ebar-sheet img{display:block;width:100%;height:auto;}
+  /* Framed the way the site frames artwork everywhere else: an ink outline and the same
+     hard offset shadow the hero art and the buttons carry. Thin at 3px, matching the
+     panels and the letter rather than the hero art's 5px, since this sheet is smaller. */
+  .ebar-sheet img{
+    display:block;width:100%;height:auto;
+    border:3px solid var(--ink);box-shadow:var(--shadow);
+  }
   /* On the flyer rather than under it, and parked by `linksAt` on the strip of artwork
      that already prints the same URLs, so the clickable version covers nothing the
      reader loses. Pinned to the bottom by default; every poster puts its own furniture

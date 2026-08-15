@@ -5,6 +5,7 @@ All notable changes to the Flock Off Cobb site are recorded here.
 ## 2026-08-15
 
 ### Changed
+- The event poster is framed the way the site frames artwork everywhere else: a 3px ink outline and the same hard offset shadow the hero art and the buttons carry, thin rather than the hero art's 5px since the sheet is smaller. The panel clips and takes its height from the poster's box, so it also gained 6px of bottom padding as the shadow's room; without it the shadow would have been cut off flush at the bottom edge and only two of its three sides would have shown.
 - The bars scroll half again as fast, 34s a lap down to 22.6s. Both carry the same tape, so both changed together.
 
 ### Fixed

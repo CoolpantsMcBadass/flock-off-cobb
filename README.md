@@ -100,7 +100,10 @@ section below instead of pushing it, and the bar's 47px is all the room any of i
 The sheet drops rather than fades: held one sheet-height above and travelling down on the
 same duration and curve as the panel's height, so its bottom edge rides the growing edge
 and the poster reads as being lowered out of the bar. Nothing but the sheet descends, so
-there is no ground, padding or frame behind it.
+there is no ground or padding behind it: the sheet carries its own 3px ink outline and the
+site's hard offset shadow, the same framing as the hero art. `.ebar-poster` keeps 6px of
+bottom padding purely as the shadow's room, since the panel clips and takes its height
+from that box.
 
 `dev/ticker-bar.html` is the bench the affordances and the opening were chosen on, and is
 not part of the site.
