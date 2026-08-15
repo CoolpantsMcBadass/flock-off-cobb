@@ -94,6 +94,186 @@
     .nav-toggle{display:block;}
   }
 
+  /* ---------- EVENT BAR (dated events, directly under the nav) ----------
+     Sits under the sticky nav because that is the only place on the page that is high
+     on a phone: the hero art and the flyer fill the first screen, so the h1 is already
+     at 1.23 screens and everything after the hero is two swipes down. Here it is y=60
+     at every width. It scrolls away with the page rather than sticking, since a second
+     permanently pinned band would cost 44px of a 664px viewport forever.
+
+     Built for more than one event. The tape is generated from an EVENTS array and each
+     event is its own segment, so which poster opens depends on which segment the click
+     landed on. That is why the tape freezes on pointerdown: a click has to be able to
+     mean the thing that was under it, and a target moving at 30s a lap cannot be aimed
+     at fairly. Hover freezes it too on the desktop, which is also the affordance.
+
+     Two of these on the page, one under the nav and one below the hero where the slogan
+     ticker used to be. They are two instances rather than two copies: one set of events,
+     one clock, one set of rules, rendered into every `.ebar-live`. Adding a third is
+     adding a div. */
+  .ebar{
+    --ebar-h:44px;
+    background:var(--ink);color:var(--paper);
+    position:relative;
+  }
+  /* They hang off the nav and the flyer passes close to the upper one. */
+  .ebar-live{z-index:99;}
+  .ebar[hidden]{display:none;}
+  .ebar-btn{
+    display:flex;align-items:center;width:100%;height:var(--ebar-h);padding:0;
+    background:none;color:inherit;cursor:pointer;text-align:left;
+    font-family:"Space Mono",monospace;
+    /* The rule lives here rather than on .ebar so the panel, which hangs off the bottom
+       of .ebar at top:100%, starts below it: an absolutely positioned child resolves
+       top:100% against the padding box, so a border on .ebar would have put the poster
+       3px high and over its own rule. It has to be declared in the same rule that zeroes
+       the others, and after it, or `border:0` sets border-style:none and a style of none
+       computes every width to 0 no matter what a later rule asks for. */
+    border:0;border-bottom:3px solid var(--red);
+  }
+  /* The clip the tape runs inside. Everything that scrolls lives in here; the chevron
+     sits outside it so it never scrolls off. */
+  .ebar-clip{flex:1;min-width:0;overflow:hidden;height:100%;display:flex;align-items:center;}
+  /* Wrapped, because the opening flies the whole strip off to the left and a transition
+     cannot touch a property a running animation is already writing. The animation owns
+     the tape's transform; the wrapper's is free. */
+  .ebar-tape-wrap{
+    display:inline-flex;min-width:100%;
+    transition:transform .26s cubic-bezier(.5,0,.85,.3), opacity .26s ease-in;
+  }
+  .ebar-tape{display:inline-flex;white-space:nowrap;animation:ebarRun 34s linear infinite;}
+  @keyframes ebarRun{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  /* The type lives on the run so both variants get it; .ebar-ev only groups an event's
+     fields so a click can be hit-tested against them. */
+  .ebar-run{
+    display:inline-flex;align-items:center;
+    font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .ebar-ev{display:inline-flex;align-items:center;}
+  .ebar-cd{color:var(--yellow);font-weight:700;}
+  /* Says the strip opens, in the place the address used to sit. "Click" or "Tap"
+     depending on what the reader has, matching the flyer's hint. */
+  .ebar-hint{color:var(--yellow);font-weight:700;}
+  .ebar-hint .h-tap{display:none;}
+  @media(max-width:860px){
+    .ebar-hint .h-click{display:none;}
+    .ebar-hint .h-tap{display:inline;}
+  }
+  /* Within an event, a quiet middot. Between events, a yellow diamond, so a reader can
+     tell where one event stops and the next starts once there is more than one. */
+  .ebar-sep{color:#6d655c;margin:0 11px;}
+  .ebar-gap{color:var(--yellow);margin:0 20px;}
+
+  /* The affordance: a chevron that drifts down and back. It is the one signal that
+     needs no pointer, which matters because this bar exists for the phone. */
+  .ebar-chev{
+    flex:none;margin:0 16px 0 12px;font-size:.8rem;line-height:1;color:var(--yellow);
+    animation:ebarBreathe 2.4s ease-in-out infinite;
+    transition:transform .3s cubic-bezier(.22,.61,.36,1);
+  }
+  @keyframes ebarBreathe{0%,100%{transform:translateY(0);opacity:.75;}50%{transform:translateY(3px);opacity:1;}}
+  /* Open, it has arrived: stop breathing and point back up at the bar. */
+  .ebar.is-open .ebar-chev{animation:none;transform:rotate(180deg);opacity:1;}
+
+  /* What is left once the tape has run out. Also the whole payload under reduced
+     motion, where nothing scrolls and a clipped strip would hide most of the text. */
+  .ebar-title{
+    position:absolute;left:16px;right:52px;top:0;height:var(--ebar-h);
+    display:flex;align-items:center;gap:11px;
+    font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;
+    opacity:0;pointer-events:none;transition:opacity .2s ease-out;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .ebar.is-open .ebar-title{opacity:1;transition:opacity .22s ease-out .24s;}
+
+  /* Stopping under the cursor is both the usability fix and half the affordance: a
+     strip you can actually read, and one that reacts to you. The other half is the lift.
+     The site's buttons pop with translate(-2px,-2px) plus a hard offset shadow, which is
+     what the bench used, and it cannot work here: this bar is full bleed, so moving it
+     left shows the page down its right edge and an offset shadow has nowhere to fall. It
+     lifts straight up instead and the rule it was sitting on thickens and goes yellow,
+     which is the same gesture with the same palette.
+
+     `.ebar` decides the hover rather than the button, and everything that moves is
+     inside it or grows its box downward. That is deliberate: a hit region that shrinks
+     when it reacts flickers, because the strip the cursor is in stops being hovered the
+     instant it moves. This project has paid for that lesson once already on the flyer. */
+  .ebar-btn{transition:transform .1s ease, border-bottom-color .1s ease, border-bottom-width .1s ease;}
+  @media(hover:hover) and (min-width:861px){
+    .ebar-live:not(.is-open):hover .ebar-tape{animation-play-state:paused;}
+    .ebar-live:not(.is-open):hover .ebar-btn{
+      transform:translateY(-2px);border-bottom-width:6px;border-bottom-color:var(--yellow);
+    }
+    .ebar-live:not(.is-open):hover .ebar-chev{opacity:1;}
+  }
+  /* Any pointer at all, including a finger, freezes it: the click that follows has to
+     be able to mean whichever event was under it. */
+  .ebar.is-frozen .ebar-tape{animation-play-state:paused;}
+  .ebar-btn:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px;}
+
+  /* The tape runs out: the strip accelerates off to the left as though the reel ended,
+     and what was behind it is the poster. */
+  .ebar.is-open .ebar-tape-wrap{transform:translateX(-165%);opacity:0;}
+
+  /* The panel hangs off the bottom of the bar rather than sitting in the flow, so the
+     poster comes down over the section below instead of shoving it out of the way. The
+     bar's own 47px stays the only room any of this takes in the layout.
+     Nothing but the poster descends: no ground, no padding, no frame. What covers the
+     page is the flyer, not a black box holding a flyer. */
+  .ebar-panel{
+    position:absolute;left:0;right:0;top:100%;
+    height:0;overflow:hidden;
+    transition:height .5s cubic-bezier(.22,.61,.36,1);
+  }
+  .ebar-poster{display:flex;justify-content:center;}
+  /* The sheet is what the links are pinned to, so they ride the poster at any width.
+     It drops rather than fades: held one full sheet-height above at rest and travelling
+     down to nothing on the same clock as the panel's height. Both run the same duration
+     and curve, so the sheet's bottom edge sits exactly on the panel's growing edge the
+     whole way and it reads as being lowered out of the bar rather than uncovered in
+     place. A fade was what it did before, and a poster has no business being
+     translucent. */
+  .ebar-sheet{
+    position:relative;width:min(420px,92vw);
+    transform:translateY(-100%);
+    transition:transform .5s cubic-bezier(.22,.61,.36,1);
+  }
+  .ebar.is-open .ebar-sheet{transform:translateY(0);}
+  .ebar-sheet img{display:block;width:100%;height:auto;}
+  /* On the flyer rather than under it, and parked by `linksAt` on the strip of artwork
+     that already prints the same URLs, so the clickable version covers nothing the
+     reader loses. Pinned to the bottom by default; every poster puts its own furniture
+     in a different place, so the offset is per event rather than a constant here.
+     Sitting on the poster's own band means no scrim is needed to hold them. */
+  .ebar-links{
+    position:absolute;left:0;right:0;bottom:var(--links-at,0);
+    display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;
+    padding:4px 6px;background:var(--ink);
+  }
+  .ebar-links a{
+    font-family:"Space Mono",monospace;font-size:.55rem;letter-spacing:.06em;
+    text-transform:uppercase;text-decoration:none;padding:4px 8px;
+    border:1px solid var(--paper);color:var(--paper);
+  }
+  .ebar-links a:hover{background:var(--yellow);color:var(--ink);border-color:var(--yellow);}
+  .ebar-links a.go{background:var(--red);border-color:var(--red);}
+
+  @media(max-width:520px){
+    .ebar-ev{font-size:.68rem;letter-spacing:.1em;}
+    .ebar-title{font-size:.66rem;left:13px;right:46px;}
+    .ebar-chev{margin:0 13px 0 9px;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .ebar-tape{animation:none;}
+    /* Nothing scrolls, so a clipped strip would show only its first few words and hide
+       the event. The static title is the payload instead, and it is already built. */
+    .ebar-clip{display:none;}
+    .ebar-title{position:static;opacity:1;flex:1;height:auto;transition:none;}
+    .ebar-chev{animation:none;transition:none;}
+    .ebar-panel,.ebar-sheet,.ebar-tape-wrap{transition:none;}
+    .ebar-sheet{transform:none;}
+  }
+
   /* ---------- HERO ---------- */
   .hero{
     position:relative;max-width:1200px;margin:0 auto;padding:54px 20px 30px;
@@ -624,12 +804,8 @@
     .flyer-hint .tap{display:inline;}
   }
 
-  /* ---------- TICKER ---------- */
-  .ticker{background:var(--ink);color:var(--paper);overflow:hidden;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);white-space:nowrap;}
-  .ticker .track{display:inline-block;padding:12px 0;animation:scroll 32s linear infinite;}
-  .ticker span{font-family:"Space Mono",monospace;text-transform:uppercase;letter-spacing:.14em;font-size:.78rem;}
-  .ticker .x{color:var(--red);margin:0 18px;}
-  @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  /* The slogan ticker used to have its own rules here. Its place below the hero is now
+     the second event bar; see the EVENT BAR block above. */
 
   /* ---------- MAP ---------- */
   .map-frame{border:5px solid var(--ink);box-shadow:var(--shadow);background:#e9e4d8;line-height:0;}
@@ -796,7 +972,7 @@
   .reveal.in{opacity:1;transform:none;}
   @media(prefers-reduced-motion:reduce){
     .reveal{opacity:1;transform:none;transition:none;}
-    .ticker .track,.brand .dot{animation:none;}
+    .brand .dot{animation:none;}
     .social-float{animation:none;}
     html{scroll-behavior:auto;}
   }
@@ -857,6 +1033,12 @@
     </nav>
   </div>
 </header>
+
+<!-- Dated events, directly under the nav. Built and filled by the event bar IIFE at the
+     foot of the page from its EVENTS array, and unhidden only if something in it is
+     still to come. Empty here on purpose: with no script the bar never appears rather
+     than appearing empty. -->
+<div class="ebar ebar-live" hidden></div>
 
 <a id="top"></a>
 <div class="hero viewfinder reveal">
@@ -955,12 +1137,10 @@
   </div>
 </div>
 
-<div class="ticker" aria-hidden="true">
-  <div class="track">
-    <span>No warrant&nbsp;<span class="x">✕</span>&nbsp;No oversight&nbsp;<span class="x">✕</span>&nbsp;No consent&nbsp;<span class="x">✕</span>&nbsp;Shared with ICE&nbsp;<span class="x">✕</span>&nbsp;Hackable in under a minute&nbsp;<span class="x">✕</span>&nbsp;Logins found on the dark web&nbsp;<span class="x">✕</span>&nbsp;</span>
-    <span>No warrant&nbsp;<span class="x">✕</span>&nbsp;No oversight&nbsp;<span class="x">✕</span>&nbsp;No consent&nbsp;<span class="x">✕</span>&nbsp;Shared with ICE&nbsp;<span class="x">✕</span>&nbsp;Hackable in under a minute&nbsp;<span class="x">✕</span>&nbsp;Logins found on the dark web&nbsp;<span class="x">✕</span>&nbsp;</span>
-  </div>
-</div>
+<!-- The second event bar, in the slogan ticker's old place. Same events, same behaviour,
+     filled by the same IIFE: a second chance to catch what is coming up, for a reader who
+     started reading rather than clicking the first one. -->
+<div class="ebar ebar-live" hidden></div>
 
 <!-- THE CASE -->
 <section id="case" class="reveal">
@@ -1920,6 +2100,294 @@
     });
   })();
 
+  // ---- Event bars: dated events, one under the nav and one below the hero ----
+  // Everything here is driven by EVENTS. To add an event, add an entry; to retire one,
+  // do nothing and let its `linger` run out. The bars hide themselves when the array has
+  // nothing left, so the page goes back to normal without anyone editing it.
+  //
+  // There are two of them, and they are two instances rather than two copies: one set of
+  // events, one clock, one set of rules, rendered into every `.ebar-live` on the page.
+  // Adding a third is adding a div. They open and close independently on purpose, since
+  // the one you clicked is the one you were looking at.
+  (function(){
+    const bars = Array.prototype.slice.call(document.querySelectorAll('.ebar-live'));
+    if(!bars.length) return;
+
+    const TZ = 'America/New_York';
+    // UTC instant for an Eastern wall-clock time (DST-correct). Same helper as the
+    // council countdowns above; the two must not disagree about what day it is.
+    function zoned(y, mo, da, h, mi){
+      const guess = Date.UTC(y, mo, da, h, mi), inv = new Date(guess);
+      const et  = new Date(inv.toLocaleString('en-US',{timeZone:TZ}));
+      const utc = new Date(inv.toLocaleString('en-US',{timeZone:'UTC'}));
+      return guess - (et.getTime() - utc.getTime());
+    }
+
+    const EVENTS = [
+      {
+        id:'live-info-session',
+        name:'Live Info Session',
+        date:'Tue Aug 18',
+        time:'6–10 PM',
+        where:'45 South Ave SE, Marietta',
+        start:[2026, 7, 18, 18, 0],
+        end:  [2026, 7, 18, 22, 0],
+        // Hours the bars keep carrying it after it is over, for anyone who turns up
+        // late that night. Retires at 4 AM ET on the 19th.
+        linger:6,
+        poster:'assets/live-info-session.jpg',
+        w:1429, h:2000,
+        alt:'DeFlock Cobb Live Info Session, August 18 2026, 6:00 pm to 10:00 pm, at 45 South Ave SE, Marietta, Georgia 30060. Explore the rapid expansion of AI-powered surveillance, ALPRs, and the growing impact these technologies have on privacy and civil liberties. Speakers: guest speaker Dr. Jon Padfield of YouTube channel BusinessReform, a special message from Will Freeman, DeFlock founder, and a guest question and answer session with Benn Jordan of YouTube channel BennJordan. Register via Eventbrite. More at noalprs.com and deflockatlanta.org.',
+        // The poster says REGISTER NOW but the Eventbrite link is not in hand yet. These
+        // two are the sites printed on the flyer itself. Add the registration URL as a
+        // third entry with primary:true and it becomes the red button.
+        // Where the clickable links sit on the sheet, measured from its bottom edge.
+        // This poster prints noalprs.com and deflockatlanta.org in a yellow band at 11%,
+        // so the buttons land on top of the very links they are, and the venue address
+        // in the band below stays readable. Re-measure for a different flyer, or drop it
+        // and they pin to the bottom edge.
+        linksAt:'11%',
+        links:[
+          {label:'noalprs.com', href:'https://noalprs.com'},
+          {label:'deflockatlanta.org', href:'https://deflockatlanta.org'}
+        ]
+      }
+    ];
+    // When it ends and when the bars stop carrying it are two different instants, and
+    // conflating them is how an event that finished at 10 reads "Happening now" at 2am.
+    EVENTS.forEach(e => {
+      e._start = zoned.apply(null, e.start);
+      e._end   = zoned.apply(null, e.end);
+      e._gone  = e._end + (e.linger || 0) * 36e5;
+    });
+
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    // Whole Eastern calendar days, not 24-hour chunks, so the day before reads
+    // "Tomorrow" all evening rather than flipping to "Today" at some arbitrary hour.
+    function etDayIndex(ms){
+      const p = new Intl.DateTimeFormat('en-US',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(ms));
+      const g = t => +p.find(x => x.type === t).value;
+      return Math.floor(Date.UTC(g('year'), g('month') - 1, g('day')) / 864e5);
+    }
+    function countdown(ev, now){
+      if(now >= ev._end)   return 'Just happened';
+      if(now >= ev._start) return 'Happening now';
+      const n = etDayIndex(ev._start) - etDayIndex(now);
+      if(n <= 0) return 'Today';
+      if(n === 1) return 'Tomorrow';
+      return 'In ' + n + ' days';
+    }
+
+    const live = () => EVENTS.filter(e => Date.now() < e._gone);
+    let list = live();
+    if(!list.length) return;
+
+    /* One event is one segment, and the segment is what a click resolves against. */
+    function evHTML(ev){
+      return '<span class="ebar-ev" data-ev="' + esc(ev.id) + '">' +
+        '<span class="ebar-cd" data-cd="' + esc(ev.id) + '"></span>' +
+        '<span class="ebar-sep">&middot;</span>' + esc(ev.name) +
+        '<span class="ebar-sep">&middot;</span>' + esc(ev.date) + ', ' + esc(ev.time) +
+        // The address is on the poster and in its alt text; what the strip needs in that
+        // space is to say it can be opened. Wording swaps with the pointer, the way the
+        // flyer's hint does.
+        '<span class="ebar-sep">&middot;</span>' +
+        '<span class="ebar-hint"><span class="h-click">Click for info</span>' +
+        '<span class="h-tap">Tap for info</span></span>' +
+      '</span>';
+    }
+    // The trailing diamond separates the last event from the first one coming round again.
+    const runHTML = () => list.map(evHTML).join('<span class="ebar-gap">&#9670;</span>') +
+                          '<span class="ebar-gap">&#9670;</span>';
+
+    // Countdowns are painted across every bar at once, so the two can never disagree
+    // about how far away the same event is.
+    function paintCountdowns(){
+      const now = Date.now();
+      list.forEach(ev => {
+        const text = countdown(ev, now);
+        document.querySelectorAll('[data-cd="' + ev.id + '"]').forEach(el => { el.textContent = text; });
+      });
+    }
+
+    function setup(bar, idx){
+      const panelId = 'ebarPanel' + idx;
+      let current = null;
+
+      const btn   = () => bar.querySelector('.ebar-btn');
+      const panel = () => bar.querySelector('.ebar-panel');
+      const clip  = () => bar.querySelector('.ebar-clip');
+
+      /* What is left once the tape has run out, and under reduced motion the payload
+         itself, since nothing scrolls there and a clipped strip would show only its
+         first few words. Written at build time for that reason, not on open. Its
+         countdown carries the same data-cd as the tape's, so one pass keeps both. */
+      function renderTitle(ev){
+        bar.querySelector('.ebar-title').innerHTML =
+          '<b>' + esc(ev.name) + '</b><span class="ebar-sep">&middot;</span>' +
+          esc(ev.date) + ', ' + esc(ev.time) +
+          '<span class="ebar-sep">&middot;</span>' +
+          '<span class="ebar-cd" data-cd="' + esc(ev.id) + '"></span>';
+      }
+
+      function build(){
+        const run = runHTML();
+        bar.innerHTML =
+          '<button type="button" class="ebar-btn" aria-expanded="false" aria-controls="' + panelId + '">' +
+            '<span class="ebar-clip"><span class="ebar-tape-wrap"><span class="ebar-tape">' +
+              '<span class="ebar-run">' + run + '</span>' +
+              // The second run only exists to make the loop seamless; a screen reader
+              // should not hear the whole thing twice.
+              '<span class="ebar-run" aria-hidden="true">' + run + '</span>' +
+            '</span></span></span>' +
+            '<span class="ebar-title"></span>' +
+            '<span class="ebar-chev" aria-hidden="true">&#9660;</span>' +
+          '</button>' +
+          '<div class="ebar-panel" id="' + panelId + '"></div>';
+        bar.classList.remove('is-open', 'is-frozen');
+        current = null;
+        renderTitle(list[0]);
+        bar.hidden = false;
+      }
+
+      /* Which event did that click mean? A segment under the pointer wins outright. If
+         the click landed in a gap between segments, the one with the most of itself on
+         screen does. With one event this always answers the same way; with several it is
+         what makes the moment of the click the thing that chooses, which is why the tape
+         stops dead on pointerdown rather than carrying on under the finger. */
+      const byId = id => list.find(e => e.id === id) || list[0];
+      function eventAt(clientX){
+        const segs = bar.querySelectorAll('.ebar-ev');
+        const box = clip().getBoundingClientRect();
+        let best = null, bestSeen = -Infinity;
+        for(const seg of segs){
+          const r = seg.getBoundingClientRect();
+          if(clientX >= r.left && clientX <= r.right) return byId(seg.dataset.ev);
+          const seen = Math.min(r.right, box.right) - Math.max(r.left, box.left);
+          if(seen > bestSeen){ bestSeen = seen; best = seg; }
+        }
+        return best ? byId(best.dataset.ev) : list[0];
+      }
+
+      function fill(ev){
+        const links = (ev.links || []).map(l =>
+          '<a href="' + esc(l.href) + '" target="_blank" rel="noopener"' +
+          (l.primary ? ' class="go"' : '') + '>' + esc(l.label) + '</a>').join('');
+        panel().innerHTML =
+          '<div class="ebar-poster"><div class="ebar-sheet"' +
+            (ev.linksAt ? ' style="--links-at:' + esc(ev.linksAt) + '"' : '') + '>' +
+            '<img src="' + esc(ev.poster) + '" width="' + ev.w +
+              '" height="' + ev.h + '" alt="' + esc(ev.alt) + '">' +
+            (links ? '<div class="ebar-links">' + links + '</div>' : '') +
+          '</div></div>';
+        renderTitle(ev);
+        paintCountdowns();
+        // The intrinsic ratio comes off the width/height attributes, so the panel can be
+        // measured before the JPEG has arrived. Re-measure when it does, in case a
+        // fallback or a cache miss changes it.
+        const img = panel().querySelector('img');
+        img.addEventListener('load', () => { if(bar.classList.contains('is-open')) size(); }, {once:true});
+      }
+      function size(){ panel().style.height = panel().scrollHeight + 'px'; }
+
+      /* The poster is taller than a phone's viewport and the lower bar is mid-page, so
+         bring it into view rather than leaving the reader to guess that something
+         happened off screen. It hangs off the bar rather than sitting in the flow, so
+         what has to fit is the bar's own box plus the panel below it; the bar's rect
+         alone is 47px and would always look like it fits. */
+      function bringIntoView(){
+        const box = bar.getBoundingClientRect();
+        const nav = document.querySelector('header.nav');
+        const navH = nav ? nav.getBoundingClientRect().height : 0;
+        if(box.top >= navH && box.bottom + panel().scrollHeight <= window.innerHeight) return;
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({
+          top: Math.max(0, box.top + window.scrollY - navH),
+          behavior: reduce ? 'auto' : 'smooth'
+        });
+      }
+
+      function open(ev){
+        current = ev;
+        fill(ev);
+        size();                                  // also flushes layout, so the fades run
+        bar.classList.add('is-open');
+        btn().setAttribute('aria-expanded', 'true');
+        requestAnimationFrame(bringIntoView);
+      }
+      function close(){
+        panel().style.height = '0px';
+        bar.classList.remove('is-open', 'is-frozen');
+        btn().setAttribute('aria-expanded', 'false');
+        current = null;
+      }
+
+      // Bound to the container rather than the button, so a rebuild does not lose them.
+      bar.addEventListener('pointerdown', () => {
+        if(!bar.classList.contains('is-open')) bar.classList.add('is-frozen');
+      });
+      // A touch that turns into a page scroll cancels rather than clicking, and the tape
+      // should not be left stopped for it.
+      bar.addEventListener('pointercancel', () => bar.classList.remove('is-frozen'));
+      bar.addEventListener('pointerleave',  () => {
+        if(!bar.classList.contains('is-open')) bar.classList.remove('is-frozen');
+      });
+      bar.addEventListener('click', e => {
+        if(e.target.closest('.ebar-links a')) return;   // let the links be links
+        // Open, anything closes it, the poster included. Opening scrolls the bar into
+        // view, which slides the strip out from under the pointer and leaves it over the
+        // poster, so a second click landing there has to mean the obvious thing. There is
+        // nothing else it could mean: the tape has run out by then, so there is no other
+        // event on screen to be choosing between.
+        if(bar.classList.contains('is-open')){ close(); return; }
+        if(!e.target.closest('.ebar-btn')) return;
+        open(eventAt(e.clientX));
+      });
+
+      build();
+      return {
+        el: bar,
+        build: build,
+        close: close,
+        focus: () => btn().focus(),
+        resize: () => { if(bar.classList.contains('is-open')) size(); },
+        isOpen: () => bar.classList.contains('is-open')
+      };
+    }
+
+    const instances = bars.map(setup);
+    paintCountdowns();
+
+    /* The poster covers the section under it now, so a click anywhere else has to put it
+       away. Clicks inside a bar are its own handler's business, and a click on the other
+       bar opens that one while this closes, which is the right outcome either way. */
+    document.addEventListener('click', e => {
+      instances.forEach(inst => {
+        if(inst.isOpen() && !inst.el.contains(e.target)) inst.close();
+      });
+    });
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'Escape') return;
+      instances.forEach(inst => {
+        if(inst.isOpen()){ inst.close(); inst.focus(); }
+      });
+    });
+    addEventListener('resize', () => instances.forEach(inst => inst.resize()));
+
+    /* Days-only means the text changes at most once a day, but the bars have to notice
+       an event starting, and ending, on a page that was left open. Half a minute is
+       cheap and catches both. */
+    setInterval(() => {
+      const next = live();
+      if(next.length !== list.length){
+        list = next;
+        if(!list.length){ instances.forEach(inst => { inst.el.hidden = true; }); return; }
+        instances.forEach(inst => inst.build());
+      }
+      paintCountdowns();
+    }, 30000);
+  })();
   // ---- Week of Action flyer: unroll on tap, and retire itself once the week is over ----
   (function(){
     const flyer = document.getElementById('weekFlyer');

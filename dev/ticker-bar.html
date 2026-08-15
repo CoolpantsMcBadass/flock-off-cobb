@@ -1,0 +1,569 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Ticker bar — affordances and openings</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+<!--
+  Not part of the site. A bench for the dated-event bar that would sit directly under the
+  sticky nav, which is the only place on the page that is high on a phone: measured in
+  WebKit at iPhone 13 size, the hero art and the flyer fill the whole first screen, the
+  h1 lands at 1.23 screens and the existing ticker at 1.96, so anything after the hero is
+  two swipes down. Under the nav is y=60 at every width.
+
+  Two questions here, and they are separate.
+
+  SECTION A asks how a bar says "click me" with no label. The bars are closed and static
+  so they can be compared at a glance. Each one is tagged with whether it survives on
+  touch, because the honest answer for half of them is no: hover does not exist on the
+  phone this whole idea is for, and this project has already paid twice for forgetting
+  that (see the :hover and :focus-visible notes in the README).
+
+  SECTION B asks how it opens. Three treatments on a mock page with a nav above and a
+  hero below, so the thing you are judging includes what happens to the rest of the page.
+  The push/overlay control is the decision underneath all three.
+
+  What is real: the countdown (DST-correct Eastern, same zoned() helper the council
+  countdowns use), the marquee, the palette, the poster artwork and its aspect ratio.
+  What is mock: the nav and hero are grey blocks, and the copy is placeholder. The
+  poster standing in is the Week of Action sheet, since the second event's art does not
+  exist yet; only its 1080x1350 proportion matters to the animation.
+
+  The fast-clock control exists because of a hole in my own argument for the countdown.
+  A number that visibly ticks is a good reason to look at a bar, but an event three weeks
+  out only changes its minutes field once a minute, so it is not visibly anything. Run
+  the clock at 3600x and you can see what the bar actually does over a day.
+-->
+<style>
+  :root{
+    --paper:#f1ece0; --paper-2:#e7e0cf; --ink:#161311; --ink-soft:#3a342f;
+    --red:#d6233a; --yellow:#f5c518; --teal:#1f6f8b; --shadow:6px 6px 0 var(--ink);
+    /* One clock and one curve, the way the flyer's unroll runs. */
+    --dur:.5s; --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  body.slow{--dur:2.2s;}
+  *{box-sizing:border-box;}
+  body{
+    margin:0;padding:26px 22px 70px;background:var(--paper);color:var(--ink);
+    font-family:"Spectral",Georgia,serif;
+    background-image:radial-gradient(var(--paper-2) 1px,transparent 1px);
+    background-size:14px 14px;
+  }
+  h1{font-family:"Anton",Impact,sans-serif;font-size:1.5rem;letter-spacing:.02em;margin:0 0 4px;text-transform:uppercase;}
+  h2.sec{font-family:"Anton",Impact,sans-serif;font-size:1.15rem;text-transform:uppercase;letter-spacing:.02em;
+         margin:34px 0 4px;padding-top:14px;border-top:3px solid var(--ink);}
+  .lede{font-size:.9rem;color:var(--ink-soft);margin:0 0 18px;max-width:78ch;line-height:1.5;}
+  .mono{font-family:"Space Mono",monospace;text-transform:uppercase;letter-spacing:.12em;font-size:.7rem;}
+
+  /* ---------- controls ---------- */
+  .bar-ctl{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 8px;
+    padding:12px;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);
+    position:sticky;top:8px;z-index:60;
+  }
+  /* Narrow, the controls wrap to three rows and stick over the top of the mock, hiding
+     the nav and the bar, which are the two things being looked at. Let them scroll. */
+  @media(max-width:900px){ .bar-ctl{position:static;} }
+  button.ctl{
+    font-family:"Space Mono",monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);border:2px solid var(--ink);padding:9px 13px;cursor:pointer;
+  }
+  button.ctl[aria-pressed="false"]{background:var(--paper);color:var(--ink);}
+  button.ctl:hover{background:var(--yellow);color:var(--ink);}
+  .ctl-group{display:flex;align-items:center;gap:7px;}
+  .ctl-group > span.mono{color:var(--ink-soft);}
+  input[type="datetime-local"]{
+    font-family:"Space Mono",monospace;font-size:.7rem;padding:7px 8px;
+    border:2px solid var(--ink);background:var(--paper);color:var(--ink);
+  }
+
+  /* ============================================================
+     THE BAR ITSELF
+     Shared by every variant below. Ink ground so it reads as part of the nav
+     stack rather than as page content, 44px tall, full bleed.
+     ============================================================ */
+  .tbar{
+    position:relative;display:block;width:100%;height:44px;padding:0;
+    background:var(--ink);color:var(--paper);border:0;border-bottom:3px solid var(--red);
+    overflow:hidden;cursor:pointer;text-align:left;
+    font-family:"Space Mono",monospace;
+    transition:transform .1s ease, box-shadow .1s ease;
+  }
+  /* The clipped strip and the things that never scroll live side by side. */
+  .tbar-in{display:flex;align-items:center;height:100%;gap:0;}
+  .tb-dot{
+    flex:none;width:11px;height:11px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 0 3px var(--paper);margin:0 13px 0 15px;
+  }
+  /* The fixed segment: the payload that must never scroll out of sight. */
+  .tb-fixed{
+    flex:none;display:flex;align-items:center;gap:9px;padding-right:14px;margin-right:14px;
+    border-right:2px solid #3a342f;
+    font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);
+    white-space:nowrap;
+  }
+  .tb-scroll{flex:1;overflow:hidden;position:relative;height:100%;display:flex;align-items:center;}
+  /* The marquee is wrapped because one of the openings below flies the whole strip off
+     to the left, and a transition cannot touch a property an animation is already
+     writing. The animation owns the tape's transform; the wrapper's is free. */
+  .tape-wrap{display:inline-flex;}
+  .tape{display:inline-flex;white-space:nowrap;animation:tapeRun 30s linear infinite;}
+  .tape .run{
+    font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;padding-right:0;
+  }
+  .tape .x{color:var(--red);margin:0 16px;}
+  .tape .cd{color:var(--yellow);font-weight:700;}
+  @keyframes tapeRun{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  /* Payload mode: everything in the tape, nothing pinned. */
+  body.payload-all .tb-fixed{display:none;}
+  body.payload-split .tape .cd-inline{display:none;}
+
+  /* ---- the peeking corner: a sliver of the sheet tucked under the bar ----
+     Static, so it is one of the few signals that works with no pointer and no
+     motion. It sits at the right end, poking below the bar's bottom edge. */
+  .tb-peek{
+    position:absolute;right:16px;bottom:-9px;width:44px;height:16px;
+    background:var(--yellow);border:2px solid var(--ink);border-bottom:0;
+    transform:rotate(-2.5deg);transform-origin:50% 100%;
+    transition:transform var(--dur) var(--ease), bottom var(--dur) var(--ease);
+  }
+  .tb-peek::after{
+    content:"";position:absolute;left:6px;right:6px;top:4px;height:2px;background:rgba(0,0,0,.22);
+  }
+  /* The bar has to stop clipping for the corner to show below it. */
+  .tbar.has-peek{overflow:visible;}
+  .tbar.has-peek .tb-scroll{overflow:hidden;}
+
+  /* ---- the breathing chevron ---- */
+  .tb-chev{
+    flex:none;margin:0 15px 0 12px;font-size:.8rem;color:var(--yellow);
+    animation:chevBreathe 2.4s ease-in-out infinite;
+  }
+  @keyframes chevBreathe{0%,100%{transform:translateY(0);opacity:.75;}50%{transform:translateY(3px);opacity:1;}}
+
+  /* ---- the blinking REC dot, borrowed from .brand .dot on the site ---- */
+  .tb-dot.blink{animation:dotBlink 1.4s steps(1) infinite;}
+  @keyframes dotBlink{50%{background:var(--ink);box-shadow:0 0 0 3px var(--red);}}
+
+  /* ---- the arrival nudge: once, a beat after load, never again ----
+     The site's habit is that things land rather than being there. One motion is
+     self-explanatory and cannot become wallpaper the way a loop does. */
+  .nudge .tb-peek{animation:peekNudge 1.1s var(--ease) .9s 1 both;}
+  @keyframes peekNudge{
+    0%{transform:rotate(-2.5deg) translateY(0);}
+    38%{transform:rotate(-2.5deg) translateY(9px);}
+    100%{transform:rotate(-2.5deg) translateY(0);}
+  }
+
+  /* ---- hover: pause the tape and lift the bar ----
+     Behind the hover guard, and that is not decoration. iOS keeps :hover stuck on
+     whatever was tapped last, which is how the flyer shipped broken in August. Any
+     rule keyed on :hover in this project belongs behind this query. */
+  @media(hover:hover) and (min-width:861px){
+    .tbar.aff-hover:hover{transform:translate(-2px,-2px);box-shadow:var(--shadow);}
+    .tbar.aff-hover:hover .tape{animation-play-state:paused;}
+    .tbar.has-peek:hover .tb-peek{bottom:-15px;}
+  }
+  .tbar:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px;}
+
+  /* ---------- section A layout ---------- */
+  .affs{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;max-width:1180px;}
+  .aff{background:var(--paper-2);border:3px solid var(--ink);padding:13px 13px 16px;}
+  .aff h3{font-family:"Anton",Impact,sans-serif;font-size:1rem;margin:0 0 3px;text-transform:uppercase;letter-spacing:.02em;}
+  .aff p{font-size:.79rem;color:var(--ink-soft);margin:0 0 11px;line-height:1.45;min-height:4.3em;}
+  .aff .holder{background:var(--paper);border:2px solid var(--ink);padding:16px 0 22px;}
+  .tag{
+    display:inline-block;font-family:"Space Mono",monospace;font-size:.6rem;letter-spacing:.1em;
+    text-transform:uppercase;padding:3px 7px;border:2px solid var(--ink);margin:11px 6px 0 0;
+  }
+  .tag.touch{background:var(--teal);color:var(--paper);border-color:var(--teal);}
+  .tag.ptr{background:var(--paper);color:var(--ink-soft);}
+  .tag.pick{background:var(--yellow);color:var(--ink);}
+
+  /* ============================================================
+     SECTION B: the openings, on a mock page
+     ============================================================ */
+  .mocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px;max-width:1180px;}
+  body.narrow .mocks{grid-template-columns:repeat(auto-fit,390px);}
+  .mockcell h3{font-family:"Anton",Impact,sans-serif;font-size:1rem;margin:0 0 3px;text-transform:uppercase;letter-spacing:.02em;}
+  .mockcell p{font-size:.79rem;color:var(--ink-soft);margin:0 0 11px;line-height:1.45;min-height:5.7em;}
+
+  .mock{
+    position:relative;height:580px;overflow:hidden;
+    border:3px solid var(--ink);background:var(--paper);box-shadow:var(--shadow);
+    background-image:radial-gradient(var(--paper-2) 1px,transparent 1px);background-size:14px 14px;
+  }
+  /* the sticky nav the bar hangs off */
+  .m-nav{
+    height:60px;background:var(--ink);color:var(--paper);display:flex;align-items:center;
+    padding:0 15px;gap:9px;position:relative;z-index:20;
+  }
+  .m-nav .d{width:11px;height:11px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px var(--paper);}
+  .m-nav b{font-family:"Anton",Impact,sans-serif;font-size:1.05rem;letter-spacing:.02em;}
+  .m-nav .mn{margin-left:auto;font-family:"Space Mono",monospace;font-size:.6rem;letter-spacing:.1em;
+             background:var(--red);padding:6px 9px;}
+
+  /* The corner pokes below the bar, so the bar has to sit above everything the corner
+     overhangs. Without this it is painted under the hero and the panel, both of which
+     carry a z-index, and the signal the whole section is about is simply invisible.
+     Above the panel (15), below the nav (20), which stays on top of everything. */
+  .mock .tbar{z-index:18;}
+  /* Open, the corner has nothing left to advertise, and it would otherwise sit over
+     the poster it just delivered. */
+  .mock.is-open .tb-peek{opacity:0;transition:opacity .14s ease-out;}
+
+  /* the panel the poster comes out of */
+  .m-panel{
+    height:0;overflow:hidden;background:var(--ink);position:relative;z-index:15;
+    transition:height var(--dur) var(--ease);
+  }
+  body.overlay .m-panel{position:absolute;left:0;right:0;top:104px;}
+  .m-poster{padding:10px;background:var(--ink);}
+  .m-poster img{
+    display:block;width:100%;height:auto;aspect-ratio:1080/1350;
+    border:3px solid var(--paper);background:var(--paper-2);
+  }
+  .m-scrim{
+    position:absolute;inset:104px 0 0 0;background:rgba(22,19,17,.55);opacity:0;pointer-events:none;
+    transition:opacity var(--dur) var(--ease);z-index:10;
+  }
+  body.overlay .mock.is-open .m-scrim{opacity:1;}
+
+  /* the hero below, so push vs overlay is visible */
+  .m-hero{padding:16px 15px 0;position:relative;z-index:1;}
+  .m-hero .art{height:150px;background:var(--paper-2);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);}
+  .m-hero .h1{font-family:"Anton",Impact,sans-serif;font-size:2.5rem;line-height:.94;margin:15px 0 0;text-transform:uppercase;}
+  .m-hero .h1 .r{color:var(--red);-webkit-text-stroke:1.5px var(--ink);display:block;}
+  .m-hero .sub{font-size:.88rem;margin:9px 0 13px;color:var(--ink-soft);}
+  .m-hero .btns{display:flex;gap:9px;}
+  .m-hero .btns i{
+    font-style:normal;font-family:"Space Mono",monospace;font-size:.6rem;letter-spacing:.1em;
+    text-transform:uppercase;padding:10px 13px;border:3px solid var(--ink);
+  }
+  .m-hero .btns i:first-child{background:var(--red);color:var(--paper);}
+
+  /* ---- opening 1: roller shade ----
+     The bar is the roller and the sheet is pulled down out of it. The hem is what
+     sells it as material rather than as a wipe: a lip that rides the bottom edge
+     of the growing panel with a shadow under it, and the poster drifting down a
+     few percent behind it so it reads as being drawn out. */
+  .m-hem{
+    position:absolute;left:0;right:0;bottom:0;height:7px;background:var(--paper-2);
+    border-top:2px solid var(--ink);box-shadow:0 5px 9px rgba(22,19,17,.45);
+  }
+  .shade .m-poster{transform:translateY(-7%);transition:transform var(--dur) var(--ease);}
+  .shade.is-open .m-poster{transform:translateY(0);}
+
+  /* ---- opening 2: the tape runs out ----
+     The scroll accelerates off to the left as though the reel ended, and what was
+     behind it is the poster. Uses the bar's own motion as the transition. */
+  .tapeout .tape-wrap{transition:transform .26s cubic-bezier(.5,0,.85,.3), opacity .26s ease-in;}
+  .tapeout.is-open .tape-wrap{transform:translateX(-165%);opacity:0;}
+  .tapeout.is-open .tape{animation-play-state:paused;}
+  .tapeout.is-open .tb-fixed{opacity:0;transition:opacity .18s ease-in;}
+  .tapeout .tb-fixed{transition:opacity .2s ease-out .25s;}
+  .tapeout .m-poster{opacity:.35;transition:opacity var(--dur) var(--ease);}
+  .tapeout.is-open .m-poster{opacity:1;}
+
+  /* ---- opening 3: the bar splits ----
+     The bar's bottom edge detaches and carries the red rule down with it, and the
+     poster is revealed in the gap. Nothing about the poster moves: it was always
+     there, the bar just opened. More mechanical, more printing press.
+     The lip is the bar's own red rule and nothing else: the panel's ground is already
+     ink, so a 3px red strip pinned to its bottom edge is indistinguishable from the
+     bar's border travelling downward. Giving it any height of its own would leave a
+     window at the start of the open where the panel is shorter than the lip and the
+     red has not appeared yet. */
+  .m-lip{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--red);}
+  /* Closed, the bar draws its own rule. Open, the lip has taken it over. */
+  .split.is-open .tbar{border-bottom-color:transparent;}
+
+  .foot{margin-top:38px;font-size:.8rem;color:var(--ink-soft);max-width:78ch;line-height:1.5;}
+  code{font-family:"Space Mono",monospace;font-size:.86em;background:var(--paper-2);padding:1px 4px;}
+
+  @media(prefers-reduced-motion:reduce){
+    .tape,.tb-dot.blink,.tb-chev{animation:none;}
+  }
+  /* The simulated version of the same, so it can be checked without OS settings. */
+  body.rm .tape,body.rm .tb-dot.blink,body.rm .tb-chev,body.rm .nudge .tb-peek{animation:none;}
+  body.rm .m-panel,body.rm .m-poster,body.rm .tape,body.rm .m-scrim{transition:none;}
+</style>
+
+<h1>Ticker bar: affordances and openings</h1>
+<p class="lede">
+  The dated-event bar that would sit directly under the sticky nav, which is the only
+  spot that is high on a phone. Section A is about how a bar says "click me" with no
+  label. Section B is about how it opens, and what happens to the page when it does.
+  Not part of the site. Placeholder copy, real countdown.
+</p>
+
+<div class="bar-ctl">
+  <div class="ctl-group">
+    <span class="mono">Event</span>
+    <input type="datetime-local" id="when" value="2026-09-09T19:00">
+    <span class="mono" style="color:var(--ink-soft)">ET</span>
+  </div>
+  <button class="ctl" id="fast" aria-pressed="false">Fast clock 3600&times;</button>
+  <button class="ctl" id="payload" aria-pressed="true">Payload: pinned + scrolling</button>
+  <button class="ctl" id="mode" aria-pressed="false">Opening: push</button>
+  <button class="ctl" id="slow" aria-pressed="false">Slow motion</button>
+  <button class="ctl" id="narrow" aria-pressed="false">Phone width</button>
+  <button class="ctl" id="rm" aria-pressed="false">Reduced motion</button>
+  <button class="ctl" id="replay">Replay nudges</button>
+</div>
+
+<h2 class="sec">A · Saying "click me" with no label</h2>
+<p class="lede">
+  All closed, all static, so they can be compared as they would first be met. The tag
+  says whether the signal survives with no pointer, which is the question that matters:
+  this bar exists for the phone. Hover-only signals are not wrong, they are just not
+  enough on their own.
+</p>
+<div class="affs" id="affs"></div>
+
+<h2 class="sec">B · How it opens</h2>
+<p class="lede">
+  A nav above and a hero below, because the opening includes what happens to everything
+  else. <b>Push</b> puts the panel in the flow, so the hero is shoved down by the full
+  height of the poster. <b>Overlay</b> drops it over the hero with a scrim and nothing
+  moves. Click a bar to open it, click again or press Escape to close.
+</p>
+<div class="mocks" id="mocks"></div>
+
+<p class="foot">
+  Notes worth keeping. The countdown is DST-correct Eastern using the same
+  <code>zoned()</code> helper as the council countdowns in <code>index.html</code>, so
+  it is the real thing rather than a local-time approximation. The bar is a real
+  <code>&lt;button&gt;</code> with <code>aria-expanded</code> and Escape to close, and
+  the event's date, time and place are real text rather than living only inside the
+  poster image, which is what the existing ticker's <code>aria-hidden="true"</code>
+  could not have offered. Every <code>:hover</code> rule here is behind
+  <code>@media(hover:hover) and (min-width:861px)</code>, for the reason the README
+  sets out at length.
+</p>
+
+<script>
+(function(){
+  const TZ = 'America/New_York';
+
+  /* UTC instant for an Eastern wall-clock time. Lifted from the council countdown
+     IIFE in index.html so the bench and the site agree about DST. */
+  function zoned(y, mo, da, h, mi){
+    const guess = Date.UTC(y, mo, da, h, mi), inv = new Date(guess);
+    const et  = new Date(inv.toLocaleString('en-US',{timeZone:TZ}));
+    const utc = new Date(inv.toLocaleString('en-US',{timeZone:'UTC'}));
+    return new Date(guess - (et.getTime() - utc.getTime()));
+  }
+  function parseWhen(v){
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(v || '');
+    return m ? zoned(+m[1], +m[2]-1, +m[3], +m[4], +m[5]).getTime() : null;
+  }
+
+  /* The clock. Real by default; the fast option runs an hour a second so a countdown
+     three weeks out can be watched actually moving, which is the whole claim being
+     made for it. Switching keeps continuity rather than jumping. */
+  let fast = false, wallAtSwitch = Date.now(), simAtSwitch = Date.now();
+  function now(){ return fast ? simAtSwitch + (Date.now() - wallAtSwitch) * 3600 : Date.now(); }
+  function setFast(on){ const n = now(); fast = on; wallAtSwitch = Date.now(); simAtSwitch = n; }
+
+  const pad = n => String(n).padStart(2, '0');
+  function fmt(ms){
+    if(ms <= 0) return ms > -3 * 36e5 ? 'Happening now' : 'This one has passed';
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600),
+          m = Math.floor(s % 3600 / 60), sec = s % 60;
+    if(d >= 1) return 'In ' + d + 'd ' + pad(h) + 'h ' + pad(m) + 'm';
+    if(h >= 1) return 'In ' + h + 'h ' + pad(m) + 'm ' + pad(sec) + 's';
+    return 'In ' + m + 'm ' + pad(sec) + 's';
+  }
+
+  /* Placeholder until the second event is real. */
+  const EVENT = {
+    what:  'Cobb Board of Commissioners',
+    where: '100 Cherokee St, Marietta',
+    extra: 'Public comment opens at 6:45'
+  };
+
+  const runHTML =
+    '<span class="cd cd-inline" data-cd></span>' +
+    '<span class="x">&#10005;</span>' + EVENT.what +
+    '<span class="x">&#10005;</span>' + EVENT.where +
+    '<span class="x">&#10005;</span>' + EVENT.extra +
+    '<span class="x">&#10005;</span>';
+
+  /* The bar. Options pick which signals it carries, so a variant is a set of flags
+     rather than its own copy of the markup. */
+  function barHTML(o){
+    o = o || {};
+    return '<button type="button" class="tbar ' + (o.hover ? 'aff-hover ' : '') +
+             (o.peek ? 'has-peek ' : '') + '" aria-expanded="false">' +
+      '<span class="tbar-in">' +
+        '<span class="tb-dot' + (o.blink ? ' blink' : '') + '"></span>' +
+        '<span class="tb-fixed"><span data-cd></span></span>' +
+        '<span class="tb-scroll"><span class="tape-wrap"><span class="tape">' +
+          '<span class="run">' + runHTML + '</span>' +
+          '<span class="run" aria-hidden="true">' + runHTML + '</span>' +
+        '</span></span></span>' +
+        (o.chev ? '<span class="tb-chev">&#9660;</span>' : '') +
+      '</span>' +
+      (o.peek ? '<span class="tb-peek"></span>' : '') +
+    '</button>';
+  }
+
+  /* ---------------- Section A ---------------- */
+  const VARIANTS = [
+    { id:'hover', title:'Pause and lift on hover',
+      note:'The tape stops under the cursor and the bar takes the same 2px lift and hard shadow every other button on the site takes. Motion stopping as you approach is the least ambiguous signal available, and it costs one line: animation-play-state.',
+      opts:{hover:true}, tags:[['ptr','Pointer only']] },
+
+    { id:'peek', title:'Peeking corner',
+      note:'A sliver of the sheet tucked under the right end, ink outline and all. Static, silent, and it says there is something folded up in here without a word. It also happens to be honest about what clicking does.',
+      opts:{peek:true, hover:true}, tags:[['touch','Works on touch'],['pick','In the pick']] },
+
+    { id:'nudge', title:'Arrival nudge',
+      note:'The corner peeks out 8px and retracts, once, a beat after load. The site already believes things should land rather than be there. One motion cannot become wallpaper the way a loop does.',
+      opts:{peek:true, hover:true}, cls:'nudge', tags:[['touch','Works on touch'],['pick','In the pick']] },
+
+    { id:'blink', title:'Blinking REC dot',
+      note:'Borrowed wholesale from the wordmark and the hero eyebrow, where it already means live. Free vocabulary, and it draws the eye without claiming anything. On its own it reads as decoration rather than as a control.',
+      opts:{blink:true, hover:true}, tags:[['touch','Works on touch']] },
+
+    { id:'chev', title:'Breathing chevron',
+      note:'A single triangle drifting down and back. The closest thing to a label without being one, and the flyer already uses the same arrow in its hint. The risk is that a permanent loop is what banner blindness is made of.',
+      opts:{chev:true, hover:true}, tags:[['touch','Works on touch']] },
+
+    { id:'combo', title:'The combination',
+      note:'Corner plus one nudge plus pause-and-lift. Three signals at three different moments: one on the static state, one on arrival, one on approach, and the two that matter most need no pointer at all.',
+      opts:{peek:true, hover:true}, cls:'nudge', tags:[['touch','Works on touch'],['pick','Recommended']] }
+  ];
+
+  const affs = document.getElementById('affs');
+  affs.innerHTML = VARIANTS.map(v =>
+    '<div class="aff">' +
+      '<h3>' + v.title + '</h3>' +
+      '<p>' + v.note + '</p>' +
+      '<div class="holder' + (v.cls ? ' ' + v.cls : '') + '">' + barHTML(v.opts) + '</div>' +
+      v.tags.map(t => '<span class="tag ' + t[0] + '">' + t[1] + '</span>').join('') +
+    '</div>'
+  ).join('');
+
+  /* ---------------- Section B ---------------- */
+  const OPENINGS = [
+    { id:'shade', title:'Roller shade',
+      note:'The bar is the roller and the sheet is pulled down out of it. A hem rides the bottom edge with a shadow under it, and the poster drifts down a few percent behind, which is what makes it read as material being drawn out rather than as a box getting taller.',
+      hem:'<span class="m-hem"></span>' },
+
+    { id:'tapeout', title:'The tape runs out',
+      note:'The scroll accelerates off to the left as though the reel ended, and what was behind it is the poster. It uses the bar\'s own motion as the transition, which is the elegant part. Watch it in slow motion for whether it reads as intent or as a glitch.',
+      hem:'' },
+
+    { id:'split', title:'The bar splits',
+      note:'The bottom edge detaches, carries the red rule down with it, and the poster is revealed in the gap. Nothing about the poster moves: it was always there and the bar simply opened. More mechanical, more printing press.',
+      hem:'<span class="m-lip"></span>' }
+  ];
+
+  const mocks = document.getElementById('mocks');
+  mocks.innerHTML = OPENINGS.map(o =>
+    '<div class="mockcell">' +
+      '<h3>' + o.title + '</h3>' +
+      '<p>' + o.note + '</p>' +
+      '<div class="mock ' + o.id + '" data-open="' + o.id + '">' +
+        '<div class="m-nav"><span class="d"></span><b>DEFLOCK COBB</b><span class="mn">Menu</span></div>' +
+        barHTML({peek:true, hover:true}) +
+        '<div class="m-panel"><div class="m-poster">' +
+          '<img src="../assets/week-of-action.jpg" width="1080" height="1350" alt="">' +
+        '</div>' + o.hem + '</div>' +
+        '<div class="m-scrim"></div>' +
+        '<div class="m-hero">' +
+          '<div class="art"></div>' +
+          '<div class="h1">Flock<span class="r">Off &ndash; Cobb</span></div>' +
+          '<div class="sub">Cancel the contract. Take the cameras down.</div>' +
+          '<div class="btns"><i>&#9994; Send the letter</i><i>&#9742; Officials</i></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  ).join('');
+
+  /* Opening and closing. The panel's height is driven from its own content rather
+     than a constant, so changing the poster or the cell width needs nothing here. */
+  function panelHeight(panel){
+    const inner = panel.querySelector('.m-poster');
+    return inner ? inner.getBoundingClientRect().height : 0;
+  }
+  function setOpen(mock, open){
+    const btn = mock.querySelector('.tbar');
+    const panel = mock.querySelector('.m-panel');
+    mock.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    panel.style.height = open ? panelHeight(panel) + 'px' : '0px';
+  }
+  mocks.querySelectorAll('.mock').forEach(mock => {
+    const btn = mock.querySelector('.tbar');
+    btn.addEventListener('click', () => setOpen(mock, !mock.classList.contains('is-open')));
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') mocks.querySelectorAll('.mock.is-open').forEach(m => setOpen(m, false));
+  });
+  /* A resize changes the poster's height, so anything open has to be re-measured or
+     it keeps a stale pixel value and clips. */
+  addEventListener('resize', () => {
+    mocks.querySelectorAll('.mock.is-open').forEach(m => {
+      m.querySelector('.m-panel').style.height = panelHeight(m.querySelector('.m-panel')) + 'px';
+    });
+  });
+
+  /* Section A's bars do not open onto anything; they only have to look clickable. */
+  affs.querySelectorAll('.tbar').forEach(b => {
+    b.addEventListener('click', () => {
+      b.setAttribute('aria-expanded', b.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+    });
+  });
+
+  /* ---------------- the live countdown ---------------- */
+  const whenInput = document.getElementById('when');
+  let target = parseWhen(whenInput.value);
+  whenInput.addEventListener('change', () => { target = parseWhen(whenInput.value); paint(); });
+
+  function paint(){
+    const text = target == null ? 'Set a date' : fmt(target - now());
+    document.querySelectorAll('[data-cd]').forEach(el => { el.textContent = text; });
+  }
+  paint();
+  setInterval(paint, 250);
+
+  /* ---------------- controls ---------------- */
+  function toggle(id, fn){
+    const b = document.getElementById(id);
+    b.addEventListener('click', () => {
+      const on = b.getAttribute('aria-pressed') !== 'true';
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      fn(on, b);
+    });
+  }
+  toggle('fast', on => setFast(on));
+  toggle('slow', on => document.body.classList.toggle('slow', on));
+  toggle('narrow', on => document.body.classList.toggle('narrow', on));
+  toggle('rm', on => document.body.classList.toggle('rm', on));
+  toggle('mode', (on, b) => {
+    document.body.classList.toggle('overlay', on);
+    b.textContent = 'Opening: ' + (on ? 'overlay' : 'push');
+    /* Switching layout mid-open leaves a panel measured against the other one. */
+    mocks.querySelectorAll('.mock.is-open').forEach(m => setOpen(m, false));
+  });
+  document.getElementById('payload').setAttribute('aria-pressed', 'true');
+  document.body.classList.add('payload-split');
+  toggle('payload', (on, b) => {
+    document.body.classList.toggle('payload-split', on);
+    document.body.classList.toggle('payload-all', !on);
+    b.textContent = 'Payload: ' + (on ? 'pinned + scrolling' : 'all scrolling');
+    paint();
+  });
+  document.getElementById('replay').addEventListener('click', () => {
+    document.querySelectorAll('.nudge').forEach(n => {
+      n.classList.remove('nudge');
+      void n.offsetWidth;      /* forces the animation to start over */
+      n.classList.add('nudge');
+    });
+  });
+})();
+</script>

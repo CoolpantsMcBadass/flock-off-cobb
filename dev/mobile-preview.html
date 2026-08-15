@@ -35,11 +35,22 @@
   flyer opens on tap and closes on a tap outside. Everything else about the pop is the same.
   <br><br>
   <b>What this can't show:</b> real touch (these are mouse clicks), the iOS/Android URL bar
-  eating vertical space, and system font rendering. For those, open
-  <b><code id="lan">http://192.168.40.37:8123</code></b> on a phone on the same wi-fi —
-  <code>python3 -m http.server</code> listens on every interface, so it just works. That IP
-  is whatever the Mac had when this file was written; re-check with
-  <code>ipconfig getifaddr en0</code> if it has moved.
+  eating vertical space, and system font rendering.
+  <br><br>
+  <b>Getting it onto a real phone is not reliable, so don't plan on it.</b> The obvious
+  route is <code>http://&lt;this Mac's IP&gt;:&lt;the port serving this page&gt;</code> on a
+  phone on the same wi-fi (<code>ipconfig getifaddr en0</code> for the IP;
+  <code>python3 -m http.server</code> does listen on every interface). It failed on
+  2026-08-14 with the Mac and the phone on the same network, the firewall off, the server
+  answering that exact URL from the Mac in milliseconds, and Safari still timing out with
+  "the server stopped responding" — which is what client isolation on the access point
+  looks like, and plenty of routers ship with it on. If that happens, a phone Personal
+  Hotspot with the Mac joined to it puts both ends on a network that isn't isolated.
+  <br><br>
+  <b>For the engine rather than the hardware</b>, drive real WebKit instead:
+  <code>npx playwright install webkit</code>, then <code>playwright-core</code> with
+  <code>devices['iPhone 13']</code>. That is what has actually caught the WebKit bugs in
+  this project, and it takes real <code>tap()</code> events.
 </p>
 
 <div class="bar" id="bar"></div>
