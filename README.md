@@ -17,6 +17,93 @@ Plain HTML/CSS/JS — no build step, no dependencies.
 - `assets/powder-springs-wards.geojson` — Powder Springs ward polygons (wards 1–3)
 - `assets/smyrna-wards.geojson` — Smyrna ward polygons (wards 1–7)
 - `assets/week-of-action.jpg` — the Week of Action flyer shown in the hero
+- `assets/live-info-session.jpg` — the Live Info Session poster carried by the event bars
+
+## The event bars
+Two ink strips carrying dated events: one directly under the nav, one below the hero
+where the slogan ticker used to be. Both are `.ebar-live` and both are filled by one
+IIFE at the foot of the page from its `EVENTS` array. They are two instances rather
+than two copies, so a third is a third `<div class="ebar ebar-live" hidden></div>`.
+
+Under the nav because that is the only place on the page that is high on a phone.
+Measured in WebKit at iPhone 13 size, the hero art and the flyer fill the whole first
+screen: the h1 lands at 1.23 screens and the old ticker at 1.96, which put anything
+after the hero two swipes down. Under the nav is y=60 at every width. The bars scroll
+away with the page rather than sticking, since a second permanently pinned band would
+cost 44px of a 664px viewport forever.
+
+### Adding an event
+Add an entry to `EVENTS`. To retire one, do nothing and let its `linger` run out: the
+bars drop finished events, rebuild, and hide themselves when nothing is left, so the
+page returns to normal without anyone editing it.
+
+| field | meaning |
+| --- | --- |
+| `name` / `date` / `time` / `where` | what the strip says. `where` is data only; the strip carries the hint in that space instead |
+| `start` / `end` | `[y, monthIndex, day, hour, minute]` in Eastern, DST-correct via the same `zoned()` helper the council countdowns use |
+| `linger` | hours the bars keep carrying it *after* `end` |
+| `poster` / `w` / `h` / `alt` | the sheet. `w`/`h` give the intrinsic ratio so the panel can be measured before the JPEG lands |
+| `linksAt` | where the link buttons sit on the sheet, from its bottom edge |
+| `links` | `{label, href, primary}`; `primary` makes it the red button |
+
+**`end` and retirement are deliberately separate.** Conflating them is how an event that
+finished at 10 PM reads "Happening now" at 2 AM. The countdown is days only, counted in
+whole Eastern calendar days rather than 24-hour chunks, so the day before reads
+"Tomorrow" all evening instead of flipping at some arbitrary hour. Check a change by
+freezing the page clock: override `Date` in an init script and load the page at each
+boundary. Seven of them are worth checking, from days out through "Just happened" to the
+bar hiding itself.
+
+**`linksAt` is per event because every poster puts its furniture somewhere different.**
+Pinned to the bottom edge by default, which was tried first on the Live Info Session
+sheet and covered the venue address, the one thing on it somebody actually needs. At 11%
+the buttons land on that poster's own yellow band, which already prints the same URLs, so
+the clickable version covers nothing a reader loses. Re-measure for a new flyer.
+
+### Which event a click means
+Each event is its own `.ebar-ev` segment and a click resolves against the segment it
+landed on: one under the pointer wins outright, and a click in a gap falls to whichever
+segment has the most of itself on screen. With one event it always answers the same way;
+with several the moment of the click is what chooses.
+
+That is why **the tape stops dead on `pointerdown`, not just on hover.** A click has to be
+able to mean the thing that was under it, and a target moving at 22.6 seconds a lap cannot
+be aimed at with a finger, where there is no hover to stop it first.
+
+### Gotchas
+**One tap is one state change, and it has to be enforced.** Real touch hardware delivers a
+second click from the same tap. The two ways through the click handler were not symmetric
+about it: a second click on the poster falls out at the `.ebar-btn` guard and does nothing,
+while a second click on the strip lands on the open branch and toggles straight back, so
+the bar closed by tapping the poster and refused to close by tapping the strip. Every state
+change now stamps `lastToggle` and clicks inside 450ms of one are dropped.
+**No amount of synthetic tapping reproduces this.** Playwright's WebKit delivers exactly
+one click per `tap()` and passed throughout. It only showed up on a real iPhone, and only
+reproduced by dispatching the pairs by hand.
+
+**The bar's red rule is declared in the same rule that zeroes the others, and after it.**
+`border:0` sets `border-style:none`, and a style of none computes every border width to 0
+no matter what a later rule asks for. Declared separately it vanished at rest and on hover,
+with only the hover colour computing through to prove the selector matched at all. It lives
+on `.ebar-btn` rather than `.ebar` because the panel hangs off `.ebar` at `top:100%`, which
+resolves against the padding box, so a border there would start the poster over its own rule.
+
+**`.ebar` decides the hover, not the button.** Everything that moves on hover is inside it
+or grows its box downward. A hit region that shrinks when it reacts flickers, because the
+pixels the cursor is in stop being hovered the instant it moves. The site's usual
+`translate(-2px,-2px)` plus offset shadow cannot work here anyway: the bar is full bleed,
+so moving it left shows the page down its right edge. It lifts straight up and the rule
+thickens and goes yellow instead.
+
+**The panel hangs off the bar rather than sitting in the flow**, so the poster covers the
+section below instead of pushing it, and the bar's 47px is all the room any of it takes.
+The sheet drops rather than fades: held one sheet-height above and travelling down on the
+same duration and curve as the panel's height, so its bottom edge rides the growing edge
+and the poster reads as being lowered out of the bar. Nothing but the sheet descends, so
+there is no ground, padding or frame behind it.
+
+`dev/ticker-bar.html` is the bench the affordances and the opening were chosen on, and is
+not part of the site.
 
 ## The hero flyer
 The empty space in the hero holds the Week of Action flyer. Closed, it is a comic
@@ -498,4 +585,7 @@ folder works on Netlify/Vercel with no build step (publish directory is the fold
   `data-city` value on each `.countdown` span. `wd` is the weekday (0=Sun), `weeks` the
   ordinal weeks of the month, and an optional `summer` overrides `weeks` for Jul–Sep.
   Omit a city from `SCHED` and its countdown hides itself (that's how Acworth works).
+- **Events on the bars:** the `EVENTS` array in the event bar IIFE. One entry per event;
+  see "The event bars" above for the fields. Nothing else needs touching to add, change
+  or retire one.
 - **Colors/fonts:** the `:root` CSS variables at the top of the `<style>` block.
