@@ -141,7 +141,9 @@
     display:inline-flex;min-width:100%;
     transition:transform .26s cubic-bezier(.5,0,.85,.3), opacity .26s ease-in;
   }
-  .ebar-tape{display:inline-flex;white-space:nowrap;animation:ebarRun 34s linear infinite;}
+  /* 22.6s is 34s at 1.5x. The lap time is the speed: the tape travels its own width
+     either way, so a shorter duration is a faster scroll and nothing else shifts. */
+  .ebar-tape{display:inline-flex;white-space:nowrap;animation:ebarRun 22.6s linear infinite;}
   @keyframes ebarRun{from{transform:translateX(0);}to{transform:translateX(-50%);}}
   /* The type lives on the run so both variants get it; .ebar-ev only groups an event's
      fields so a click can be hit-tested against them. */
