@@ -2,6 +2,11 @@
 
 All notable changes to the Flock Off Cobb site are recorded here.
 
+## 2026-08-15
+
+### Fixed
+- On a real iPhone the event bar would not close by tapping the strip that opened it: it closed and reopened in one gesture. Real touch hardware delivers a second click from the same tap, and the two ways through the click handler were not symmetric about it. A second click on the poster falls out at the `.ebar-btn` guard and does nothing, which is why closing by tapping the poster looked fine, while a second click on the strip itself lands on the open branch and toggles straight back. One tap is now one state change: every state change stamps a clock and clicks arriving inside 450ms of one are the gesture's own echo and are dropped, which covers Escape and outside-clicks too. Worth knowing for next time: no amount of synthetic tapping reproduces this. Playwright's WebKit delivers exactly one click per `tap()`, and the bug only showed up by dispatching the pairs by hand, where two clicks up to 300ms apart reopened it every time.
+
 ## 2026-08-14
 
 ### Added

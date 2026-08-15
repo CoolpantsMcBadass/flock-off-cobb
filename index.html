@@ -2214,6 +2214,16 @@
     function setup(bar, idx){
       const panelId = 'ebarPanel' + idx;
       let current = null;
+      /* One tap has to be one state change. Real touch hardware delivers a second click
+         from the same gesture, and the two ways through the click handler are not
+         symmetric about it: a second click on the poster falls out at the `.ebar-btn`
+         guard and does nothing, while a second click on the strip lands on the open
+         branch and toggles straight back, which reads as the bar refusing to close while
+         the poster closes fine. That is exactly what it did on a real iPhone, and no
+         amount of synthetic tapping reproduces it: emulated WebKit delivers one click.
+         Set by every state change, so Escape and outside-clicks are covered too, and long
+         enough to outlast the pairs actually seen, which were up to 300ms apart. */
+      let lastToggle = 0;
 
       const btn   = () => bar.querySelector('.ebar-btn');
       const panel = () => bar.querySelector('.ebar-panel');
@@ -2309,6 +2319,7 @@
       }
 
       function open(ev){
+        lastToggle = Date.now();
         current = ev;
         fill(ev);
         size();                                  // also flushes layout, so the fades run
@@ -2317,6 +2328,7 @@
         requestAnimationFrame(bringIntoView);
       }
       function close(){
+        lastToggle = Date.now();
         panel().style.height = '0px';
         bar.classList.remove('is-open', 'is-frozen');
         btn().setAttribute('aria-expanded', 'false');
@@ -2335,6 +2347,7 @@
       });
       bar.addEventListener('click', e => {
         if(e.target.closest('.ebar-links a')) return;   // let the links be links
+        if(Date.now() - lastToggle < 450) return;       // the gesture's second click
         // Open, anything closes it, the poster included. Opening scrolls the bar into
         // view, which slides the strip out from under the pointer and leaves it over the
         // poster, so a second click landing there has to mean the obvious thing. There is
