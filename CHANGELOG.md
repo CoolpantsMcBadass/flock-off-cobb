@@ -2,7 +2,12 @@
 
 All notable changes to the Flock Off Cobb site are recorded here.
 
-## 2026-08-15
+## 2026-08-17
+
+### Changed
+- The Week of Action flyer is the updated version. Only Tuesday changed on it: the Smyrna City Council meeting is now DeFlock Further, the live conversation on ALPR surveillance and privacy at 45 South Avenue Marietta, with free tickets on Eventbrite. That is the same event the bars under the nav are carrying, so the two now say the same thing. Note the artwork prints "Get free tickets n Eventbrite"; the `alt` text says "on", since a screen reader has no picture to correct against.
+- The `alt` text was rewritten for that day. It is the only version of the schedule a screen reader gets, so a flyer swap that leaves it alone silently publishes last week's plan to the people who can least check it.
+- Nothing else needed touching, which was worth confirming rather than assuming. The new artwork is 1080×1350 like the old one, so `--ar` stays at `.8`; the day tabs sit within 2px vertically of where they were, so the five `flyer-check` tops stay where they are; and the dates on it are unchanged, so `DONE_AT` and `ENDS` stay too. Verified in real WebKit with the page clock frozen at four instants: Monday afternoon (no ticks yet, correct — Monday's lands at midnight ET), Wednesday morning (Monday and Tuesday struck, and the screen-reader status line agreeing), Saturday (all five), and the Monday after `ENDS` (the flyer gone). Ticks land at 33.57/45.57/57.56/69.57/81.56% of the poster in both engines' geometry, which is on the tabs, and the checked screenshots confirm it by eye at phone width and at desktop hover width. No page errors in any run.
 
 ### Changed
 - The event poster is framed the way the site frames artwork everywhere else: a 3px ink outline and the same hard offset shadow the hero art and the buttons carry, thin rather than the hero art's 5px since the sheet is smaller. The panel clips and takes its height from the poster's box, so it also gained 6px of bottom padding as the shadow's room; without it the shadow would have been cut off flush at the bottom edge and only two of its three sides would have shown.
