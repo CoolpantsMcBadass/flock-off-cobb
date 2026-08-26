@@ -667,6 +667,61 @@ Then normalize each feature's property to `district` / `ward` (integers, so Mabl
 saving. Some wards are multi-part, which is expected — Powder Springs ward 2 and
 Smyrna ward 3 both arrive as separate pieces.
 
+## Recent posts (step 5)
+Four cards in the "Follow us on social" box, driven by `assets/posts.json`. The newest
+four entries with a caption render; the rest stay in the file and do not. If the file is
+missing, empty or malformed, the strip hides itself and step 5 looks exactly as it did
+before, which is why it is safe to leave broken.
+
+### Adding one
+```
+python3 dev/add-post.py <post-url> --date 2026-08-24 \
+    --caption "Short line for the card" \
+    --alt "What the picture actually shows"
+```
+It reads the post's public embed page, pulls the picture, its dimensions and whether it is
+a carousel or a reel, writes a 640px WebP into `assets/posts/`, and inserts or updates the
+entry keyed on the post URL. Re-running on the same URL replaces that entry, keeping any
+caption and alt you do not re-supply. `--dry-run` says what it would do.
+
+**`--caption` and `--alt` are yours to write, deliberately.** The caption is not scraped
+because the card wants a trimmed line rather than the full post with its hashtags. The alt
+is not scraped because there is nothing to scrape and it matters: **describe the picture,
+not the post's subject.** The first pass here got three of four wrong by paraphrasing what
+each post was *about*, which is useless to somebody who cannot see that the Aug 2 card is
+a drawing of two arms holding a WARNING placard.
+
+**Do not automate this.** It is a hand-run helper: one post, when you ask, from your own
+machine, for your own account. A scheduled job hitting Instagram from a datacenter IP is
+a different thing and is the version that risks the account. Instagram can change the
+embed page whenever it likes and this will break; when it does, the fix is a regex, and
+the fallback is to save the picture yourself and edit `posts.json`, which is plain data a
+human can always write.
+
+It shells out to `curl` rather than using `urllib`, because the python.org build of Python
+on macOS has no usable CA bundle and every HTTPS call raises `CERTIFICATE_VERIFY_FAILED`
+until somebody runs `Install Certificates.command`. Needs `cwebp` (`brew install webp`).
+
+### Why hand-curated at all
+There is no automatic route. The account is a **personal** one, and Instagram's Basic
+Display API, the last one that could read those, shut off in September 2024. Its
+replacement requires the account be converted to Business or Creator, which is not this
+repo's call to make. An embed widget needs no conversion but puts Meta's tracking in front
+of every visitor, on a site whose argument is that unconsented tracking is wrong and which
+runs GoatCounter for that reason. So: our pictures, our domain, nothing third-party loads.
+
+### Two things that will bite
+**Every colour on the card is stated, and the selectors are two classes deep.** The cards
+are paper sitting inside a step that is light-on-ink, and the step colours its own
+descendants: `.step p` is pale cream and `.step a` is yellow. Both beat a bare `.igcap` or
+`.igcard`, and both are invisible on paper. Same trap as `.ebar-card`, met a second time.
+
+**The picture box is a fixed 4:5 with `object-fit:cover`.** Posts arrive in whatever shape
+the app gave them, and this strip mixes 4:5 stills with 9:16 reels, which is nearly half
+again as tall at the same width. Left at their own ratios the captions stop lining up and
+the row grows to the tallest thing in it. Cropping to one shape is what Instagram's own
+grid does, and it means whatever gets added next still fits.
+
 ## Preview locally
 ```
 cd "flock-off-cobb"

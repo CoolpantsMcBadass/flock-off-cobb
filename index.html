@@ -947,7 +947,82 @@
   .step-socials a{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:var(--paper);color:var(--ink);border:2px solid var(--paper);transition:background .15s ease,color .15s ease,border-color .15s ease;}
   .step-socials a:hover{background:var(--red);color:var(--paper);border-color:var(--red);}
   .step-socials svg{width:22px;height:22px;fill:currentColor;display:block;}
-  @media(max-width:760px){.steps{grid-template-columns:1fr;}}
+
+  /* Recent posts, inside step 5. The step sits on ink, so the cards are paper: the same
+     3px outline and hard offset shadow the artwork and the event panel carry, which is
+     what keeps them reading as part of this page rather than pasted in from Instagram. */
+  .igwall{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    margin:18px 0 4px;
+  }
+  .igwall[hidden]{display:none;}
+  /* Every colour in here is stated, and the selectors are deliberately two classes deep.
+     These are paper cards sitting inside a step that is light type on ink, and the step
+     already colours its own descendants: `.step p` is pale cream and `.step a` is yellow,
+     both of which beat a bare `.igcap` or `.igcard` on specificity and both of which are
+     invisible on paper. Same lesson as `.ebar-card`, met a second time. */
+  .igwall .igcard{
+    display:flex;flex-direction:column;background:var(--paper);color:var(--ink);
+    border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);
+    text-decoration:none;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  /* The site's buttons pop by translating up and left into a bigger shadow. Same move. */
+  .igwall .igcard:hover,.igwall .igcard:focus-visible{
+    transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--yellow);
+  }
+  .igwall .igcard:focus-visible{outline:3px solid var(--yellow);outline-offset:3px;}
+  /* One shape for every card, whatever the post was. This strip mixes 4:5 stills with
+     9:16 reels, and a row of those at their own ratios is ragged: a reel is nearly half
+     again as tall as a carousel at the same width, so the captions stop lining up and the
+     row grows to the tallest thing in it. Fixing the box and cropping to fill is what
+     Instagram's own grid does, and it means whatever gets added next still fits.
+     The ratio also reserves the space before the picture lands, so nothing reflows.
+     `position:relative` is what the kind mark is pinned to. */
+  .igcard .igshot{
+    position:relative;display:block;aspect-ratio:4/5;overflow:hidden;
+    background:var(--paper-2);border-bottom:3px solid var(--ink);
+  }
+  .igcard .igshot img{display:block;width:100%;height:100%;object-fit:cover;}
+  /* Carousel and reel marks. A flat still misrepresents both, and two thirds of the
+     account is one or the other. */
+  .igkind{
+    position:absolute;top:7px;right:7px;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--ink);color:var(--paper);
+  }
+  .igkind svg{width:13px;height:13px;fill:currentColor;display:block;}
+  .igcard .igbody{padding:9px 10px 11px;display:flex;flex-direction:column;gap:5px;}
+  .igcard .igdate{
+    font-family:"Space Mono",monospace;font-size:.55rem;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--red);font-weight:700;
+  }
+  .igcard .igcap{
+    font-family:"Spectral",Georgia,serif;font-size:.82rem;line-height:1.35;margin:0;
+    color:var(--ink);
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  /* No picture yet: the card is a paper note instead of a broken frame. This is also the
+     mode to use on purpose when adding a post from a phone, where resizing an image is
+     not on offer. The kind mark moves inline since there is no shot to pin it to. */
+  .igcard.no-shot .igbody{padding-top:12px;}
+  .igcard.no-shot .igkind{
+    position:static;width:auto;height:auto;padding:2px 6px;gap:5px;
+    align-self:flex-start;font-family:"Space Mono",monospace;font-size:.5rem;
+    letter-spacing:.1em;text-transform:uppercase;
+  }
+  .igcard .igmore{
+    font-family:"Space Mono",monospace;font-size:.52rem;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-soft);margin-top:auto;padding-top:4px;
+  }
+  .igwall .igcard:hover .igmore,
+  .igwall .igcard:focus-visible .igmore{color:var(--red);}
+  @media(max-width:1000px){.igwall{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:760px){
+    .steps{grid-template-columns:1fr;}
+    .igwall{grid-template-columns:1fr;gap:12px;}
+    .igcap{-webkit-line-clamp:4;}
+  }
 
   /* letter */
   .letter-wrap{border:3px solid var(--ink);background:var(--paper);box-shadow:var(--shadow);}
@@ -1321,6 +1396,9 @@
       <div>
         <h3>Follow us on social</h3>
         <p>Keep up with actions, meetings, and wins, then share a post with a neighbor.</p>
+        <!-- Recent posts, filled from assets/posts.json. Hidden until it has something to
+             show, so a missing or empty file leaves this box exactly as it was. -->
+        <div class="igwall" id="igwall" hidden></div>
         <div class="step-socials">
           <a href="https://www.instagram.com/deflockcobb/" target="_blank" rel="noopener" aria-label="DeFlock Cobb on Instagram" title="Instagram">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.31-1.46.72-2.12 1.38C1.36 2.67.95 3.34.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.8.72 1.47 1.38 2.13.66.66 1.33 1.07 2.12 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.8-.31 1.47-.72 2.13-1.38.66-.66 1.07-1.33 1.38-2.13.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.89 5.89 0 0 0-1.38-2.12A5.89 5.89 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32ZM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm6.41-10.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88Z"/></svg>
@@ -2619,6 +2697,82 @@
       paintCountdowns();
     }, 30000);
   })();
+  /* ---- Recent posts, inside step 5 of Join the Campaign ----
+     Hand-curated in assets/posts.json rather than pulled from Instagram. The account is a
+     personal one and Instagram has had no API for reading those since Basic Display shut
+     off in 2024, so there is no automatic route that does not first require the person who
+     runs it to convert the account. An embed widget would work without that, but it would
+     put Meta's tracking in front of every visitor to a site whose whole argument is that
+     unconsented tracking is wrong, and which runs GoatCounter for that reason. So the
+     pictures are ours, on our domain, and nothing third-party loads here at all.
+
+     The cost is that this is a list somebody keeps by hand. That is why every card is
+     dated: a curated strip goes stale by definition, and a visible date is honest where a
+     bare grid quietly implies "current". */
+  (function(){
+    const wall = document.getElementById('igwall');
+    if(!wall) return;
+
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    // A flat still misrepresents two thirds of the account, which is mostly carousels and
+    // reels, so each says what it is rather than pretending to be a single photo.
+    const MARK = {
+      carousel: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 2h11a2 2 0 0 1 2 2v11h-2V4H9V2Z"/><path d="M4 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm0 2v12h12V8H4Z"/></svg>',
+      reel:     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14l11-7z"/></svg>'
+    };
+    const LABEL = { carousel: 'Multiple photos', reel: 'Video' };
+
+    /* `2026-08-24` means a calendar day, and letting Date parse it directly reads it as
+       UTC midnight, which prints as the day before anywhere west of Greenwich. Build it
+       from its parts at local noon instead. */
+    function pretty(iso){
+      const p = String(iso).split('-').map(Number);
+      return new Date(p[0], p[1] - 1, p[2], 12)
+        .toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    }
+
+    function card(p){
+      const kind = MARK[p.kind] ? p.kind : '';
+      const mark = kind
+        ? '<span class="igkind">' + MARK[kind] +
+            '<span class="sr-only">' + esc(LABEL[kind]) + '</span></span>'
+        : '';
+      // width/height give the intrinsic ratio, so the row holds its shape before the
+      // picture lands. Same reason the event poster carries them.
+      const shot = p.img
+        ? '<span class="igshot">' +
+            '<img src="' + esc(p.img) + '"' +
+              (p.w ? ' width="' + p.w + '"' : '') + (p.h ? ' height="' + p.h + '"' : '') +
+              ' alt="' + esc(p.alt || '') + '" loading="lazy">' + mark +
+          '</span>'
+        : '';
+      return '<a class="igcard' + (p.img ? '' : ' no-shot') + '" href="' + esc(p.url) + '" ' +
+          'target="_blank" rel="noopener">' + shot +
+          '<span class="igbody">' +
+            (p.img ? '' : mark) +
+            '<span class="igdate">' + esc(pretty(p.date)) + '</span>' +
+            '<p class="igcap">' + esc(p.caption) + '</p>' +
+            '<span class="igmore">View on Instagram &rarr;</span>' +
+          '</span>' +
+        '</a>';
+    }
+
+    fetch('assets/posts.json')
+      .then(r => r.ok ? r.json() : [])
+      .then(posts => {
+        // A card with no caption or no date is worse than no card, so drop it rather than
+        // render "undefined" at somebody. ISO dates sort as strings, newest first.
+        const live = (Array.isArray(posts) ? posts : [])
+          .filter(p => p && p.url && p.caption && p.date)
+          .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+          .slice(0, 4);
+        if(!live.length) return;   // nothing to show, so step 5 stays exactly as it was
+        wall.innerHTML = live.map(card).join('');
+        wall.hidden = false;
+      })
+      .catch(() => {});            // a missing or malformed file is not the reader's problem
+  })();
   // ---- Week of Action flyer: unroll on tap, and retire itself once the week is over ----
   (function(){
     const flyer = document.getElementById('weekFlyer');
@@ -2702,6 +2856,7 @@
       flyer.classList.add('is-soft-close');
       // Carries closing timings, so it must be on before the style flush — same rule as
       // the pop class. Cleared generously late; it only ever affects a close.
+
       softTimer = setTimeout(unsoften, SOFT + 150);
     }
 
