@@ -629,6 +629,19 @@ struck over it again, they lived in `.flyer-plate` alongside the image (never in
 `.flyer-window`, whose height is animated and clipping, so percentages against it drift
 as the sheet unrolls) and were positioned as percentages of the artwork.
 
+### `hovering` is a lie on a touch screen
+The flyer rewinds to slide 1 when it shuts, and the guard that stops it firing mid-view
+reads `if(hoverable.matches && hovering) return;`. **The `hoverable.matches &&` is
+load-bearing.** A tap on iOS fires a synthetic `mouseenter` before the click, so
+`hovering` goes true and then stays true forever, because no `mouseleave` ever follows a
+tap. Written bare, that guard is permanently on and the flyer never rewinds on a phone.
+
+It is worth knowing how that one hid: it worked in every simulation. A dispatched
+`click` fires no `mouseenter`, so `hovering` stayed false in the harness and the rewind
+ran perfectly. Reproducing it took dispatching `mouseenter` first, deliberately, to
+imitate what the hardware does. Every other read of `hovering` in that IIFE is already
+gated the same way; this one was the exception.
+
 ### The retirement date belongs to the artwork
 `ENDS` is not a matter of taste. The current slide 2 ends "showing up at the Flock town
 hall meeting **THIS THURSDAY**", so the flyer is wrong the moment that Thursday is over,

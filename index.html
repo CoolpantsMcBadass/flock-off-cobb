@@ -3352,7 +3352,15 @@
          leaving it. Only rewinds if the flyer really is shut by the time this runs, and
          never announces, since nothing has been navigated to. */
       rewind = () => {
-        if(flyer.classList.contains('is-open') || hovering) return;
+        if(flyer.classList.contains('is-open')) return;
+        /* `hoverable.matches &&` is not decoration. On a touch screen the tap fires a
+           synthetic mouseenter before the click, so `hovering` goes true and then stays
+           true, because no mouseleave ever follows a tap. Testing it bare meant the guard
+           was permanently on and the flyer never rewound on a phone: it worked in every
+           simulation, because a dispatched click fires no mouseenter, and failed on the
+           actual hardware. Same gate the rest of this IIFE uses on `hovering`, for the
+           same reason. */
+        if(hoverable.matches && hovering) return;
         if(slide !== 0) show(0, false);
       };
 

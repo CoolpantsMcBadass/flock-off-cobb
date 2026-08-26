@@ -4,6 +4,9 @@ All notable changes to the Flock Off Cobb site are recorded here.
 
 ## 2026-08-25
 
+### Fixed
+- The hero flyer never rewound to slide 1 on a phone. The guard meant to stop a rewind firing mid-view tested `hovering` bare, and on a touch screen that is always true: a tap fires a synthetic `mouseenter` before the click, and no `mouseleave` ever follows, so the flag latches on and the guard was permanently shut. Now gated on `hoverable.matches && hovering`, the same way every other read of that flag in the IIFE already was. Worth knowing how it hid: it passed every simulation, because a dispatched click fires no `mouseenter`. Reproducing it meant dispatching one first on purpose, to imitate the hardware. Verified after the fix at 390px that it rewinds, and at desktop width that both intended behaviours survive: a genuine hover-out rewinds, and a pointer clipping the corner and coming straight back keeps the slide the reader was on.
+
 ### Added
 - The posts strip swipes on a phone instead of stacking. Below 760px it becomes a snapping row of cards at 80% width, so the whole strip is one screen rather than four and the social icons are not buried under it. Native CSS scroll-snap does the gesture, momentum included, so there is no touch handling to get wrong on real hardware; the cards are links, so tab still reaches them. The 80% is deliberate: the peek of the next card is the only thing saying there is more.
 - The hero flyer rewinds to slide 1 when it shuts, so every opening starts where the story does rather than wherever the last reader left off. Both closes call it, the pop and the quiet one. Guarded: a pointer clipping the corner on the desktop closes and reopens within a few frames, and flipping the slide out from under someone still looking at it is worse than leaving it, so it only rewinds if the flyer is genuinely shut by the time it runs.
