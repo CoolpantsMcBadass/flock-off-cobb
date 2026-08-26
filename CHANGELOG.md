@@ -6,6 +6,8 @@ the long-form reasoning behind older entries is in git history.
 ## 2026-08-26
 
 ### Removed
+- **The two flyer pop-droplet colour benches**, `dev/pop-colors.html` and `dev/pop-colors-mock.html`. They asked whether the droplets thrown when the flyer pops shut should stay white or go back to ink. **Settled: they stay as they are, white — the drops look right and the question is closed.** Neither bench was ever committed, so this note is the only record they existed.
+- What they were, in case the question is ever reopened: `pop-colors.html` ran the real `index.html` in two iframes side by side, one with the colour forced back to ink, on a shared scrubber so both could be frozen at the same instant instead of compared from memory. `pop-colors-mock.html` was the same 26 droplets — real positions, diameters, flick vectors and stagger, lifted off the `<i>` elements — blown up, slowed down and looped over the four grounds the mist actually crosses: cream page with its dot grid, the ink eyebrow bar, display type, and a dark image block. Both existed because at real size the droplets are 4 to 10px and gone in 320ms, which is too small and too quick to judge by popping the flyer over and over.
 - **The riso misregistration on headings.** Hovering any `h1`/`h2`/`h3` split it into a red and teal channel, most visibly on the hero's "Flock Off – Cobb". It read as a rendering glitch rather than as emphasis, because headings aren't clickable and a heading that answers the pointer promises a link that isn't there. The `.18s` text-shadow transition, the zeroed `text-shadow` that gave it something to animate from, and the `prefers-reduced-motion` block that existed only to cancel that transition all went with it.
 
 ## 2026-08-25
