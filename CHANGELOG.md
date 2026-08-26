@@ -3,6 +3,11 @@
 All notable changes to the Flock Off Cobb site are recorded here. Entries are kept short;
 the long-form reasoning behind older entries is in git history.
 
+## 2026-08-26
+
+### Removed
+- **The riso misregistration on headings.** Hovering any `h1`/`h2`/`h3` split it into a red and teal channel, most visibly on the hero's "Flock Off – Cobb". It read as a rendering glitch rather than as emphasis, because headings aren't clickable and a heading that answers the pointer promises a link that isn't there. The `.18s` text-shadow transition, the zeroed `text-shadow` that gave it something to animate from, and the `prefers-reduced-motion` block that existed only to cancel that transition all went with it.
+
 ## 2026-08-25
 
 ### Added
