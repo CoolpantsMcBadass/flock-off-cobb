@@ -39,20 +39,86 @@ page returns to normal without anyone editing it.
 
 | field | meaning |
 | --- | --- |
-| `name` / `date` / `time` / `where` | what the strip says. `where` is data only; the strip carries the hint in that space instead |
+| `name` / `date` / `time` | what the strip says |
+| `where` | the venue, printed on the strip and the card's headline. Optional |
 | `start` / `end` | `[y, monthIndex, day, hour, minute]` in Eastern, DST-correct via the same `zoned()` helper the council countdowns use |
 | `linger` | hours the bars keep carrying it *after* `end` |
-| `poster` / `w` / `h` / `alt` | the sheet. `w`/`h` give the intrinsic ratio so the panel can be measured before the JPEG lands |
-| `linksAt` | where the link buttons sit on the sheet, from its bottom edge |
+| `poster` / `w` / `h` / `alt` | the sheet, **if the event has artwork**. `w`/`h` give the intrinsic ratio so the panel can be measured before the JPEG lands |
+| `note` / `address` | the card, for an event with no poster. See below |
+| `linksAt` | where the link buttons sit on the sheet, from its bottom edge. Poster only |
 | `links` | `{label, href, primary}`; `primary` makes it the red button |
+
+### What the panel shows
+One framed paper sheet holding every live event as an `.ebar-item` row: countdown, date,
+time, venue, street address, and that event's links. Rows are separated by hairlines, not
+boxed individually, since four framed cards inside a framed sheet is three frames deep and
+the dates already do the separating.
+
+**An event with a `poster` still gets it**, inside its own row, in an `.ebar-shot` wrapper.
+That wrapper is the positioned ancestor the `linksAt` overlay needs, so a flyer keeps
+exactly the behaviour it had: artwork framed, buttons parked on its own band. An event
+with no poster puts the same links under its address as `.ebar-rowlinks`, which is the
+same button inverted for paper, since there is no artwork to park them on.
+
+Most events never get a flyer. The four Cobb PD town halls were announced in a paragraph
+of prose, which is why the text row is the default and the poster is the special case.
+
+The row **repeats the date and time that the bar's own title already shows**, which looks
+redundant on a wide screen and is not. The title is one line with `text-overflow:
+ellipsis`, and a long `name` eats the time first: at 390px, "Cobb PD Flock Town Hall ·
+Tue Sep 15, 6:30–8 PM" truncates mid-time. Under `prefers-reduced-motion` that title is
+the *entire* strip, since `.ebar-clip` is hidden there. A poster prints its own times in
+the artwork, so a row has to do the same job.
+
+Two things that will bite when styling it. **The frame goes on `.ebar-sheet.is-card`, not
+on the card**, so the sheet frames the list as one object and a poster inside a row can
+carry its own thinner border without fighting it. And **`.ebar-card` must state `color`**:
+the bar is light type on ink, so any line that does not set its own colour inherits
+paper-on-paper and disappears. That is exactly what happened to the venue headline the
+first time, while `note` and `address` looked fine because they each set their own colour.
+
+**Height is worth checking when you add an event.** Four rows plus the hoisted note is
+465px at 390px wide, and the bar's bottom edge sits at 107, so it lands inside the ~664px
+an iPhone actually leaves once the URL bar has taken its share. A sixth or seventh event
+will not, and at that point the panel wants a `max-height` and its own scroll.
 
 **`end` and retirement are deliberately separate.** Conflating them is how an event that
 finished at 10 PM reads "Happening now" at 2 AM. The countdown is days only, counted in
 whole Eastern calendar days rather than 24-hour chunks, so the day before reads
-"Tomorrow" all evening instead of flipping at some arbitrary hour. Check a change by
-freezing the page clock: override `Date` in an init script and load the page at each
-boundary. Seven of them are worth checking, from days out through "Just happened" to the
-bar hiding itself.
+"Tomorrow" all evening instead of flipping at some arbitrary hour.
+
+### Testing against the clock
+Copy `index.html` to `_clocktest.html` **in the repo root** (relative asset paths have to
+keep resolving) and paste this as the first thing in `<head>`, then delete the copy after.
+It is deliberately not committed: it overrides `Date` for the whole page.
+
+```html
+<script>
+(function(){
+  var q = location.search, mt = q.match(/[?&]t=(-?\d+)/), mo = q.match(/[?&]off=(-?\d+)/);
+  if(!mt && !mo) return;
+  var R = Date, fixed = mt ? +mt[1] : null, off = mo ? +mo[1] : 0;
+  var nowFn = fixed !== null ? function(){ return fixed; } : function(){ return R.now() + off; };
+  function D(){
+    if(arguments.length === 0) return new R(nowFn());
+    return new (Function.prototype.bind.apply(R, [null].concat([].slice.call(arguments))))();
+  }
+  D.now = nowFn; D.UTC = R.UTC; D.parse = R.parse; D.prototype = R.prototype;
+  window.Date = D;
+})();
+</script>
+```
+
+`?t=<ms>` freezes the clock, which is what you want for checking how a given instant
+*renders*: "Just happened", which row is accented, whether the bars are hidden.
+
+`?off=<ms>` runs the real clock shifted, and it is the one that matters for anything the
+30-second tick does, because **a frozen clock can never cross a boundary**. Set the offset
+so the boundary lands ~25s after load, open the panel, and wait past the next tick. That
+is how the retirement-with-the-panel-open path gets tested at all.
+
+Compute the offset with the same `zoned()` the page uses, e.g. for the first town hall's
+retirement: `zoned(2026,7,27,20,0) + 4*36e5 - Date.now() - 25000`.
 
 **`linksAt` is per event because every poster puts its furniture somewhere different.**
 Pinned to the bottom edge by default, which was tried first on the Live Info Session
@@ -60,15 +126,57 @@ sheet and covered the venue address, the one thing on it somebody actually needs
 the buttons land on that poster's own yellow band, which already prints the same URLs, so
 the clickable version covers nothing a reader loses. Re-measure for a new flyer.
 
-### Which event a click means
-Each event is its own `.ebar-ev` segment and a click resolves against the segment it
-landed on: one under the pointer wins outright, and a click in a gap falls to whichever
-segment has the most of itself on screen. With one event it always answers the same way;
-with several the moment of the click is what chooses.
+### A click means all of them
+The panel is the whole bill. Every live event is listed, in date order, and where on the
+strip the click landed makes no difference.
 
-That is why **the tape stops dead on `pointerdown`, not just on hover.** A click has to be
-able to mean the thing that was under it, and a target moving at 22.6 seconds a lap cannot
-be aimed at with a finger, where there is no hover to stop it first.
+It used to resolve: each event was a `.ebar-ev` segment, a segment under the pointer won
+outright, and a click in a gap fell to whichever segment had the most of itself on screen.
+That was right for one event and wrong for four. A lap of four town halls is 108 seconds,
+so any one of them is on screen about a quarter of the time, and "click the one you want"
+meant waiting for it to come round, on a strip that is moving. Reading four dates and
+picking one is what a reader wants to do anyway. `eventAt()` and its hit-testing are gone.
+
+The segments still exist, because they are what the tape is built from and what carries
+each event's `data-cd`, but nothing hit-tests them any more.
+
+**The tape still stops dead on `pointerdown`, not just on hover**, though the reason has
+changed. It is no longer about aiming: it is that a strip in motion under a finger reads as
+something that got away from you, and stopping it is half the affordance that the bar is
+a control at all.
+
+**One row is accented as the next one up:** the soonest event that has not finished yet,
+red-ruled with a red countdown. `nextUp()` returns null rather than `list[0]` once every
+event on the bar is over and only lingering, so nothing is accented then; the accent means
+"plan around this one" and a finished meeting is not it. The title still needs a name in
+that state, so it falls back through `titleEvent()`.
+
+**The accent is moved by `paintCountdowns()`, not by `fillAll()`.** It has to be, because
+the panel can be open when the clock crosses a boundary: setting it once at fill time meant
+a panel left open across 8 PM on a hall night showed that row's countdown flip to "Just
+happened" while it stayed painted red as the one to plan around. The accent and the
+countdown are two readings of the same clock, so they move on the same pass.
+
+### Retirement while the panel is open
+The 30-second tick calls `refresh()`, which rebuilds a *closed* bar and refreshes an *open*
+one in place. It has to split, because `build()` replaces the bar's innerHTML, which takes
+the panel with it and clears `is-open`: the dropdown would slam shut in the reader's face
+at the exact moment the list changed under them. Open, it swaps only the two things
+carrying the list, the tape's runs and the panel's contents, and the panel's height
+transition then runs from the old height to the new one so the retired row is *seen* to go.
+
+**Pace after painting the countdowns, never before.** `runHTML()` writes the countdown
+spans empty and `paintCountdowns()` is what fills them, so the run is not its final width
+until it has. Measuring first sets the lap for a narrower tape than the one on screen and
+the type runs fast. On first load this is invisible, because the `fonts.ready` re-pace
+corrects it a moment later; on a retirement nothing corrects it and the speed drifts up
+for good. It read 39.4 px/s instead of 36 after one hall retired, which is exactly the
+kind of thing only a clock test catches.
+
+**A shared `note` is hoisted** to the top of the panel as an introduction, but only when
+every live event carries the identical note. Four town halls in one series share one
+description and printing it four times is noise. A mixed bill keeps each note with its own
+event instead.
 
 ### Gotchas
 **One tap is one state change, and it has to be enforced.** Real touch hardware delivers a

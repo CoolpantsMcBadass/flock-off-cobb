@@ -141,8 +141,11 @@
     display:inline-flex;min-width:100%;
     transition:transform .26s cubic-bezier(.5,0,.85,.3), opacity .26s ease-in;
   }
-  /* 22.6s is 34s at 1.5x. The lap time is the speed: the tape travels its own width
-     either way, so a shorter duration is a faster scroll and nothing else shifts. */
+  /* The duration here is only a fallback for the first frame. Lap time is NOT the speed
+     once the number of events can vary: the tape travels its own width per lap, so a run
+     of four events at a fixed 22.6s scrolls four times as fast as a run of one. `pace()`
+     measures the run and sets the duration from a constant px/s, which is the thing a
+     reader actually experiences. See TAPE_SPEED in the script. */
   .ebar-tape{display:inline-flex;white-space:nowrap;animation:ebarRun 22.6s linear infinite;}
   @keyframes ebarRun{from{transform:translateX(0);}to{transform:translateX(-50%);}}
   /* The type lives on the run so both variants get it; .ebar-ev only groups an event's
@@ -268,6 +271,74 @@
   }
   .ebar-links a:hover{background:var(--yellow);color:var(--ink);border-color:var(--yellow);}
   .ebar-links a.go{background:var(--red);border-color:var(--red);}
+
+  /* Not every event comes with artwork. A poster carries its own frame on the <img>, so
+     a card has to be framed instead, and the frame goes on the sheet rather than the card
+     so the links bar sits inside it as a footer strip rather than floating below the
+     shadow. Same 3px ink outline and hard offset shadow either way, so the two variants
+     are the same object with different contents. */
+  .ebar-sheet.is-card{
+    background:var(--paper);border:3px solid var(--ink);box-shadow:var(--shadow);
+  }
+  /* The bar's own title already says the name, the date and the time. What the card owes
+     the reader is the part the strip has no room for: what the meeting is, and where. */
+  /* The colour has to be stated here. The card is a paper box inside the bar, and the bar
+     is light type on ink, so anything that does not set its own colour inherits paper on
+     paper and vanishes. */
+  .ebar-card{padding:16px 18px;color:var(--ink);}
+  .ebar-card p{margin:0;}
+  .ebar-card .what{
+    font-family:"Spectral",Georgia,serif;font-size:.84rem;line-height:1.45;
+    color:var(--ink-soft);
+  }
+  .ebar-card .venue{
+    font-family:"Anton",Impact,sans-serif;font-size:1.35rem;line-height:1.1;
+    letter-spacing:.02em;text-transform:uppercase;margin-top:10px;
+  }
+  .ebar-card .addr{
+    font-family:"Space Mono",monospace;font-size:.6rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-soft);margin-top:5px;
+  }
+  /* Every event on the bar, because a click means all of them. Hairlines between rather
+     than boxes around each: four framed cards inside a framed sheet is three frames deep,
+     and the dates are already doing the separating. */
+  .ebar-all{list-style:none;margin:0;padding:0;}
+  .ebar-item{padding:13px 0;border-top:1px solid rgba(22,19,17,.16);}
+  .ebar-item:first-child{border-top:0;padding-top:4px;}
+  .ebar-item:last-child{padding-bottom:2px;}
+  /* Full ink and set first: the when is the line that has to survive being skimmed, and
+     with four rows it is what the reader is actually scanning down. */
+  .ebar-item .when{
+    font-family:"Space Mono",monospace;font-size:.62rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .ebar-item .when .ebar-cd{color:var(--teal);}
+  .ebar-item .venue{font-size:1.05rem;margin-top:6px;}
+  /* The soonest one that has not happened yet. A list of four dates has one row that
+     matters most today, and it should not take reading all four to find it: red rule,
+     red countdown, and the row indented off it. */
+  .ebar-item.is-next{border-left:3px solid var(--red);padding-left:11px;}
+  .ebar-item.is-next .when .ebar-cd{color:var(--red);}
+  .ebar-item.is-next .venue{color:var(--red-deep);}
+  /* A shared note is an introduction to the bill, so it needs air under it. */
+  .ebar-card > .what{margin-bottom:13px;}
+  .ebar-item .what{margin-top:7px;}
+  /* Poster inside a row: the positioned ancestor `linksAt` needs, and the frame the
+     sheet is no longer providing per event now that the sheet holds the whole list. */
+  .ebar-shot{position:relative;margin-top:10px;}
+  .ebar-shot img{display:block;width:100%;height:auto;border:3px solid var(--ink);}
+  /* Links for an event with no artwork to park them on. Same buttons, inverted for paper. */
+  .ebar-rowlinks{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+  .ebar-rowlinks a{
+    font-family:"Space Mono",monospace;font-size:.55rem;letter-spacing:.06em;
+    text-transform:uppercase;text-decoration:none;padding:4px 8px;
+    border:1px solid var(--ink);color:var(--ink);
+  }
+  .ebar-rowlinks a:hover{background:var(--ink);color:var(--paper);}
+  .ebar-rowlinks a.go{background:var(--red);border-color:var(--red);color:var(--paper);}
+  /* In flow for a card: `linksAt` parks the buttons on a band of artwork that a card
+     does not have, so here they become the footer of the frame instead. */
+  .ebar-sheet.is-card .ebar-links{position:static;margin-top:14px;}
 
   @media(max-width:520px){
     .ebar-ev{font-size:.68rem;letter-spacing:.1em;}
@@ -2134,34 +2205,57 @@
       return guess - (et.getTime() - utc.getTime());
     }
 
+    // Cobb County PD's four community town halls on Flock. They are one series run four
+    // times at four venues, so `name` is the same on all of them and `where` is what tells
+    // them apart: the strip prints the venue for that reason, and the panel leads with it.
+    // None of the four has a flyer, which is what the posterless card variant is for.
+    // Ours, not a quotation, so it says what we are willing to say. "Flock Safety" is the
+    // company's own branding rather than its name, and "safeguarded" is the claim the
+    // whole campaign disputes; neither belongs in our description of their meeting.
+    const HALL_NOTE = 'Cobb County PD will address common concerns about Flock, ' +
+                      'explain how the technology is used, and take questions ' +
+                      'from the community.';
+    // All four run 6:30 to 8 PM. Retiring 4 hours after the end drops each one at midnight
+    // the same night, so a finished hall never reads as live the next morning and the next
+    // one in the series moves up on its own.
+    const HALL = {name:'Cobb PD Flock Town Hall', time:'6:30–8 PM', linger:4, note:HALL_NOTE};
+
     const EVENTS = [
       {
-        id:'live-info-session',
-        name:'Live Info Session',
-        date:'Tue Aug 18',
-        time:'6–10 PM',
-        where:'45 South Ave SE, Marietta',
-        start:[2026, 7, 18, 18, 0],
-        end:  [2026, 7, 18, 22, 0],
-        // Hours the bars keep carrying it after it is over, for anyone who turns up
-        // late that night. Retires at 4 AM ET on the 19th.
-        linger:6,
-        poster:'assets/live-info-session.jpg',
-        w:1429, h:2000,
-        alt:'DeFlock Cobb Live Info Session, August 18 2026, 6:00 pm to 10:00 pm, at 45 South Ave SE, Marietta, Georgia 30060. Explore the rapid expansion of AI-powered surveillance, ALPRs, and the growing impact these technologies have on privacy and civil liberties. Speakers: guest speaker Dr. Jon Padfield of YouTube channel BusinessReform, a special message from Will Freeman, DeFlock founder, and a guest question and answer session with Benn Jordan of YouTube channel BennJordan. Register via Eventbrite. More at noalprs.com and deflockatlanta.org.',
-        // The poster says REGISTER NOW but the Eventbrite link is not in hand yet. These
-        // two are the sites printed on the flyer itself. Add the registration URL as a
-        // third entry with primary:true and it becomes the red button.
-        // Where the clickable links sit on the sheet, measured from its bottom edge.
-        // This poster prints noalprs.com and deflockatlanta.org in a yellow band at 11%,
-        // so the buttons land on top of the very links they are, and the venue address
-        // in the band below stays readable. Re-measure for a different flyer, or drop it
-        // and they pin to the bottom edge.
-        linksAt:'11%',
-        links:[
-          {label:'noalprs.com', href:'https://noalprs.com'},
-          {label:'deflockatlanta.org', href:'https://deflockatlanta.org'}
-        ]
+        ...HALL,
+        id:'town-hall-milford',
+        date:'Thu Aug 27',
+        where:'Milford Recreation Center',
+        address:'675 Smyrna Powder Springs Rd, Marietta',
+        start:[2026, 7, 27, 18, 30],
+        end:  [2026, 7, 27, 20, 0]
+      },
+      {
+        ...HALL,
+        id:'town-hall-sewell-mill',
+        date:'Mon Aug 31',
+        where:'Sewell Mill Library',
+        address:'2051 Lower Roswell Rd, Marietta',
+        start:[2026, 7, 31, 18, 30],
+        end:  [2026, 7, 31, 20, 0]
+      },
+      {
+        ...HALL,
+        id:'town-hall-west-cobb',
+        date:'Tue Sep 1',
+        where:'West Cobb Senior Center',
+        address:'4915 Dallas Hwy, Powder Springs',
+        start:[2026, 8, 1, 18, 30],
+        end:  [2026, 8, 1, 20, 0]
+      },
+      {
+        ...HALL,
+        id:'town-hall-north-cobb',
+        date:'Tue Sep 15',
+        where:'North Cobb Senior Center',
+        address:'3900 S. Main St, Acworth (in Kenworth Park)',
+        start:[2026, 8, 15, 18, 30],
+        end:  [2026, 8, 15, 20, 0]
       }
     ];
     // When it ends and when the bars stop carrying it are two different instants, and
@@ -2173,6 +2267,28 @@
     });
 
     const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    /* Pixels per second, and the tape's real setting. The stylesheet used to fix the lap
+       at 22.6s, which was the same thing while there was exactly one event on the bar: the
+       tape covers its own width once per lap, so with a constant width, lap time is speed.
+       With a variable number of events it is not. Measured on this page: the single Live
+       Info Session ran a 630px lap at 27.9 px/s, and the same 22.6s across four town halls
+       is a 3,886px lap at 172 px/s, six times faster and unreadable. So the duration is
+       derived from the width instead and the speed is what stays put. A longer bill takes
+       a longer lap, which is the honest trade.
+
+       36 px/s, chosen by eye against the old bar's 27.9, which read as slow once four
+       events meant waiting through all of them. This is the one number to turn: everything
+       else follows from it, at every width. */
+    const TAPE_SPEED = 36;
+    function pace(bar){
+      const run = bar.querySelector('.ebar-run'), tape = bar.querySelector('.ebar-tape');
+      if(!run || !tape) return;
+      const w = run.getBoundingClientRect().width;
+      // Zero while the bar is hidden or mid-rebuild; leave the stylesheet's value alone
+      // rather than writing an infinite duration.
+      if(w > 0) tape.style.animationDuration = (w / TAPE_SPEED).toFixed(2) + 's';
+    }
 
     // Whole Eastern calendar days, not 24-hour chunks, so the day before reads
     // "Tomorrow" all evening rather than flipping to "Today" at some arbitrary hour.
@@ -2190,6 +2306,14 @@
       return 'In ' + n + ' days';
     }
 
+    /* The soonest event that has not finished yet, or null when everything still on the
+       bar is over and only lingering. Not list[0]: a finished event goes on lingering, so
+       between 8 PM and midnight on a hall night the first entry is already over. Null
+       rather than a fallback, because the accent means "plan around this one" and a
+       finished meeting is not it. Out here rather than inside setup() because the
+       countdown pass needs it too, and the two must not disagree about which row is next. */
+    const nextUp = now => list.find(e => now < e._end) || null;
+
     const live = () => EVENTS.filter(e => Date.now() < e._gone);
     let list = live();
     if(!list.length) return;
@@ -2200,9 +2324,13 @@
         '<span class="ebar-cd" data-cd="' + esc(ev.id) + '"></span>' +
         '<span class="ebar-sep">&middot;</span>' + esc(ev.name) +
         '<span class="ebar-sep">&middot;</span>' + esc(ev.date) + ', ' + esc(ev.time) +
-        // The address is on the poster and in its alt text; what the strip needs in that
-        // space is to say it can be opened. Wording swaps with the pointer, the way the
-        // flyer's hint does.
+        // The venue, where there is one. A series run four times under one name is told
+        // apart by where it is, and the tape is the one place with room to say so: the
+        // title truncates, and it has the date to identify the next one by.
+        (ev.where ? '<span class="ebar-sep">&middot;</span>' + esc(ev.where) : '') +
+        // The street address lives in the panel; what the strip needs in that space is to
+        // say it can be opened. Wording swaps with the pointer, the way the flyer's
+        // hint does.
         '<span class="ebar-sep">&middot;</span>' +
         '<span class="ebar-hint"><span class="h-click">Click for info</span>' +
         '<span class="h-tap">Tap for info</span></span>' +
@@ -2216,15 +2344,25 @@
     // about how far away the same event is.
     function paintCountdowns(){
       const now = Date.now();
+      const next = nextUp(now);
       list.forEach(ev => {
         const text = countdown(ev, now);
         document.querySelectorAll('[data-cd="' + ev.id + '"]').forEach(el => { el.textContent = text; });
+        /* The accent and the countdown are two readings of the same clock, so they move
+           together or not at all. They used to not: the accent was set once when the panel
+           was filled and never again, so a panel left open across 8 PM on a hall night
+           showed that row's countdown flip to "Just happened" while it stayed painted red
+           as the one to plan around. Costs one class toggle on the pass that was already
+           running, and covers the empty case too, where nothing is upcoming and no row
+           should be accented. */
+        document.querySelectorAll('.ebar-item[data-ev="' + ev.id + '"]').forEach(li => {
+          li.classList.toggle('is-next', ev === next);
+        });
       });
     }
 
     function setup(bar, idx){
       const panelId = 'ebarPanel' + idx;
-      let current = null;
       /* One tap has to be one state change. Real touch hardware delivers a second click
          from the same gesture, and the two ways through the click handler are not
          symmetric about it: a second click on the poster falls out at the `.ebar-btn`
@@ -2238,7 +2376,6 @@
 
       const btn   = () => bar.querySelector('.ebar-btn');
       const panel = () => bar.querySelector('.ebar-panel');
-      const clip  = () => bar.querySelector('.ebar-clip');
 
       /* What is left once the tape has run out, and under reduced motion the payload
          itself, since nothing scrolls there and a clipped strip would show only its
@@ -2267,48 +2404,87 @@
           '</button>' +
           '<div class="ebar-panel" id="' + panelId + '"></div>';
         bar.classList.remove('is-open', 'is-frozen');
-        current = null;
-        renderTitle(list[0]);
+        // The soonest unfinished one, not list[0]: between 8 PM and midnight on a hall
+        // night the first entry is still on the bar and is already over.
+        renderTitle(titleEvent());
         bar.hidden = false;
+        /* Order matters, and getting it wrong is silent. `runHTML()` writes the countdown
+           spans empty and `paintCountdowns()` is what puts "In 3 days" in them, so the run
+           is not its final width until it has run. Pacing first measures a tape narrower
+           than the one on screen and sets too short a lap, which reads as the tape running
+           fast for no visible reason. On first load that was hidden by the fonts.ready
+           re-pace happening to correct it a moment later; on a retirement there is nothing
+           to correct it and the speed simply drifts up. Also after `hidden` is cleared, or
+           the run measures 0 and there is nothing to pace at all. */
+        paintCountdowns();
+        pace(bar);
       }
 
-      /* Which event did that click mean? A segment under the pointer wins outright. If
-         the click landed in a gap between segments, the one with the most of itself on
-         screen does. With one event this always answers the same way; with several it is
-         what makes the moment of the click the thing that chooses, which is why the tape
-         stops dead on pointerdown rather than carrying on under the finger. */
-      const byId = id => list.find(e => e.id === id) || list[0];
-      function eventAt(clientX){
-        const segs = bar.querySelectorAll('.ebar-ev');
-        const box = clip().getBoundingClientRect();
-        let best = null, bestSeen = -Infinity;
-        for(const seg of segs){
-          const r = seg.getBoundingClientRect();
-          if(clientX >= r.left && clientX <= r.right) return byId(seg.dataset.ev);
-          const seen = Math.min(r.right, box.right) - Math.max(r.left, box.left);
-          if(seen > bestSeen){ bestSeen = seen; best = seg; }
-        }
-        return best ? byId(best.dataset.ev) : list[0];
-      }
+      // The title always needs something to name, even when nothing is upcoming.
+      const titleEvent = () => nextUp(Date.now()) || list[0];
 
-      function fill(ev){
-        const links = (ev.links || []).map(l =>
+      function evLinks(ev){
+        return (ev.links || []).map(l =>
           '<a href="' + esc(l.href) + '" target="_blank" rel="noopener"' +
           (l.primary ? ' class="go"' : '') + '>' + esc(l.label) + '</a>').join('');
+      }
+
+      function itemHTML(ev, isNext, shared){
+        const links = evLinks(ev);
+        /* A poster keeps everything it had: its own frame, and its `linksAt` overlay,
+           for which this wrapper is the positioned ancestor those absolutely placed
+           buttons need. Without a poster the same buttons sit under the address as
+           ordinary paper-side buttons instead, since there is no artwork to park them on. */
+        const shot = ev.poster
+          ? '<div class="ebar-shot"' +
+              (ev.linksAt ? ' style="--links-at:' + esc(ev.linksAt) + '"' : '') + '>' +
+              '<img src="' + esc(ev.poster) + '" width="' + ev.w + '" height="' + ev.h +
+                '" alt="' + esc(ev.alt) + '">' +
+              (links ? '<div class="ebar-links">' + links + '</div>' : '') +
+            '</div>'
+          : (links ? '<div class="ebar-rowlinks">' + links + '</div>' : '');
+        // data-ev is what lets the countdown pass find this row again to move the accent.
+        return '<li class="ebar-item' + (isNext ? ' is-next' : '') +
+            '" data-ev="' + esc(ev.id) + '">' +
+            '<p class="when"><span class="ebar-cd" data-cd="' + esc(ev.id) + '"></span>' +
+              '<span class="ebar-sep">&middot;</span>' + esc(ev.date) +
+              '<span class="ebar-sep">&middot;</span>' + esc(ev.time) + '</p>' +
+            (ev.where ? '<p class="venue">' + esc(ev.where) + '</p>' : '') +
+            (ev.address ? '<p class="addr">' + esc(ev.address) + '</p>' : '') +
+            // Only when the bill does not share one note. See fillAll.
+            (!shared && ev.note ? '<p class="what">' + esc(ev.note) + '</p>' : '') +
+            shot +
+          '</li>';
+      }
+
+      /* The panel is the whole bill, not the segment that happened to be under the
+         pointer. Four dates for one series is something you read as a list and pick from,
+         and showing all of it takes the lap out of the reader's way: at 36 px/s any one
+         hall is on screen for about a quarter of 108 seconds, so "click the one you want"
+         meant waiting for it to come round. Now any click answers every question the bar
+         can answer, which is also why nothing has to work out which event a click meant. */
+      function fillAll(){
+        const next = nextUp(Date.now());
+        /* One note shared by every event on the bar is an introduction, not a per-row
+           field: printing "Cobb County PD will address..." four times is noise. Hoisted
+           only when they all agree, so a mixed bill keeps each note with its own event. */
+        const notes = list.map(e => e.note || '');
+        const shared = notes.length && notes.every(n => n === notes[0]) ? notes[0] : '';
         panel().innerHTML =
-          '<div class="ebar-poster"><div class="ebar-sheet"' +
-            (ev.linksAt ? ' style="--links-at:' + esc(ev.linksAt) + '"' : '') + '>' +
-            '<img src="' + esc(ev.poster) + '" width="' + ev.w +
-              '" height="' + ev.h + '" alt="' + esc(ev.alt) + '">' +
-            (links ? '<div class="ebar-links">' + links + '</div>' : '') +
-          '</div></div>';
-        renderTitle(ev);
+          '<div class="ebar-poster"><div class="ebar-sheet is-card"><div class="ebar-card">' +
+            (shared ? '<p class="what">' + esc(shared) + '</p>' : '') +
+            '<ol class="ebar-all">' +
+              list.map(ev => itemHTML(ev, ev === next, shared)).join('') +
+            '</ol>' +
+          '</div></div></div>';
+        renderTitle(next || list[0]);
         paintCountdowns();
         // The intrinsic ratio comes off the width/height attributes, so the panel can be
-        // measured before the JPEG has arrived. Re-measure when it does, in case a
-        // fallback or a cache miss changes it.
-        const img = panel().querySelector('img');
-        img.addEventListener('load', () => { if(bar.classList.contains('is-open')) size(); }, {once:true});
+        // measured before any JPEG has arrived. Re-measure as each lands, in case a
+        // fallback or a cache miss changes it. Text rows are already their full height.
+        panel().querySelectorAll('img').forEach(img => {
+          img.addEventListener('load', () => { if(bar.classList.contains('is-open')) size(); }, {once:true});
+        });
       }
       function size(){ panel().style.height = panel().scrollHeight + 'px'; }
 
@@ -2329,10 +2505,9 @@
         });
       }
 
-      function open(ev){
+      function open(){
         lastToggle = Date.now();
-        current = ev;
-        fill(ev);
+        fillAll();
         size();                                  // also flushes layout, so the fades run
         bar.classList.add('is-open');
         btn().setAttribute('aria-expanded', 'true');
@@ -2343,7 +2518,28 @@
         panel().style.height = '0px';
         bar.classList.remove('is-open', 'is-frozen');
         btn().setAttribute('aria-expanded', 'false');
-        current = null;
+      }
+
+      /* What the clock calls when an event retires. A closed bar can simply be rebuilt.
+         An open one cannot: `build()` replaces the bar's innerHTML, which takes the panel
+         with it and clears `is-open`, so the dropdown would slam shut in the reader's face
+         at the exact moment the list changed under them, with no explanation on offer.
+         So when it is open, swap only the two things that actually carry the list, the
+         tape's runs and the panel's contents, and leave the elements holding them alone.
+         The panel's height transition then does the right thing by itself: it runs from
+         the old height to the new one, so the retired row is seen to go rather than
+         vanishing between frames. Nothing re-animates, because the sheet is rebuilt inside
+         a bar that is already `is-open` and a fresh element does not transition into its
+         starting style. */
+      function refresh(){
+        if(!bar.classList.contains('is-open')){ build(); return; }
+        const run = runHTML();
+        bar.querySelectorAll('.ebar-run').forEach(el => { el.innerHTML = run; });
+        // fillAll paints the countdowns, and the tape is not its final width until it has.
+        // Pace after, never before. See the note in build().
+        fillAll();
+        pace(bar);       // the run is shorter now, so the lap has to shorten with it
+        size();
       }
 
       // Bound to the container rather than the button, so a rebuild does not lose them.
@@ -2357,31 +2553,40 @@
         if(!bar.classList.contains('is-open')) bar.classList.remove('is-frozen');
       });
       bar.addEventListener('click', e => {
-        if(e.target.closest('.ebar-links a')) return;   // let the links be links
+        // Let the links be links, wherever they sit: on a poster or under an address.
+        if(e.target.closest('.ebar-links a, .ebar-rowlinks a')) return;
         if(Date.now() - lastToggle < 450) return;       // the gesture's second click
-        // Open, anything closes it, the poster included. Opening scrolls the bar into
-        // view, which slides the strip out from under the pointer and leaves it over the
-        // poster, so a second click landing there has to mean the obvious thing. There is
-        // nothing else it could mean: the tape has run out by then, so there is no other
-        // event on screen to be choosing between.
+        // Open, anything closes it, the panel included. A click no longer has to mean a
+        // particular event, since every click means all of them, so where on the strip it
+        // landed does not matter and there is nothing to hit-test.
         if(bar.classList.contains('is-open')){ close(); return; }
         if(!e.target.closest('.ebar-btn')) return;
-        open(eventAt(e.clientX));
+        open();
       });
 
       build();
       return {
         el: bar,
-        build: build,
+        refresh: refresh,
         close: close,
         focus: () => btn().focus(),
-        resize: () => { if(bar.classList.contains('is-open')) size(); },
+        pace: () => pace(bar),
+        // The type shrinks at the 520px breakpoint, so the run gets narrower and the lap
+        // has to shorten with it or the speed changes on rotation.
+        resize: () => { pace(bar); if(bar.classList.contains('is-open')) size(); },
         isOpen: () => bar.classList.contains('is-open')
       };
     }
 
     const instances = bars.map(setup);
     paintCountdowns();
+
+    /* The pace is measured, so it depends on the face that did the measuring. Space Mono
+       arrives after first paint and is wider than the fallback, so the build-time pass can
+       set a lap for type that is no longer on screen. Do it again once the real face is in. */
+    if(document.fonts && document.fonts.ready){
+      document.fonts.ready.then(() => instances.forEach(inst => inst.pace()));
+    }
 
     /* The poster covers the section under it now, so a click anywhere else has to put it
        away. Clicks inside a bar are its own handler's business, and a click on the other
@@ -2407,7 +2612,9 @@
       if(next.length !== list.length){
         list = next;
         if(!list.length){ instances.forEach(inst => { inst.el.hidden = true; }); return; }
-        instances.forEach(inst => inst.build());
+        // Rebuilds a closed bar and refreshes an open one in place. Events only ever leave
+        // this list, never join it, so a change in length is always a retirement.
+        instances.forEach(inst => inst.refresh());
       }
       paintCountdowns();
     }, 30000);
