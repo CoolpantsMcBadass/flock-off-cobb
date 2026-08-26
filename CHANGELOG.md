@@ -5,6 +5,20 @@ All notable changes to the Flock Off Cobb site are recorded here.
 ## 2026-08-25
 
 ### Added
+- The hero flyer has content again: the two-slide Week of Action thank-you carousel, with working paging. It had been empty since the schedule flyer retired on the 23rd.
+- The slides are the clean originals from the post rather than the screenshots they were handed over as. Both screenshots had Instagram's own carousel UI baked into the pixels, the arrows and the dot indicators, which would have sat underneath the real buttons and read as a rendering fault. `assets/week-recap-1.webp` and `-2.webp`, 1000px WebP, 144KB and 108KB against 488KB of source JPEG.
+- Prev and next arrows, two dots, and left/right arrow keys. Paging does not wrap: the end buttons disable, so an arrow that does nothing at least looks like it. Each change announces "Slide 1 of 2" through the existing `.flyer-status` live region.
+- **The controls are siblings of `.flyer-btn`, not children.** The flyer's toggle is one big `<button>` wrapping the entire sheet, so paging buttons inside it would be buttons inside a button: invalid content and not reliably reachable by a screen reader. `.flyer-nav` sits alongside and is laid back over the sheet by carrying the button's own width, `rotate(-2.2deg)` and `transform-origin`. It also means an arrow click never reaches the toggle, so none of it needs `stopPropagation`; what it does need is `markOpen()` on each paging action, or a click on an arrow lets the dwell clock run out and the next click reads as an abandon rather than a dismiss.
+- Slides cross-fade rather than slide, because `.flyer-plate` is already being scaled by `--plate-s` through the unroll and a second transform nested inside that is a fight nobody wins. Both slides are 4:5 like the artwork they replaced, so `--ar` stays at `.8` and no open geometry moved.
+
+### Removed
+- The five day-ticks and their `DONE_AT` schedule, along with the now-unused `DAYS` array. They belonged to the week's schedule artwork; a two-slide recap has no day tabs to strike through.
+
+### Changed
+- `ENDS` moves to 11:59 PM ET Thu 27 Aug 2026, and the date belongs to the artwork rather than to taste: slide 2 ends "showing up at the Flock town hall meeting THIS THURSDAY", so the flyer is wrong the moment that Thursday is over. Three more town halls follow and the event bars carry those correctly, but this sheet cannot, because the words are painted into the picture.
+- The burst label reads "Thank you, Cobb County! / Week of Action" instead of the schedule's "National Week of Action! / Aug 17 – 21", and the button's screen-reader label says what it now opens and how many slides are in it.
+
+### Added
 - The event bars carry Cobb County PD's four community town halls on Flock: Thu Aug 27 at Milford Recreation Center, Mon Aug 31 at Sewell Mill Library, Tue Sep 1 at West Cobb Senior Center, and Tue Sep 15 at North Cobb Senior Center, all 6:30–8 PM. The bars had been empty since the Live Info Session retired on the 19th. They are one series run four times, so `name` is shared and the venue is what tells them apart.
 - The strip now prints `where`. It was a declared field that nothing had ever rendered, which was fine when one event was on the bar and is not when four share a name and a time and differ only by address.
 - A card for events with no poster. Most events are not announced with a flyer, and these four were a paragraph of prose, so an event without artwork now opens to what the strip has no room for: what the meeting is, the venue, the street address, and the date and time. The frame moved from the image to the sheet so the links bar sits inside it as a footer rather than floating below the shadow.

@@ -590,23 +590,46 @@ droplets on every page load. Three separate things can hold the flyer open (hove
 keyboard focus, the `is-open` class), so `stillOpen()` checks all three before anything
 counts as a close.
 
-### Crossing the days off
-Each day gets a green marker tick once it is over, at midnight ET the following
-morning, from the `DONE_AT` instants in the same IIFE. Ticks already earned are drawn
-on load; any still to come get a `setTimeout`, so a page left open overnight crosses
-the day off by itself.
+### Paging between slides
+The flyer holds a carousel. The first `.fslide` stays in normal flow and is what gives
+`.flyer-plate` its height; the rest are absolutely positioned over it and cross-fade.
+**Every slide must be the same shape**, or the sheet changes height mid-carousel and
+fights the open geometry. Both current slides are 4:5, the same as the schedule artwork
+they replaced, so `--ar` stays at `.8` and nothing about the unroll moved.
 
-The ticks are positioned as percentages of the artwork, so they hold at any size. The
-day tabs were measured off the image: 264px wide starting at x128, 136px tall, the
-first at y385 and one every 162px. In percentages that is `left:15.1%` with tab centres
-at `33.56%` and every 12% after. They live in `.flyer-plate` alongside the image rather
-than in `.flyer-window`, because the window's height is animated and clipping, so
-percentages against it would drift as the sheet unrolls.
+They cross-fade rather than slide because `.flyer-plate` is already being scaled by
+`--plate-s` during the unroll, and a second transform nested inside that is a fight
+nobody wins.
 
-Re-measure if the artwork changes. The tabs are hard to find by colour alone (the white
-day names break each tab into pieces, and "Wednesday" is wide enough to reach the strip
-of tab left of the text) so the reliable route is to find the first two tabs, take the
-pitch between them, and step down.
+**The controls are siblings of `.flyer-btn`, not children, and this is not negotiable.**
+The flyer's toggle is one big `<button>` wrapping the whole sheet, so paging buttons
+placed inside it would be buttons inside a button: invalid content, and not reliably
+reachable by screen readers. `.flyer-nav` sits alongside and is laid back over the sheet
+by carrying the button's own `width`, `rotate(-2.2deg)` and `transform-origin:100% 0`.
+Change the button's tilt and you must change the nav's to match.
+
+A happy consequence: clicks on the arrows never reach the toggle, so none of this needs
+`stopPropagation`. What it does need is `markOpen()` on every paging action, or a click
+on an arrow lets the dwell clock run out and the next click reads as an abandon rather
+than a dismiss.
+
+Arrows sit at `calc(var(--fw) / var(--ar) / 2)`, the vertical middle of the open sheet.
+Dots go *under* the sheet rather than on it, because the artwork runs to its own edges
+and a row of dots over the bottom would land on the words. Paging does not wrap; the end
+buttons disable instead, so an arrow that does nothing at least looks like it. Left and
+right arrow keys page too, but only while the sheet is open.
+
+The old day-ticks are gone with the schedule artwork. If a future flyer needs marks
+struck over it again, they lived in `.flyer-plate` alongside the image (never in
+`.flyer-window`, whose height is animated and clipping, so percentages against it drift
+as the sheet unrolls) and were positioned as percentages of the artwork.
+
+### The retirement date belongs to the artwork
+`ENDS` is not a matter of taste. The current slide 2 ends "showing up at the Flock town
+hall meeting **THIS THURSDAY**", so the flyer is wrong the moment that Thursday is over,
+which is why it retires 11:59 PM ET on Thu 27 Aug 2026. Three more town halls follow it
+and the event bars carry those correctly, but this sheet cannot: the words are painted
+into the picture. Move `ENDS` only by replacing the artwork.
 
 ## The map
 The "Cameras Are Already Here" section is a self-hosted Leaflet map centered on
