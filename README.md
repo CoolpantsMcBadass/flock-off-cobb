@@ -16,7 +16,8 @@ Plain HTML/CSS/JS — no build step, no dependencies.
 - `assets/mableton-districts.geojson` — Mableton council district polygons (districts 1–6)
 - `assets/powder-springs-wards.geojson` — Powder Springs ward polygons (wards 1–3)
 - `assets/smyrna-wards.geojson` — Smyrna ward polygons (wards 1–7)
-- `assets/week-of-action.jpg` — the Week of Action flyer shown in the hero
+- `assets/week-recap-1.webp`, `-2.webp` — the two flyer slides shown in the hero
+- `assets/posts.json` + `assets/posts/` — the recent-posts strip in step 5
 - `assets/live-info-session.jpg` — the Live Info Session poster carried by the event bars
 
 ## The event bars
@@ -254,14 +255,18 @@ end of the first `<script>`. The CSS variables on `.flyer` do the work:
 | `--open-d` | the outline's open shape; see "Morphing the edge" |
 | `--plate-w` / `--plate-s` | derived; see below |
 
-To swap in a different flyer, drop the image at `assets/week-of-action.jpg`, set `--ar`
-to its ratio, and edit the two lines of text inside `.flyer-burst`. Update the `alt`
-text to describe the new schedule too, since that text is the only version a screen
-reader gets.
+To swap in a different flyer: drop the images in `assets/`, point the `.fslide` tags at
+them, set `--ar` to their ratio, and edit the two lines of text inside `.flyer-burst`.
+One slide or six, the paging code counts what it finds; with one it hides the controls.
+**Every slide must share one ratio**, or the sheet changes height mid-carousel.
 
-The flyer hides itself once the week is over: the IIFE compares the clock against
-`ENDS`, set to 11:59 PM ET on the Sunday after the week, and simply never unhides it
-after that. To run it again for a later action, change `ENDS` and the image.
+Write new `alt` text for each. It is the only version of the artwork a screen reader
+gets, so a swap that leaves it alone silently publishes the last flyer's message to the
+people least able to check it against the picture.
+
+The flyer hides itself once its moment has passed: the IIFE compares the clock against
+`ENDS` and simply never unhides it after that. Set `ENDS` from what the artwork *says*,
+not from how long you would like it up. See "The retirement date belongs to the artwork".
 
 ### Morphing the edge
 The spikes retract into the sheet's four edges. They do not fade out while a rectangle
