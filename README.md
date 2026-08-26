@@ -738,6 +738,29 @@ repo's call to make. An embed widget needs no conversion but puts Meta's trackin
 of every visitor, on a site whose argument is that unconsented tracking is wrong and which
 runs GoatCounter for that reason. So: our pictures, our domain, nothing third-party loads.
 
+### On a phone it swipes
+Below 760px the strip stops being a grid and becomes a snapping row: `display:flex`,
+`overflow-x:auto`, `scroll-snap-type:x mandatory`, cards at `flex:0 0 80%`. Four
+full-width cards down a phone is four screens of scrolling for something meant to be
+glanceable, and it buries the social icons underneath all of it.
+
+Native scroll-snap does the whole gesture, momentum included, so there is no touch
+handling here to get wrong on real hardware. The cards are links, so tab still reaches
+them and the browser scrolls each into view by itself.
+
+The cards are 80% rather than 100% on purpose: the peek of the next card is the only
+thing telling anyone there is more. The row bleeds `-24px` right and pads it back, so a
+card can sit flush against the step's inner edge, and the trailing padding is what lets
+the last card snap all the way in instead of stopping short.
+
+**`overflow-x` alone does not make it scroll.** `.step` is a grid item and its text
+column is a flex item, and both default to `min-width:auto`, which refuses to shrink
+below their content. A row of cards is very wide content, so rather than the cards
+scrolling inside a narrow box, the box grew to fit them and dragged the whole step with
+it: 456px of step on a 390px screen, clipped by `body{overflow-x:hidden}` so it looked
+merely wrong rather than obviously broken. `.step, .step > div{min-width:0}` is what
+actually lets the scroller scroll.
+
 ### Two things that will bite
 **Every colour on the card is stated, and the selectors are two classes deep.** The cards
 are paper sitting inside a step that is light-on-ink, and the step colours its own

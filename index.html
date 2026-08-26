@@ -1079,8 +1079,37 @@
   @media(max-width:1000px){.igwall{grid-template-columns:repeat(2,1fr);}}
   @media(max-width:760px){
     .steps{grid-template-columns:1fr;}
-    .igwall{grid-template-columns:1fr;gap:12px;}
-    .igcap{-webkit-line-clamp:4;}
+    /* Without this the scroller cannot scroll: `.step` is a flex row, its text column is
+       a flex item, and a flex item's `min-width:auto` refuses to shrink below its
+       content. A row of cards is very wide content, so instead of the cards scrolling
+       inside a narrow box, the box grew to fit them and took the whole step with it,
+       456px of it on a 390px screen. `overflow-x` on the scroller is not enough on its
+       own; something in the chain has to be allowed to be narrower than its contents. */
+    .step, .step > div{min-width:0;}
+    /* Swipe rather than stack. Four full-width cards down a phone is four screens of
+       scrolling for a strip meant to be glanceable, and it buries the social icons under
+       all of it. A snapping row keeps the whole thing to one screen.
+       Native scroll-snap does the entire gesture, momentum and all, so there is no touch
+       handling here to get wrong on real hardware — which, given what one tap cost on the
+       event bar, is the whole reason for doing it this way. The cards are links, so tab
+       still reaches them and the browser scrolls each into view by itself. */
+    .igwall{
+      display:flex;gap:12px;
+      overflow-x:auto;overscroll-behavior-x:contain;
+      scroll-snap-type:x mandatory;
+      /* Bleed to the step's inner edge and pad back, so a card can sit flush right while
+         the next one peeks past it. That peek is the only thing saying there is more, and
+         it is why the cards are not full width. The trailing padding is also what lets the
+         last card snap all the way in rather than stopping short. */
+      margin-right:-24px;padding-right:24px;scroll-padding-right:24px;
+      padding-bottom:6px;                 /* room for the cards' offset shadow */
+      scrollbar-width:none;
+    }
+    .igwall::-webkit-scrollbar{display:none;}
+    .igwall .igcard{flex:0 0 80%;scroll-snap-align:start;}
+    /* Two classes deep, to match the base rule. As a bare `.igcap` this lost to
+       `.igcard .igcap` and the phone quietly kept the three-line clamp. */
+    .igcard .igcap{-webkit-line-clamp:4;}
   }
 
   /* letter */
@@ -2938,9 +2967,14 @@
     const DWELL = 250, SOFT = 250;
     let openedAt = 0, softTimer;
     const markOpen = () => { openedAt = performance.now(); };
+    /* Assigned by the paging block further down, which is where the slides are. Declared
+       up here as a no-op because the closes below run before it and must not care whether
+       this flyer has more than one slide. */
+    let rewind = () => {};
     const unsoften = () => { clearTimeout(softTimer); flyer.classList.remove('is-soft-close'); };
     function softClose(){
       unsoften();
+      rewind();
       flyer.classList.add('is-soft-close');
       // Carries closing timings, so it must be on before the style flush — same rule as
       // the pop class. Cleared generously late; it only ever affects a close.
@@ -3006,7 +3040,7 @@
 
     let popTimer;
     const popping = () => flyer.classList.contains('is-popping');
-    const unpop = () => { clearTimeout(popTimer); endReform(); flyer.classList.remove('is-popping'); };
+    const unpop = () => { clearTimeout(popTimer); endReform(); rewind(); flyer.classList.remove('is-popping'); };
 
     // Two callers: the pop, which runs it after its .6s of empty space, and the spawn,
     // which runs the same thing on arrival with almost no wait in front of it. Hence the
@@ -3307,6 +3341,20 @@
         markOpen();
         show(slide + (e.key === 'ArrowRight' ? 1 : -1), true);
       });
+
+      /* Back to the first slide once it has shut, so every opening starts where the story
+         does rather than wherever the last reader left off. Both closes call this: the pop
+         through `unpop`, the quiet one through `softClose`.
+
+         Guarded, because the sheet is not always gone when a close begins. A pointer
+         clipping the corner on the desktop closes and reopens within a few frames, and
+         flipping the slide out from under someone still looking at it is worse than
+         leaving it. Only rewinds if the flyer really is shut by the time this runs, and
+         never announces, since nothing has been navigated to. */
+      rewind = () => {
+        if(flyer.classList.contains('is-open') || hovering) return;
+        if(slide !== 0) show(0, false);
+      };
 
       show(0, false);
     }

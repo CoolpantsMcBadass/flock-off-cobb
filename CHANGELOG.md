@@ -5,6 +5,14 @@ All notable changes to the Flock Off Cobb site are recorded here.
 ## 2026-08-25
 
 ### Added
+- The posts strip swipes on a phone instead of stacking. Below 760px it becomes a snapping row of cards at 80% width, so the whole strip is one screen rather than four and the social icons are not buried under it. Native CSS scroll-snap does the gesture, momentum included, so there is no touch handling to get wrong on real hardware; the cards are links, so tab still reaches them. The 80% is deliberate: the peek of the next card is the only thing saying there is more.
+- The hero flyer rewinds to slide 1 when it shuts, so every opening starts where the story does rather than wherever the last reader left off. Both closes call it, the pop and the quiet one. Guarded: a pointer clipping the corner on the desktop closes and reopens within a few frames, and flipping the slide out from under someone still looking at it is worse than leaving it, so it only rewinds if the flyer is genuinely shut by the time it runs.
+
+### Fixed
+- **`overflow-x:auto` alone did not make the strip scroll.** `.step` is a grid item and its text column is a flex item; both default to `min-width:auto` and refuse to shrink below their content. So instead of the cards scrolling inside a narrow box, the box grew to fit them and took the whole step with it, 456px wide on a 390px screen, clipped by `body{overflow-x:hidden}` so it read as merely wrong rather than obviously broken. `.step, .step > div{min-width:0}` fixes it. Both links in the chain need it; doing only the inner one changed nothing.
+- The mobile four-line caption clamp had never applied. It was written as a bare `.igcap`, and bumping the base rule to `.igcard .igcap` for the colour fix made the base more specific, so the phone quietly kept the three-line clamp. Now two classes deep to match.
+
+### Added
 - The hero flyer has content again: the two-slide Week of Action thank-you carousel, with working paging. It had been empty since the schedule flyer retired on the 23rd.
 - The slides are the clean originals from the post rather than the screenshots they were handed over as. Both screenshots had Instagram's own carousel UI baked into the pixels, the arrows and the dot indicators, which would have sat underneath the real buttons and read as a rendering fault. `assets/week-recap-1.webp` and `-2.webp`, 1000px WebP, 144KB and 108KB against 488KB of source JPEG.
 - Prev and next arrows, two dots, and left/right arrow keys. Paging does not wrap: the end buttons disable, so an arrow that does nothing at least looks like it. Each change announces "Slide 1 of 2" through the existing `.flyer-status` live region.
