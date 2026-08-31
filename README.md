@@ -849,6 +849,37 @@ rAF that asked for 1 again. It never left 1, so the cue dissolved into nothing. 
 looked fine throughout, because its start value is the same 1 it already had: half of a
 two-sided cross-fade can be broken while the other half is perfect.
 
+### Saying it can be opened
+Two things do it, and the corner box on the art is the third.
+
+`.issue-hint` sits under the art where the credit used to, set in Bangers in signal red
+and tilted a degree and a half. It reads "Click to open!" and swaps to "Tap to open!"
+below 860px, reusing the flyer's `.hov`/`.tap` idiom. It is `aria-hidden` — the button
+above it already says all of this in a sentence — and `pointer-events:none`, because the
+picture is the button and a second thing that looks like a target but is not would be
+worse than nothing. **It must stay a sibling of the button, not a child**: the flight
+clones `.issue-front`, and anything inside would fly with the cover.
+
+The nudge is one shimmy and swell on the art, half a second after `load`, once per page.
+It peaks at `1.034` scale and about 6px of travel, and the hint pulses a beat behind it so
+they read as one gesture.
+
+- **There is no rotation in the keyframes and there must not be.** The flight measures the
+  hero and fits a stand-in onto it. `fitPose` solves a scale and an offset, so a hero
+  caught mid-scale or mid-shift is absorbed exactly and a hero caught mid-rotation is not.
+  This is the same constraint that keeps the hover lift to a translate.
+- It runs on `.issue-front`, a child of the box the flight measures, and the stand-in's
+  clone is not inside `.issue.is-nudging` — so the clone can never inherit it and the
+  cover cannot fly mid-wobble.
+- `open()` removes the class before it measures anything. Clicking mid-nudge at `1.034`
+  therefore starts the stand-in at the hero's resting rect, not the swollen one. The cost
+  is that the art snaps back to rest on the click; it is a 3% snap in the frame you press,
+  which is a moment of expected change anyway.
+- On `load` + 500ms, not a timer from parse: on a slow connection the wait would otherwise
+  be spent on a page that has not drawn, and the nudge would happen where nobody is
+  looking. Skipped if the reader has already been opened, and never added at all under
+  `prefers-reduced-motion`.
+
 ### The pencilled credit
 The inside of the front cover carries the credit, in three lines: the cover artist, the
 zine's makers, and a thank you. It is the left-hand page of the spread the book opens to,

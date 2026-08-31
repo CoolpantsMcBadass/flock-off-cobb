@@ -5,6 +5,14 @@ the long-form reasoning behind older entries is in git history.
 
 ## 2026-08-31
 
+### Added
+- **"Click to open!" under the hero art, and a single nudge to go with it.** Bangers in signal red, right-aligned where the art credit used to sit, tilted the way a comic sets an aside. It reads "Tap to open!" below 860px, reusing the flyer's `.hov`/`.tap` swap.
+- **The art shakes itself once, half a second after the page has settled.** A shimmy and a swell, peaking at 1.034 scale and about 6px of travel, with the hint pulsing a beat behind it so the two read as one gesture. Once per load, and skipped entirely for anyone who has already opened the reader.
+  - **No rotation in it, and that is not a style choice.** The flight measures the hero and fits a stand-in onto it, and `fitPose` solves a scale and an offset — a hero caught mid-scale or mid-shift is absorbed exactly, a hero caught mid-rotation is not. Same constraint that governs the hover lift.
+  - Fires on `load` + 500ms rather than on a timer from parse, so the wait is half a second of a finished page. On a slow connection a timer from parse spends it on a page that has not drawn.
+  - `open()` clears the class before it measures anything, so clicking mid-nudge is clean: verified in both engines at 1.034 scale, the stand-in's first frame starts at the hero's resting `{804,161,476}` rather than at the swollen one.
+  - Silent under `prefers-reduced-motion`: the class is never added at all, verified.
+
 ### Changed
 - **The art credit is pencilled on the inside of the zine's cover.** Three lines where a zine's maker signs it, on the left-hand page of the spread the book opens to: the cover artist, then "Zine art and content by anonymous concerned citizens", then "Thank you".
   - Set in Caveat, the one handwriting face on the site. The zine's own hand could not do this job — VTC Letterer Pro is caps-only comic lettering, so it reads as printed *on* the page, and a signature has to read as written on it.

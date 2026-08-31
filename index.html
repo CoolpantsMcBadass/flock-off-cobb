@@ -410,7 +410,64 @@
   }
   /* .art-credit is gone with the line it styled. The credit is pencilled on the
      inside of the zine's cover now, and the footer's legal line still names the
-     artist for anyone who never opens the book. */
+     artist for anyone who never opens the book. What sits in its place is the
+     invitation to open it. */
+  .issue-hint{
+    margin:11px 0 0;text-align:right;
+    font-family:'Bangers',Impact,sans-serif;font-weight:400;
+    font-size:1.5rem;letter-spacing:.045em;line-height:1;
+    color:var(--red);
+    /* Hand-lettered on the end of a line, the way a comic sets an aside. The
+       origin is the right edge so the tilt pivots where the line ends rather
+       than swinging the whole thing off its margin. */
+    transform:rotate(-1.8deg);transform-origin:100% 50%;
+    /* It is a label, not a target: the whole picture above it is the button, and
+       a second hit region that looks like a link but is not would be worse than
+       none. */
+    pointer-events:none;
+  }
+  .issue-hint .tap{display:none;}
+
+  /* The nudge. Nothing else on the page says the picture can be opened, and a
+     comic lying on a table does not announce itself, so it asks once -- half a
+     second after the page has settled, and never again.
+
+     NO ROTATION IN HERE, and that is not a style choice. The flight measures the
+     hero and fits a stand-in onto it; fitPose solves a scale and an offset, so a
+     hero that is mid-scale or mid-shift when you click is absorbed exactly, and a
+     hero that is mid-ROTATION is not. The same constraint governs the hover lift,
+     and it is why this is a shimmy and a swell rather than a waggle.
+
+     It runs on .issue-front, which is a child of the box the flight measures, and
+     the stand-in's clone is not inside .issue.is-nudging -- so the clone never
+     inherits it and the cover cannot fly mid-wobble. */
+  @keyframes issue-nudge{
+    0%   {transform:translateX(0)    scale(1);}
+    12%  {transform:translateX(-7px) scale(1.010);}
+    26%  {transform:translateX(7px)  scale(1.024);}
+    40%  {transform:translateX(-6px) scale(1.034);}
+    54%  {transform:translateX(4px)  scale(1.028);}
+    68%  {transform:translateX(-3px) scale(1.018);}
+    84%  {transform:translateX(1px)  scale(1.007);}
+    100% {transform:translateX(0)    scale(1);}
+  }
+  .issue.is-nudging .issue-front{
+    animation:issue-nudge 1.05s cubic-bezier(.36,.07,.19,.97);
+  }
+  /* The hint gets the same beat, a little behind, so the two read as one gesture
+     rather than as a picture moving next to a caption that does not. */
+  @keyframes hint-nudge{
+    0%,100%{transform:rotate(-1.8deg) scale(1);}
+    30%    {transform:rotate(-1.8deg) scale(1.13);}
+    60%    {transform:rotate(-1.8deg) scale(.99);}
+  }
+  .issue.is-nudging + .issue-hint{
+    animation:hint-nudge .72s cubic-bezier(.36,.07,.19,.97) .1s;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .issue.is-nudging .issue-front,
+    .issue.is-nudging + .issue-hint{animation:none;}
+  }
 
   /* ---------- WEEK OF ACTION FLYER (rolled poster in the hero) ----------
      --fw is the poster width, --ar its width/height ratio, and --roll-h the
@@ -961,6 +1018,9 @@
     .flyer-btn{transform:none;}
     .flyer-hint .hov{display:none;}
     .flyer-hint .tap{display:inline;}
+    /* Same swap, same reason: there is no clicking on a phone. */
+    .issue-hint .hov{display:none;}
+    .issue-hint .tap{display:inline;}
   }
 
   /* The slogan ticker used to have its own rules here. Its place below the hero is now
@@ -2704,7 +2764,14 @@
     <!-- The credit that used to sit here is pencilled on the inside of the
          cover now, where the zine's maker signs it. The footer's legal line
          still names the artist on the page itself, so nothing is lost for a
-         visitor who never opens the book. -->
+         visitor who never opens the book.
+
+         In its place, the invitation. aria-hidden because the button above it
+         already says all of this in a sentence, and a screen reader announcing
+         "Click to open" next to "Read the zine..." is the same instruction
+         twice. It must stay a SIBLING of the button, not a child: the flight
+         clones .issue-front, and anything inside it would fly with the cover. -->
+    <p class="issue-hint" aria-hidden="true"><span class="hov">Click to open!</span><span class="tap">Tap to open!</span></p>
   </div>
 </div>
 
@@ -5716,6 +5783,9 @@
     var seq = ++openSeq;
 
     lastFocus = document.activeElement;
+    // The nudge has done its job the moment this runs, and it writes a transform
+    // on the very element the flight is about to measure and clone.
+    issueBtn.classList.remove('is-nudging');
 
     // The page is locked BEFORE the hero is measured, not after, which is the
     // one ordering difference from the zine's own page. Hiding the body's
@@ -5937,6 +6007,37 @@
 
   issueBtn.addEventListener('click', open);
   document.getElementById('rClose').addEventListener('click', close);
+
+  // ---- the nudge ----------------------------------------------------------
+  // The hero art has always been a picture, so nothing about it says it can now
+  // be opened. It shakes itself once, half a second after the page has settled.
+  //
+  // On `load` rather than on a timer from parse, so the half second is half a
+  // second of a finished page and not of one still pulling in the map, the fonts
+  // and the artwork — on a slow connection a timer from parse spends its wait on
+  // a page that has not drawn yet, and the nudge happens where nobody is looking.
+  //
+  // Once. An affordance that keeps asking is not an affordance, it is a fidget,
+  // and this one is on the largest thing on the page.
+  if(!reduceMotion.matches){
+    var nudge = function(){
+      window.setTimeout(function(){
+        // Somebody who has already opened it does not need to be told it opens.
+        if(!reader.hidden || nudged) return;
+        nudged = true;
+        issueBtn.classList.add('is-nudging');
+      }, 500);
+    };
+    var nudged = false;
+    if(document.readyState === 'complete') nudge();
+    else window.addEventListener('load', nudge, { once:true });
+    // Cleared when it finishes so the class cannot collide with the hover lift,
+    // which writes the same property on the same element. Guarded by name: this
+    // listener sees every animation that bubbles out of the button.
+    issueBtn.addEventListener('animationend', function(e){
+      if(e.animationName === 'issue-nudge') issueBtn.classList.remove('is-nudging');
+    });
+  }
 
   // ---- shut the book by pressing a cover ----------------------------------
   // Three faces close the book: the outside front, the inside front, and the
