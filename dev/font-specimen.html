@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zine body font candidates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Shantell+Sans:ital,wght@0,400;0,700&family=Comic+Relief:wght@400;700&family=Comic+Neue:ital,wght@0,400;0,700&family=Kalam:wght@400;700&family=Baloo+2:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+/* Trial faces served as the original TTFs, deliberately unconverted: Komika's
+   licence permits use "as is" next to a no-modification clause, and there is no
+   need to lean on the grey area while we are only choosing. */
+@font-face{font-family:'Komika Text';src:url('fonts-trial/KomikaText-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:block;}
+@font-face{font-family:'Komika Text';src:url('fonts-trial/KomikaText-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:block;}
+@font-face{font-family:'VTC Letterer Pro';src:url('fonts-trial/VTCLettererPro.ttf') format('truetype');font-weight:400;font-style:normal;font-display:block;}
+
+/* Real numbers throughout: the zine's paper, its dot screen, its 32.9px Bangers
+   heading and its 13.3px body with a real bold. */
+:root{--page:#f6f0df;--ink:#17140f;}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:#2a2622;color:#f6f0df;padding:12px 16px 16px;
+  font-family:system-ui,-apple-system,sans-serif;
+}
+h1{font-family:'Bangers',sans-serif;font-weight:400;letter-spacing:.02em;font-size:1.25rem;margin:0 0 2px;}
+.note{font-size:.68rem;color:#b6ab99;margin:0 0 12px;line-height:1.45;max-width:120ch;}
+.note b{color:#f5c518;font-weight:600;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+@media(max-width:820px){.grid{grid-template-columns:1fr;}}
+
+.tag{font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:#f5c518;margin:0 0 5px;font-weight:600;}
+.tag em{color:#8f8676;font-style:normal;text-transform:none;letter-spacing:0;font-weight:400;}
+.tag.win{color:#7fd18a;}
+.tag.bad{color:#e0705f;}
+
+.page{
+  background-color:var(--page);color:var(--ink);
+  background-image:
+    radial-gradient(rgba(23,20,15,.055) 1px,transparent 1.1px),
+    radial-gradient(rgba(23,20,15,.03) 1px,transparent 1.4px);
+  background-size:3px 3px,9px 9px;
+  padding:13px 14px;border:2px solid #000;height:100%;
+}
+.page h2{
+  font-family:'Bangers',Impact,sans-serif;font-weight:400;
+  font-size:23px;line-height:1;margin:0 0 .45em;letter-spacing:.012em;
+}
+.page p{font-size:13.3px;line-height:1.45;margin:0 0 .7em;}
+.page p:last-child{margin:0;}
+.page .say{font-weight:700;text-align:center;font-size:14.8px;line-height:1.28;margin:.8em 0 0;}
+.page strong{font-weight:700;}
+
+.f1 .page p{font-family:'Shantell Sans',cursive;}
+.f2 .page p{font-family:'Komika Text',cursive;}
+.f3 .page p{font-family:'Comic Relief',cursive;}
+.f4 .page p{font-family:'Comic Neue',cursive;}
+.f5 .page p{font-family:'Kalam',cursive;}
+.f6 .page p{font-family:'Baloo 2',cursive;}
+.f7 .page p{font-family:'VTC Letterer Pro',cursive;}
+</style>
+</head>
+<body>
+<h1>Zine body font — 7 candidates</h1>
+<p class="note">Set at the zine's real 13.3&nbsp;px body size on the real paper, with a real bold. Headings stay Bangers throughout. <b>Green</b> = licence clearly permits webfont serving and the face ships a true 700 weight. <b>Red</b> = a problem worth knowing about.</p>
+
+<div class="grid">
+
+  <div class="f1">
+    <p class="tag">1 · Shantell Sans <em>— current · OFL</em></p>
+    <div class="page">
+      <h2>Are You Safer Being Watched?</h2>
+      <p><strong>Not in Atlanta. Clearance Rates have Declined, NOT IMPROVED</strong></p>
+      <p class="say">Democracy doesn't defend itself!</p>
+    </div>
+  </div>
+
+  <div class="f2">
+    <p class="tag win">2 · Komika Text <em>— recommended · freeware</em></p>
+    <div class="page">
+      <h2>Are You Safer Being Watched?</h2>
+      <p><strong>Not in Atlanta. Clearance Rates have Declined, NOT IMPROVED</strong></p>
+      <p class="say">Democracy doesn't defend itself!</p>
+    </div>
+  </div>
+
+  <div class="f3">
+    <p class="tag">3 · Comic Relief <em>— OFL</em></p>
+    <div class="page">
+      <h2>Are You Safer Being Watched?</h2>
+      <p><strong>Not in Atlanta. Clearance Rates have Declined, NOT IMPROVED</strong></p>
+      <p class="say">Democracy doesn't defend itself!</p>
+    </div>
+  </div>
+
+  <div class="f4">
+    <p class="tag">4 · Comic Neue <em>— OFL</em></p>
+    <div class="page">
+      <h2>Are You Safer Being Watched?</h2>
+      <p><strong>Not in Atlanta. Clearance Rates have Declined, NOT IMPROVED</strong></p>
+      <p class="say">Democracy doesn't defend itself!</p>
+    </div>
+  </div>
+
+  <div class="f5">
+    <p class="tag">5 · Kalam <em>— OFL</em></p>
+    <div class="page">
+      <h2>Are You Safer Being Watched?</h2>
+      <p><strong>Not in Atlanta. Clearance Rates have Declined, NOT IMPROVED</strong></p>
+      <p class="say">Democracy doesn't defend itself!</p>
+    </div>
+  </div>
+
+  <div class="f6">
+    <p class="tag">6 · Baloo 2 <em>— OFL</em></p>
+    <div class="page">
+      <h2>Are You Safer Being Watched?</h2>
+      <p><strong>Not in Atlanta. Clearance Rates have Declined, NOT IMPROVED</strong></p>
+      <p class="say">Democracy doesn't defend itself!</p>
+    </div>
+  </div>
+
+  <div class="f7">
+    <p class="tag bad">7 · VTC Letterer Pro <em>— caps only, fake bold</em></p>
+    <div class="page">
+      <h2>Are You Safer Being Watched?</h2>
+      <p><strong>Not in Atlanta. Clearance Rates have Declined, NOT IMPROVED</strong></p>
+      <p class="say">Democracy doesn't defend itself!</p>
+    </div>
+  </div>
+
+
+</div>
+<p class="note" style="margin:12px 0 0;"><b>Ruled out:</b> Blambot (Back Issues, Badaboom) — best faces here, but the licence explicitly excludes "Embedding, Webfont, and Redistributive use." · Adam Warren Pro — ships a real Bold, but is non-commercial freeware and silent on embedding; needs written permission first.</p>
+</body>
+</html>
