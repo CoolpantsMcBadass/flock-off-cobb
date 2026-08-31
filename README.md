@@ -885,6 +885,14 @@ open, the 18 leaves print one to a page and the reader bar and arrows are hidden
 paths verified under print emulation.
 
 ### Things that will bite
+- **Anything the flying cover needs must not be behind a `.hero-art` descendant
+  selector.** The stand-in carries a clone of the hero's image appended to
+  `document.body`, so it has no `.hero-art` ancestor. `.hero-art .frame` is what draws the
+  art's 5px trim and its hard shadow, and for one revision the cover flew without either
+  and snapped both on at touchdown. `box-sizing` is `border-box`, so a missing border is
+  not only missing chrome — the artwork rendered 10px wider and shrank to fit on landing.
+  The rule is `.hero-art .frame,.flight .frame` now. If the hero gains any other painted
+  detail, it needs the same treatment or it will pop at both joins.
 - **Focus must be restored when the hero is visible again, not at the end of `close()`.**
   The animated close hides the hero for the length of the flight, and `focus()` on a
   `visibility:hidden` element does nothing at all, silently — the browser refuses it and

@@ -389,7 +389,17 @@
   .btn-primary{background:var(--red);color:var(--paper);}
   .btn-ghost{background:var(--paper);color:var(--ink);}
   .hero-art{position:relative;}
-  .hero-art .frame{
+  /* .flight is in this selector because the stand-in that flies between the hero
+     and the open book carries a CLONE of this image, and the clone is appended to
+     document.body — it has no .hero-art ancestor, so a descendant selector alone
+     never reached it. The cover therefore flew with no trim and no shadow, and
+     both snapped on at the moment it landed.
+     It is not only chrome that was missing. The border is inside the box
+     (box-sizing is border-box on *), so without it the artwork itself rendered
+     10px wider than the real one and shrank to fit on touchdown. Measured across
+     the cover at mid-height: the flying art ran x=40..515 with no trim, the
+     resting art x=45..515 inside a 5px trim from x=40. That was the jump. */
+  .hero-art .frame,.flight .frame{
     border:5px solid var(--ink);background:var(--teal);box-shadow:var(--shadow);
     display:block;width:100%;height:auto;
   }
