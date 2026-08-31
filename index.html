@@ -6063,6 +6063,53 @@
   // is the finger-following peel on these four pages, so a drag is answered
   // directly instead: right turns back, left turns on, which is what dragging
   // a cover does. Under 24px it is a tap, and a tap shuts the book.
+  // ---- a pinch is not a page turn -----------------------------------------
+  // Two fingers on a page zoomed it AND turned it. The library's onTouchStart
+  // tests `changedTouches` and never `touches`, so the second finger of a pinch
+  // arrives looking exactly like a fresh first one: it overwrites the gesture in
+  // progress, and the fingers spreading apart is then read as a swipe when they
+  // lift.
+  //
+  // This matters more here than it would on most pages. usePortrait is off, so
+  // body copy is about 6px on a phone and pinching is how the zine gets read at
+  // all — the viewport meta leaves scaling unlocked precisely so that it can be.
+  // The one gesture a reader needs most was the one that threw the page away.
+  //
+  // Fixed above the library, not inside it. Its handlers sit on `window` in the
+  // BUBBLE phase, so a capture listener on `document` sees every touch first and
+  // stopPropagation() keeps a multi-touch gesture from ever reaching them. The
+  // vendored file stays untouched and pinned.
+  var multiTouch = false;
+  function pinchGuard(e){
+    if(e.touches && e.touches.length > 1){
+      multiTouch = true;
+      // Unstart whatever the first finger began. touchPoint is the library's
+      // entire record of a gesture in progress: the deferred startUserTouch
+      // checks it before firing, and with mobileScrollSupport on so does every
+      // touchmove. Clearing it inside the 250ms swipeTimeout means the peel
+      // never begins, rather than beginning and having to be unwound.
+      // getUI() is public; the touch state is not reached through a minified
+      // property name.
+      if(flip && flip.getUI && flip.getUI()) flip.getUI().touchPoint = null;
+      // And the same for our own press-a-cover-to-close, which is a second
+      // capture listener on this element — stopPropagation does not stop it,
+      // only stopImmediatePropagation would, and that would be too blunt.
+      coverDown = null;
+    }
+    if(multiTouch) e.stopPropagation();
+  }
+  function pinchRelease(e){
+    if(multiTouch) e.stopPropagation();
+    // Only once the LAST finger has gone. Lifting one of two still leaves a
+    // gesture in progress, and calling that the end of it hands the library the
+    // tail of a pinch to read as a fresh swipe.
+    if(e.touches && e.touches.length === 0) multiTouch = false;
+  }
+  document.addEventListener('touchstart',  pinchGuard,   true);
+  document.addEventListener('touchmove',   pinchGuard,   true);
+  document.addEventListener('touchend',    pinchRelease, true);
+  document.addEventListener('touchcancel', pinchRelease, true);
+
   var coverDown = null;
   var COVER_LAST = leaves.length - 1;
   function isCoverFace(t){
@@ -6074,6 +6121,9 @@
   }
   function coverPress(e){
     if(!flip || reader.hidden || morph) return;      // never mid-morph
+    // A second finger means a pinch, and a pinch is not a press. Without this a
+    // reader zooming in on a cover would shut the book on themselves.
+    if(e.touches && e.touches.length > 1) return;
     var t = e.target;
     // Anything you can actually press keeps its press: the sheet downloads on
     // the inside back cover, and the barcode on the outside back.

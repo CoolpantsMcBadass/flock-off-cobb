@@ -3,6 +3,16 @@
 All notable changes to the Flock Off Cobb site are recorded here. Entries are kept short;
 the long-form reasoning behind older entries is in git history.
 
+## 2026-09-01
+
+### Fixed
+- **A pinch was turning the page.** Found on a real phone against the live site: two fingers on a page zoomed it *and* threw it away. StPageFlip's `onTouchStart` tests `changedTouches` and never `touches`, so the second finger of a pinch arrives looking exactly like a fresh first one — it overwrites the gesture in progress, and the fingers spreading apart reads as a swipe when they lift.
+  - Worse here than it would be elsewhere: `usePortrait` is off, so body copy is about 6px on a phone and pinching is how the zine gets read at all. The viewport meta leaves scaling unlocked precisely so it can be. The one gesture a reader needs most was the one that lost their place.
+  - Fixed above the library rather than inside it, so the vendored file stays untouched and pinned. Its handlers sit on `window` in the bubble phase, so a capture listener on `document` sees every touch first and `stopPropagation()` keeps a multi-touch gesture from reaching them.
+  - The first finger has usually already started something, so the guard also clears the library's `touchPoint` through its public `getUI()`. That is its entire record of a gesture in progress — the deferred `startUserTouch` checks it before firing, and with `mobileScrollSupport` on so does every touchmove — so clearing it inside the 250ms `swipeTimeout` means the peel never begins rather than beginning and being unwound.
+  - `coverPress` needed the same guard separately. It is a second capture listener on `document`, and `stopPropagation` does not stop listeners on the same element. Without it, pinching to zoom on a cover shut the book.
+  - Reproduced against the shipped build before fixing: a pinch took the book from the spread `1,2` to leaf `0`. After: it stays on `1,2`, and a one-finger swipe still turns `1,2` → `3,4`. A two-finger tap on a cover leaves the reader open; a one-finger tap still closes it. Both engines.
+
 ## 2026-08-31
 
 ### Added

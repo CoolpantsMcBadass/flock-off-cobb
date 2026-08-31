@@ -937,6 +937,41 @@ nothing — `.reader[hidden]` is `display:none` at `(0,1,1)` and the print block
 open, the 18 leaves print one to a page and the reader bar and arrows are hidden. Both
 paths verified under print emulation.
 
+### Multi-touch
+**A pinch must never turn a page.** StPageFlip's `onTouchStart` tests `changedTouches` and
+never `touches`, so the second finger of a pinch arrives looking exactly like a fresh first
+one: it overwrites the gesture in progress, and the fingers spreading apart is read as a
+swipe when they lift. On the live site that took the book from a spread straight back to
+the cover.
+
+This is not a small bug here. `usePortrait` is off, so body copy is about 6px on a phone
+and pinching is how the zine gets read at all — the viewport meta leaves scaling unlocked
+precisely so it can be.
+
+`pinchGuard` sits in front of the library. Its handlers are on `window` in the **bubble**
+phase, so a capture listener on `document` sees every touch first and `stopPropagation()`
+keeps a multi-touch gesture from ever reaching them. The vendored file stays untouched.
+
+Two things about it that are easy to get wrong:
+
+- **Clear the library's `touchPoint` when the second finger lands**, through the public
+  `getUI()`. The first finger has usually already started something. `touchPoint` is the
+  library's entire record of a gesture in progress: the deferred `startUserTouch` checks
+  it before firing, and with `mobileScrollSupport: true` so does every touchmove. Clearing
+  it inside the 250ms `swipeTimeout` means the peel never begins.
+- **`coverPress` needs its own guard.** It is a second capture listener on `document`, and
+  `stopPropagation` does not stop listeners on the *same* element — only
+  `stopImmediatePropagation` would, and that would be too blunt. Without its own check,
+  pinching to zoom on a cover shut the book.
+- `multiTouch` clears only when the **last** finger lifts. Lifting one of two still leaves
+  a gesture in progress, and calling that the end hands the library the tail of a pinch.
+
+Testing it needs engine-specific plumbing: **WebKit has no `Touch` constructor** (illegal
+constructor) and keeps the legacy `document.createTouch`/`createTouchList`; Chrome is the
+other way round. Both support the `TouchEvent` constructor. And run the reproduction
+against the previous build first — a multi-touch test that passes before the fix is
+testing nothing.
+
 ### Things that will bite
 - **Anything the flying cover needs must not be behind a `.hero-art` descendant
   selector.** The stand-in carries a clone of the hero's image appended to
