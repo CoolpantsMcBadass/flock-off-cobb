@@ -3,6 +3,28 @@
 All notable changes to the Flock Off Cobb site are recorded here. Entries are kept short;
 the long-form reasoning behind older entries is in git history.
 
+## 2026-08-31
+
+### Added
+- **The zine is on the site, and it opens out of the hero art.** Pressing the chicken unfolds it into the fourteen-page reader; closing folds it back down onto the same picture. No page load anywhere in it.
+  - Inlined into `index.html` rather than iframed or given its own page, because the flight carries clones of the real leaves so its last frame is pixel-identical to the live book, and clones do not cross documents.
+  - The hero art keeps its frame, its trim, its shadow and its credit. Verified by full-page pixel diff against the committed page at 1400x950 and 390x844: the only pixels that differ anywhere on the site are the corner box, one 85x57 rectangle on desktop and 67x46 on a phone.
+  - Two changes to the flight and no more: `TILT_Y` is 0 because the hero is flat and has to stay flat, and the fore-edges grow from nothing rather than starting at the full block, because a flat poster has no page edges to show.
+- **The cue on the art is the comic's own corner box**, and it is the same box as the one on the cover inside — same rules, same corner, different word. "NO. 1 / Read it" on the hero, "NO. 1 / FREE" in the book, cross-fading into each other across the flight so the cue becomes the price box as the cover swings. The two opacities sum to 1.000 at every sampled frame.
+- **A neutraliser above the zine's CSS**, for the leak the zine's own page never had to survive: `index.html` sets `a`, `a:hover` and `h1,h2,h3` as bare element rules and all three reach inside the reader. Headings and the resting link state go in `:where()` so they outrank a bare `h2` but lose to everything the zine writes, `.dl-title` included. The hover rule is deliberately not in `:where()` — the site's `a:hover` is (0,1,1) and would otherwise light a yellow highlight under every citation in the book.
+
+### Changed
+- **`--ink` and `--ink-soft` are `--z-ink` and `--z-ink-soft` throughout the zine's CSS.** The one real collision between the two palettes, and at `#17140f` against `#161311` it would have read as slightly wrong rather than as broken.
+- **The zine's `body` rule is a `.reader,.flight` rule.** Left as a body rule it would have put a caps-only comic face and a dark board behind the whole campaign site.
+- **Focus is restored when the hero is visible again, not at the end of `close()`.** The animated close hides the hero for the length of the flight, and `focus()` on a `visibility:hidden` element does nothing at all, silently. It now runs from the morph's `onDone`. Since neither engine focuses a button when it is clicked on macOS, `lastFocus` is almost always the body, and the new fallback to the hero button is the case that actually runs — without it a keyboard visitor was dropped at the top of an 8,800px page.
+- **The page is locked before the hero is measured**, and unlocked before it is measured again on the way out. A precaution against classic scrollbars widening the viewport when the body's overflow is hidden, not a fix for anything observed: the scroll position is untouched either way, measured at 120 before, during and after in both engines.
+
+### Fixed
+- **Half the corner-box cross-fade never ran.** The pair's start values were written while their stylesheet transition was live — `ghost.style.transition='none'` is set on the ghost and transition does not inherit — so the price box, sitting at its default opacity of 1, was given a start value of 0, began a 780ms fade down, and was merely reversed by the rAF asking for 1 again. It never left 1 and the cue dissolved into nothing. The cue looked correct throughout because its start value is the same 1 it already had.
+
+### Removed
+- **`dev/zine.html`.** It was a complete copy of shipped code and would have drifted within a revision or two. Recoverable at `5683ea6`.
+
 ## 2026-08-30
 
 ### Removed

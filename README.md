@@ -19,6 +19,10 @@ Plain HTML/CSS/JS — no build step, no dependencies.
 - `assets/week-recap-1.webp`, `-2.webp` — the two flyer slides shown in the hero
 - `assets/posts.json` + `assets/posts/` — the recent-posts strip in step 5
 - `assets/live-info-session.jpg` — the Live Info Session poster carried by the event bars
+- `assets/zine/` — the zine: the two imposed source PDFs, the fold guide, the thirteen
+  drawings cut from them, the QR code, and VTC Letterer Pro with its licence
+- `assets/vendor/page-flip/` — StPageFlip, vendored with its licence (see "The zine")
+- `dev/build-zine-art.py` — rebuilds every drawing from the source sheets
 
 ## The event bars
 Two ink strips carrying dated events: one directly under the nav, one below the hero
@@ -785,6 +789,138 @@ the app gave them, and this strip mixes 4:5 stills with 9:16 reels, which is nea
 again as tall at the same width. Left at their own ratios the captions stop lining up and
 the row grows to the tallest thing in it. Cropping to one shape is what Instagram's own
 grid does, and it means whatever gets added next still fits.
+
+## The zine
+The printed zine, rebuilt as a comic book that opens out of the hero art. Press the
+chicken and it unfolds into a fourteen-page reader; close it and it folds back down onto
+the picture it came from.
+
+It lives in `index.html` like everything else. It was built as its own page,
+`dev/zine.html`, and that file is **deleted** rather than kept alongside — it was a
+complete copy of shipped code and would have drifted within a revision or two. It is at
+`5683ea6` if the standalone is ever wanted back.
+
+### Why it is inlined and not an iframe or a second page
+The opening is one continuous motion with no page load in it, and that constrains the
+architecture. The stand-in that flies from the hero to the open spread carries **clones of
+the real leaves** — the inside front cover on the back of the swinging board, the title
+page on the recto — so that the last frame of the animation is pixel-identical to the live
+book and the swap costs nothing. Clones do not cross documents. The book therefore has to
+be in the same DOM as the hero.
+
+### What the hero art is now
+`.hero-art` holds a transparent `<button class="issue">` around
+`<span class="issue-front">`, which holds the same `<img class="frame">` the site has
+always drawn. The button adds no box, no background and no border; the art, its 5px trim,
+its hard shadow and its credit line are untouched. **Verified by pixel diff against the
+committed page**: full-page, at 1400x950 and at 390x844, the only pixels that differ
+anywhere on the site are the corner box — one 85x57 rectangle on desktop, 67x46 on a
+phone. Re-run that diff after touching the hero.
+
+The class names are the ones the zine's own page used, deliberately. The morph reads
+`.issue` for the untransformed box it flies from and `.issue-front` for the face it
+clones, so keeping the names meant the animation needed no rewiring — only two changes:
+
+- **`TILT_Y` is 0**, where it was -11. The hero is a flat framed poster and has to stay
+  one, so the flight starts flat. `fitPose` solves a scale and an offset against whatever
+  pose it is given, and zero rotation is a pose like any other.
+- **The fore-edges grow from nothing** (`edgeFrom: {l:0,r:0}`) instead of starting at the
+  full block. A flat poster has no visible page edges, so paper drawn beside it at frame 0
+  would be a shape appearing out of nowhere on a picture already on screen. It thins back
+  to nothing on the way home.
+
+### The corner box
+The cue that says the picture opens is the corner box every newsstand comic carries, and
+it is the **same box** as the one on the comic's cover inside: `.issue-cue` and
+`.issue-price` share every rule, differing only in the word. On the hero it reads
+"NO. 1 / Read it"; in the book, "NO. 1 / FREE".
+
+During the flight the stand-in carries both and cross-fades them, so the cue becomes the
+price box as the cover swings. Percentages resolve against the clone before the clone is
+scaled to the face, which is why the two land on each other exactly rather than
+approximately. Measured: the two opacities sum to 1.000 at every sampled frame.
+
+**Both start values must be written with the pair's transitions suppressed.** The rule
+that animates them is in the stylesheet and is live from the moment they are in the
+document, and `ghost.style.transition='none'` does not reach them because transition does
+not inherit. Without the suppression the price box — sitting at its default opacity of 1 —
+was given a start value of 0, began a 780ms fade *down*, and was merely reversed by the
+rAF that asked for 1 again. It never left 1, so the cue dissolved into nothing. The cue
+looked fine throughout, because its start value is the same 1 it already had: half of a
+two-sided cross-fade can be broken while the other half is perfect.
+
+### Where the site leaks into the reader
+Nothing in the zine's own page had to survive a stylesheet around it. `index.html` sets
+`a`, `a:hover` and `h1,h2,h3` as **bare element rules**, and all three reach inside the
+reader, where the links are printed text and the headings are Bangers. The neutraliser
+directly above the zine's CSS handles it:
+
+- Headings and the resting link state are wrapped in `:where()`, so the block carries a
+  class's weight but none of its precedence. It outranks a bare `h2`, and every rule the
+  zine writes for its own pages outranks it — including `.dl-title`, which is an `h2` with
+  only `(0,1,0)`.
+- **The hover rule is deliberately not in `:where()`.** The site's `a:hover` is `(0,1,1)`
+  and would beat it, lighting a yellow highlight under every citation in the book. At
+  `(0,2,1)` it wins, and the zine's own `.leaf ol.cited a:hover` at `(0,3,1)` still wins
+  over that.
+
+Two other collisions were resolved on the way in. `--ink` and `--ink-soft` are `--z-ink`
+and `--z-ink-soft` throughout the zine's CSS: both files defined them, at values close
+enough (`#17140f` against `#161311`) that a collision would have read as "slightly wrong"
+rather than as broken. And the zine's `body` rule is a `.reader,.flight` rule — as a body
+rule it would have put a caps-only comic face and a dark board behind the whole campaign.
+
+### Cost to a visitor who never opens it
+The zine's fourteen images are `loading="lazy"`, and images inside a `display:none`
+subtree are not fetched until it is displayed. Measured at rest: **1 of 14 loaded**, and
+that one is the cover, which is the hero art the page was loading anyway. StPageFlip
+(44KB) is a `defer` script. Bangers is added to the existing Google Fonts request because
+the corner box needs it before the reader is ever opened.
+
+### Printing
+The zine brought the page's only `@media print` block. With the reader closed it emits
+nothing — `.reader[hidden]` is `display:none` at `(0,1,1)` and the print block never sets
+`display` on `.reader` — so the site prints as it always did, on white. With the reader
+open, the 18 leaves print one to a page and the reader bar and arrows are hidden. Both
+paths verified under print emulation.
+
+### Things that will bite
+- **Focus must be restored when the hero is visible again, not at the end of `close()`.**
+  The animated close hides the hero for the length of the flight, and `focus()` on a
+  `visibility:hidden` element does nothing at all, silently — the browser refuses it and
+  leaves the document focused on the body. `restoreFocus()` is therefore called from the
+  morph's `onDone`, and straight after the hero is restored on the unanimated path.
+  Neither engine focuses a button when it is clicked on macOS, so `lastFocus` is almost
+  always the body, and the fallback to the hero button is the case that actually runs.
+- **The page is locked before the hero is measured**, and unlocked before it is measured
+  again on the way out. Hiding the body's overflow takes the scrollbar with it, and on a
+  platform with classic scrollbars rather than macOS overlay ones that widens the viewport
+  and moves the hero sideways. Not reproducible here, and the scroll position itself is
+  untouched either way — this is ordering as a precaution, not a fix for something seen.
+- **Everything in the flight is gated behind `requestAnimationFrame`.** Any test harness
+  that leaves the tab in `visibilityState: "hidden"` will show the reader opening to a
+  blank, transparent overlay with no book and no stand-in, because rAF never fires. That
+  is the harness, not the page. See "Testing" below.
+
+### Testing
+`dev/` has no bench for this: the reader is only reachable through the hero art, so the
+page itself is the bench. What is worth keeping is the shape of the checks, because three
+separate harness artifacts nearly passed as product bugs while this was built:
+
+- **A backgrounded tab does not run rAF.** The morph looked completely broken.
+- **Playwright's `click()` scrolls the target into view first.** That moved the page and
+  looked exactly like the reader losing the visitor's scroll position; a fix was written
+  for it before the cause was found. Dispatch the click in-page (`el.click()`) when the
+  scroll position is what is under test.
+- **Screenshot latency accumulates across a filmstrip.** At the real 780ms a frame
+  labelled 460ms is nowhere near it, and the closing morph read as not running at all when
+  instrumenting it showed 25 ghost frames every time. Stretch `--fdur` with an injected
+  `:root{--fdur:5000ms}` before filming; it is the one number the whole flight is paced
+  from, and `runMorph` reads it back for its own backstop.
+
+Plus the standing one from the flyer: `isMobile: true` makes WebKit derive its layout
+viewport from the meta tag rather than the requested size, so every screen reports the
+same numbers. Use `isMobile: false` with an explicit viewport.
 
 ## Preview locally
 ```
