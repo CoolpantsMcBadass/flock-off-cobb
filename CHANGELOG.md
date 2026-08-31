@@ -20,6 +20,9 @@ the long-form reasoning behind older entries is in git history.
 - **The page is locked before the hero is measured**, and unlocked before it is measured again on the way out. A precaution against classic scrollbars widening the viewport when the body's overflow is hidden, not a fix for anything observed: the scroll position is untouched either way, measured at 120 before, during and after in both engines.
 
 ### Fixed
+- **The cover settled into place instead of arriving.** A small jump at the end of every close: the stand-in landed correctly and then the hero art moved. `:focus-visible` was in the hover-lift rule, `close()` hands focus back to the button at the instant the stand-in lands, and programmatic focus matches `:focus-visible` — so the art lifted 2px over .18s immediately after touchdown. The `is-settling` guard only covered `:hover` and never saw it.
+  - Measured: the stand-in's last frame at x=803.99 against the hero's 804, and the hero then found at 802.12 with `translate(-1.88px,-1.88px)`, mid-lift. After the fix the landing gap is 0.01–0.06px across all three close routes (Close, Escape, pressing a cover) in both engines, with no transform on the hero.
+  - The lift is hover-only now. `:focus-visible` keeps the 4px yellow outline, which is what it is for and which moves nothing.
 - **Half the corner-box cross-fade never ran.** The pair's start values were written while their stylesheet transition was live — `ghost.style.transition='none'` is set on the ghost and transition does not inherit — so the price box, sitting at its default opacity of 1, was given a start value of 0, began a 780ms fade down, and was merely reversed by the rAF asking for 1 again. It never left 1 and the cue dissolved into nothing. The cue looked correct throughout because its start value is the same 1 it already had.
 
 ### Removed

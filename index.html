@@ -1507,9 +1507,17 @@
    stuck on whatever was tapped last, so a touch reader would be left with a
    permanently lifted hero. */
 @media (hover:hover) and (min-width:861px){
-  .issue:hover .issue-front,.issue:focus-visible .issue-front{
-    transform:translate(-2px,-2px);
-  }
+  /* Hover only. :focus-visible was in this rule for one revision and it is what
+     made the closing land badly: close() hands focus back to this button at the
+     exact instant the stand-in lands on it, the button matches :focus-visible
+     because the focus was programmatic, and the art lifted 2px over .18s
+     immediately after touchdown. Measured: the stand-in's last frame sits at
+     x=803.99 against the hero's 804, and the hero was then found at 802.12 with
+     a transform of translate(-1.88px,-1.88px) — mid-lift. It read as the cover
+     settling into place rather than arriving.
+
+     The focus ring below is what :focus-visible is for, and it moves nothing. */
+  .issue:hover .issue-front{transform:translate(-2px,-2px);}
   /* After the book closes the art lands back under a stationary cursor, :hover
      fires on the instant it reappears, and it animates away from where the
      closing motion just carefully put it. Inert until the pointer moves. */
