@@ -1600,8 +1600,17 @@
      closing motion just carefully put it. Inert until the pointer moves. */
   .issue.is-settling:hover .issue-front{transform:none;}
 }
-.issue:focus-visible{outline:none;}
-.issue:focus-visible .issue-front{outline:4px solid var(--yellow);outline-offset:6px;}
+/* The ring is gated on a class this file sets from real key presses, NOT on
+   :focus-visible. On a phone, closing the reader put a 4px yellow border around
+   the hero art and left it there: close() hands focus back to this button, and
+   iOS matches :focus-visible on a programmatic focus even though the whole
+   interaction was a tap. Engines disagree about this and always have, which is
+   why the modality is tracked in script here and read as a class.
+
+   .issue itself keeps its own outline suppressed either way, so nothing draws a
+   default ring around the button box behind the art. */
+.issue:focus{outline:none;}
+html.is-keyboard .issue:focus .issue-front{outline:4px solid var(--yellow);outline-offset:6px;}
 
 /* The face the stand-in clones. A container, so the corner box that cross-fades
    on during the flight sizes in cqw against the cover -- the same way the same
@@ -5911,7 +5920,20 @@ body.is-reading{overscroll-behavior:none;}
         });
       });
     });
-    document.getElementById('rClose').focus();
+    // preventScroll, and it is not a nicety. Focusing an element inside a
+    // position:fixed overlay while the body is overflow:hidden is exactly the
+    // situation where iOS "reveals" the target by shifting the visual viewport
+    // instead of scrolling anything, which leaves the reader displaced and the
+    // book off the visible area. It bites the SECOND open rather than the first,
+    // because the first moves focus from <body>, which has nowhere to reveal
+    // from. The restore path on the way out has always passed this; this call
+    // was the one that did not.
+    try { document.getElementById('rClose').focus({ preventScroll:true }); }
+    catch(e){ document.getElementById('rClose').focus(); }
+    // And whatever the browser may have done to the scroller inside the reader
+    // before that, put it back. Cheap, and it is the frame the book is centred in.
+    var rb = reader.querySelector('.reader-body');
+    if(rb){ rb.scrollTop = 0; rb.scrollLeft = 0; }
   }
   function close(){
     // The download panel belongs to the reader and cannot outlive it — left
@@ -6093,6 +6115,28 @@ body.is-reading{overscroll-behavior:none;}
   // is the finger-following peel on these four pages, so a drag is answered
   // directly instead: right turns back, left turns on, which is what dragging
   // a cover does. Under 24px it is a tap, and a tap shuts the book.
+  // ---- which input the visitor is actually using --------------------------
+  // Tracked here rather than left to :focus-visible, because the two engines do
+  // not agree about it and iOS in particular matches :focus-visible on a
+  // programmatic focus even when every part of the interaction was a tap. That
+  // is what left a yellow keyboard ring drawn around the hero art after closing
+  // the reader on a phone: close() hands focus back to the button, and the
+  // platform decided a tap deserved a focus ring.
+  //
+  // A real key press turns it on, any pointer or touch turns it off, and both
+  // are read at capture so nothing can swallow them first. Modifier keys are
+  // ignored: holding shift to click something is not keyboard navigation.
+  var IGNORED_KEYS = { Shift:1, Control:1, Alt:1, Meta:1, CapsLock:1 };
+  function keyboardOn(e){
+    if(IGNORED_KEYS[e.key]) return;
+    document.documentElement.classList.add('is-keyboard');
+  }
+  function keyboardOff(){ document.documentElement.classList.remove('is-keyboard'); }
+  document.addEventListener('keydown',     keyboardOn,  true);
+  document.addEventListener('pointerdown', keyboardOff, true);
+  document.addEventListener('touchstart',  keyboardOff, true);
+  document.addEventListener('mousedown',   keyboardOff, true);
+
   // ---- a pinch is not a page turn -----------------------------------------
   // Two fingers on a page zoomed it AND turned it. The library's onTouchStart
   // tests `changedTouches` and never `touches`, so the second finger of a pinch

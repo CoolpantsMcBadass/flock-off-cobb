@@ -937,6 +937,28 @@ nothing — `.reader[hidden]` is `display:none` at `(0,1,1)` and the print block
 open, the 18 leaves print one to a page and the reader bar and arrows are hidden. Both
 paths verified under print emulation.
 
+### Focus, and why the ring is not `:focus-visible`
+The hero's focus ring hangs off `html.is-keyboard`, a class this file sets from real key
+presses and clears on any pointer or touch, both read at capture. It is **not**
+`:focus-visible`, and that is deliberate: on a phone, closing the reader left a 4px yellow
+keyboard ring drawn around the hero art, because `close()` hands focus back to the button
+and iOS matches `:focus-visible` on a programmatic focus even when the whole interaction
+was a tap. This is the site's standing rule — never ask `:focus-visible` to tell a key
+press from a tap — and this code had to learn it again.
+
+Focus is still returned on every close route regardless of modality; only the ring is
+gated. Anyone navigating by keyboard still gets it.
+
+**Both `focus()` calls must pass `preventScroll`.** Focusing an element inside a
+`position:fixed` overlay while the body is `overflow:hidden` is exactly the case where iOS
+reveals the target by shifting the *visual viewport* rather than scrolling anything, which
+leaves the reader displaced and the book off the visible area. `open()`'s focus of the
+Close button was missing it, and that is the leading suspect for a report of the zine
+vanishing on a second open with only the page furniture showing — the second open is the
+first one with somewhere to reveal *from*, since the first moves focus off `<body>`.
+Unconfirmed: it does not reproduce in the harness, where a touch-driven second open is
+byte-identical to the first.
+
 ### Multi-touch
 **A pinch must never turn a page.** StPageFlip's `onTouchStart` tests `changedTouches` and
 never `touches`, so the second finger of a pinch arrives looking exactly like a fresh first
