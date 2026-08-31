@@ -5,6 +5,13 @@ the long-form reasoning behind older entries is in git history.
 
 ## 2026-08-31
 
+### Changed
+- **The art credit is pencilled on the inside of the zine's cover.** Three lines where a zine's maker signs it, on the left-hand page of the spread the book opens to: the cover artist, then "Zine art and content by anonymous concerned citizens", then "Thank you".
+  - Set in Caveat, the one handwriting face on the site. The zine's own hand could not do this job — VTC Letterer Pro is caps-only comic lettering, so it reads as printed *on* the page, and a signature has to read as written on it.
+  - Graphite (`#6f6758` at .88), not the zine's `--z-ink`. Anything set in the ink reads as part of the printing rather than as something a person added afterwards. Each line takes a fraction of a degree of rotation and its own left edge, small enough to read as unevenness rather than as decoration.
+  - **The line under the hero art is gone**, and `.art-credit` with it. The footer's legal line still names the artist, so nothing is lost for a visitor who never opens the book.
+  - The art itself does not move: `{804,161,476,613}` before and after on desktop, unchanged on a phone. What moves is everything below it — the hero's text column re-centres 20px up on desktop, and on a phone, where the art sits above the text, everything under it rises by the removed line's 58px.
+
 ### Added
 - **The zine is on the site, and it opens out of the hero art.** Pressing the chicken unfolds it into the fourteen-page reader; closing folds it back down onto the same picture. No page load anywhere in it.
   - Inlined into `index.html` rather than iframed or given its own page, because the flight carries clones of the real leaves so its last frame is pixel-identical to the live book, and clones do not cross documents.

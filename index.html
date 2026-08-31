@@ -14,8 +14,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <!-- Bangers is the zine's heading face, and the face of the corner box on the hero
      art. It is needed before the reader opens, so it is asked for here with the
-     rest rather than loaded on demand. -->
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Spectral:ital,wght@0,400;0,600;0,800;1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+     rest rather than loaded on demand.
+
+     Caveat is the pencilled credit on the inside of the cover, and it is the one
+     handwriting face on the site. The zine's own hand, VTC Letterer Pro, could
+     not do that job: it is caps-only comic lettering, so it reads as printed ON
+     the page, and a signature has to read as written on it. -->
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Caveat&family=Spectral:ital,wght@0,400;0,600;0,800;1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <style>
   :root{
@@ -403,7 +408,9 @@
     border:5px solid var(--ink);background:var(--teal);box-shadow:var(--shadow);
     display:block;width:100%;height:auto;
   }
-  .art-credit{margin-top:10px;text-align:right;color:var(--ink-soft);}
+  /* .art-credit is gone with the line it styled. The credit is pencilled on the
+     inside of the zine's cover now, and the footer's legal line still names the
+     artist for anyone who never opens the book. */
 
   /* ---------- WEEK OF ACTION FLYER (rolled poster in the hero) ----------
      --fw is the poster width, --ar its width/height ratio, and --roll-h the
@@ -2094,6 +2101,36 @@
    background-size has to be restated. .leaf sets it to 3px/9px for the two dot
    layers, and without overriding it these gradients would tile at 3px into a
    stripe. */
+/* The credit, pencilled on the inside of the cover.
+   Graphite rather than ink: the zine's --z-ink is #17140f and anything set in it
+   reads as part of the printing. This has to read as something a person added
+   afterwards, so it is a warm grey at less than full opacity, sitting on the
+   glossy card stock below rather than in it.
+   Sized in cqw like everything else on a page, so it reduces with the book. */
+.signoff{
+  margin:0;
+  font-family:'Caveat','Bradley Hand','Comic Sans MS',cursive;
+  font-size:calc(3.9cqw * var(--ts));
+  line-height:1.3;
+  color:#6f6758;
+  opacity:.88;
+}
+.signoff span{display:block;}
+.signoff span + span{margin-top:.55em;}
+/* Three lines written at three moments never quite line up, and a hand does not
+   reset to the same left edge each time. The rotations are small enough to read
+   as unevenness rather than as decoration -- much past a degree and it stops
+   looking written and starts looking styled. */
+.signoff span:nth-child(1){transform:rotate(-.9deg);transform-origin:0 50%;}
+.signoff span:nth-child(2){transform:rotate(.5deg);transform-origin:0 50%;margin-left:.25em;}
+/* The sign-off proper: larger, further in, and further down, the way a name is
+   set apart from the note above it. */
+.signoff .signoff-ta{
+  margin-top:1.15em;margin-left:1.6em;
+  font-size:1.5em;
+  transform:rotate(-2.4deg);transform-origin:0 50%;
+}
+
 .leaf.is-blank{
   background-color:#f4eddc;
   background-image:
@@ -2664,7 +2701,10 @@
         <span class="issue-cue" aria-hidden="true"><b>NO. 1</b><i>Read it</i></span>
       </span>
     </button>
-    <p class="art-credit mono">Art by Marietta artist @mind_invader_comics</p>
+    <!-- The credit that used to sit here is pencilled on the inside of the
+         cover now, where the zine's maker signs it. The footer's legal line
+         still names the artist on the page itself, so nothing is lost for a
+         visitor who never opens the book. -->
   </div>
 </div>
 
@@ -4737,8 +4777,21 @@
         <span class="issue-price" aria-hidden="true"><b>NO. 1</b><i>FREE</i></span>
       </article>
 
-      <!-- INSIDE FRONT COVER · the blank back of the chicken cover ------->
-      <article class="leaf is-blank" aria-label="Inside front cover, blank"></article>
+      <!-- INSIDE FRONT COVER · the back of the chicken cover, where the credit
+           is pencilled in. This is where a zine's maker signs it, and it is the
+           left-hand page of the spread the book opens to, so it is the first
+           thing read. The line used to sit under the hero art on the site; the
+           footer still carries the artist's name for anyone who never opens the
+           book. -->
+      <article class="leaf is-blank" aria-label="Inside front cover: credits">
+        <div class="leaf-in">
+          <p class="signoff">
+            <span>Cover art by Marietta artist @mind_invader_comics</span>
+            <span>Zine art and content by anonymous concerned citizens</span>
+            <span class="signoff-ta">Thank you</span>
+          </p>
+        </div>
+      </article>
 
       <!-- p1 · TITLE ---------------------------------------------------->
       <article class="leaf is-title" aria-label="Title page">

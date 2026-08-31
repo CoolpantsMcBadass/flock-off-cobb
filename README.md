@@ -849,6 +849,28 @@ rAF that asked for 1 again. It never left 1, so the cue dissolved into nothing. 
 looked fine throughout, because its start value is the same 1 it already had: half of a
 two-sided cross-fade can be broken while the other half is perfect.
 
+### The pencilled credit
+The inside of the front cover carries the credit, in three lines: the cover artist, the
+zine's makers, and a thank you. It is the left-hand page of the spread the book opens to,
+so it is the first thing read, and it is where a zine's maker signs one.
+
+`.signoff`, set in **Caveat** — the one handwriting face on the site, and a fourth Google
+Fonts family. The zine's own hand could not do it: VTC Letterer Pro is caps-only comic
+lettering, so it reads as printed *on* the page, where this has to read as written on it.
+The colour is graphite (`#6f6758` at `.88` opacity) rather than `--z-ink`; anything set in
+the ink reads as part of the printing. Each line carries a fraction of a degree of
+rotation and its own left edge, which is enough to read as a hand and not as a style.
+
+Sized in `cqw` like everything else on a page, so it reduces with the book — about 19.6px
+on a full-width spread, 6.8px on a 390px phone, and it fits the page with no overflow at
+every size tested down to 320px.
+
+**There is no credit under the hero art any more**, and `.art-credit` went with it. The
+footer's legal line still names the artist for anyone who never opens the book. Removing
+that line reflows the hero: the art itself does not move at all, but the text column
+re-centres 20px up on desktop, and on a phone — where the art sits above the text —
+everything below it rises by the line's 58px.
+
 ### Where the site leaks into the reader
 Nothing in the zine's own page had to survive a stylesheet around it. `index.html` sets
 `a`, `a:hover` and `h1,h2,h3` as **bare element rules**, and all three reach inside the
