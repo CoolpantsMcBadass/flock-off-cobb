@@ -1831,10 +1831,18 @@
 /* ---------------------------------------------------------------------------
    2. THE READER
 --------------------------------------------------------------------------- */
+/* The document behind the reader must not move, and body's overflow:hidden is
+   not enough to promise that on a phone: it stops the page scrolling but not the
+   engine rubber-banding it, and a bounce behind a fixed overlay moves the whole
+   screen rather than anything in the book. This is what body.is-reading is for —
+   it has been carried since the stage was removed with nothing hanging off it. */
+body.is-reading{overscroll-behavior:none;}
+
 .reader{
   position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;
   background:var(--board);
   opacity:0;pointer-events:none;transition:opacity .3s ease;
+  overscroll-behavior:none;
 }
 .reader.is-open{opacity:1;pointer-events:auto;}
 .reader[hidden]{display:none;}
@@ -1856,7 +1864,29 @@
 /* The reading area. The book is centred in it and the arrows sit in the margins
    either side, which is the only place they can sit without landing on the
    paper. */
-.reader-body{flex:1;min-height:0;overflow:auto;display:flex;}
+/* The two axes are NOT the same, and making them the same is what shook the
+   screen on a phone.
+
+   A page in flight sticks out sideways, it and its shadow: measured during a
+   turn at 390px wide, scrollWidth goes to 601 against a 390 box for four frames
+   and then back. With overflow:auto on both axes that hands a touch screen a
+   briefly pannable reader in the middle of every turn — and on iOS a scroll
+   container that appears and vanishes rubber-bands, which moves the whole
+   screen, not just the book. On a desktop the same four frames are an overlay
+   scrollbar flickering, which is why this never showed there.
+
+   So x is clipped: everything past the viewport edge is off-screen anyway, and
+   nothing is lost by making it unreachable rather than pannable. y still
+   scrolls, and has to — a short window is exactly when the spread stops
+   fitting, which is the whole reason the centring below is an auto margin
+   rather than place-content.
+
+   overscroll-behavior stops what is left from chaining out to the document. */
+.reader-body{
+  flex:1;min-height:0;display:flex;
+  overflow-x:hidden;overflow-y:auto;
+  overscroll-behavior:contain;
+}
 /* Centred with `margin:auto` on the child rather than `place-content:center` on
    the scroller. Centring a flex container clips the top and left of any child
    bigger than it, and puts the clipped part somewhere no scrollbar can reach; an

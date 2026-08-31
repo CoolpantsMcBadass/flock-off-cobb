@@ -5,6 +5,13 @@ the long-form reasoning behind older entries is in git history.
 
 ## 2026-09-01
 
+### Changed
+- **The reader clips sideways and contains its overscroll**, against a whole-screen shake reported on a real phone during page turns. **Candidate fix, not a confirmed one** — see below.
+  - What is measured and real: a page in flight sticks out sideways, it and its shadow. At 390px wide, `.reader-body`'s `scrollWidth` goes to 601 against a 390 box for four frames of every turn and then back. With `overflow:auto` on both axes that hands a touch screen a briefly pannable reader in the middle of every turn, and a scroll container that appears and vanishes rubber-bands on iOS — which moves the whole screen, not just the book. On a desktop the same four frames are an overlay scrollbar flickering, which is why it never showed there.
+  - `overflow-x:hidden` with `overflow-y:auto`. Everything past the viewport edge is off-screen anyway, so nothing is lost by making it unreachable rather than pannable. Vertical scrolling stays, and has to: a short window is exactly when the spread stops fitting, which is why the centring is an auto margin rather than `place-content`. Verified at 900x300 that the book is still fully reachable.
+  - `overscroll-behavior:contain` on `.reader-body` and `none` on `.reader` and `body.is-reading`, so nothing chains out to the document behind. This is the first thing `body.is-reading` has ever had hanging off it; it has been carried since the stage was removed.
+  - **Not reproduced in the harness.** Headless WebKit at phone size shows no movement at all during a turn: document scroll width, window scroll, the reader's own scroll offsets and the visual viewport's scale and offset are all constant, before and after the change. The transient scrollable region is real and is the most plausible cause, but the shake itself is real-device behaviour that could not be exercised here, so this ships as a hypothesis to be confirmed on the phone.
+
 ### Fixed
 - **A pinch was turning the page.** Found on a real phone against the live site: two fingers on a page zoomed it *and* threw it away. StPageFlip's `onTouchStart` tests `changedTouches` and never `touches`, so the second finger of a pinch arrives looking exactly like a fresh first one — it overwrites the gesture in progress, and the fingers spreading apart reads as a swipe when they lift.
   - Worse here than it would be elsewhere: `usePortrait` is off, so body copy is about 6px on a phone and pinching is how the zine gets read at all. The viewport meta leaves scaling unlocked precisely so it can be. The one gesture a reader needs most was the one that lost their place.
