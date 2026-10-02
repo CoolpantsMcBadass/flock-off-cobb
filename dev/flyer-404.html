@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hero flyer draft: the HIDTA reporting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Spectral:ital,wght@0,400;0,600;0,800;1,400;1,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+/* ===========================================================================
+   A BENCH, NOT THE SITE.  Third pass.
+
+   What changed, and why:
+     - the REQUIRED stamp is gone, and so are the redaction bars. Both were
+       decoration pretending to be evidence, and the sheet is stronger without
+       anything on it that is not a fact.
+     - THE SHEET IS NOW THE SAME YELLOW AS THE CLOSED BURST. That is the point
+       of this pass: the burst does not merely open into a poster, it unrolls
+       into the SAME piece of paper. One object, two states, one colour. It also
+       means the red link block is the only other colour on the sheet, which is
+       what makes it the loudest thing on it.
+     - five elements, in order: source, headline, the finding, the scale, the
+       byline. Then the link.
+
+   Content, settled:
+     - a Georgia city cannot run plate readers on state roads without signing an
+       MOU committing that data to HIDTA
+     - HIDTA is federal, run from the White House drug policy office
+     - 33 regional programs, all 50 states
+     - Jason Koebler, 404 Media, 30 September 2026
+
+   What stays faithful to the real component, or the preview lies:
+     - palette and the three faces, copied from index.html
+     - --ar: .8, so every sheet is the real 4:5
+     - the two widths --fw-open actually resolves to: 500px on a wide window and
+       330px on a phone, where the clamp bottoms out
+     - the rolled burst at BOTH ends of its clamp, 250px and 190px wide, 104 tall
+   Every size is a fraction of --fw, so each pair is one design at two scales.
+
+   The link is drawn inside the sheet here. In the real build it CANNOT be: the
+   flyer is one big <button>, and an <a> inside a button is invalid and
+   unreachable, exactly as a nested <button> was. It ships as a sibling of
+   .flyer-btn laid over the sheet, the way .flyer-nav already does, carrying the
+   same width, rotate(-2.2deg) and transform-origin. Which is also why the link
+   is a full-bleed block hard against the bottom edge: that is the easiest
+   rectangle to overlay accurately.
+   =========================================================================== */
+:root{
+  --paper:#f1ece0;
+  --ink:#161311;
+  --red:#d6233a;
+  --yellow:#f5c518;
+  --teal:#1f6f8b;
+  --shadow:6px 6px 0 var(--ink);
+  /* ink softened against yellow rather than a grey, which goes muddy on it */
+  --on-yellow-soft:#6b5c12;
+}
+body{
+  margin:0;padding:28px 20px 60px;background:#2a2622;color:var(--paper);
+  font-family:"Spectral",Georgia,serif;
+}
+h1.bench{
+  font-family:"Anton",Impact,sans-serif;text-transform:uppercase;font-weight:400;
+  font-size:1.5rem;letter-spacing:.01em;margin:0 0 6px;
+}
+.bench-note{
+  font-family:"Space Mono",monospace;font-size:.76rem;line-height:1.6;
+  color:#bdb4a4;max-width:92ch;margin:0 0 26px;
+}
+.bench-note b{color:var(--yellow);font-weight:700;}
+h2.row{
+  font-family:"Space Mono",monospace;font-size:.78rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--yellow);font-weight:700;
+  margin:34px 0 14px;padding-bottom:7px;border-bottom:2px solid #4a443d;
+}
+.row-sub{font-family:"Space Mono",monospace;font-size:.72rem;color:#bdb4a4;margin:-8px 0 16px;max-width:88ch;}
+.sizes{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;}
+.size{display:flex;flex-direction:column;gap:9px;}
+.size-label{
+  font-family:"Space Mono",monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:#8d867c;
+}
+.at-desktop{--fw:500px;}
+.at-phone{--fw:330px;}
+
+/* ---------- the sheet ---------- */
+.sheet{
+  --ar:.8;
+  box-sizing:border-box;
+  width:var(--fw);height:calc(var(--fw) / var(--ar));
+  background:var(--yellow);color:var(--ink);
+  border:3px solid var(--ink);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+/* A fourteen-word headline cannot be one display size and still be a headline.
+   It splits: the claim at reading weight, the verdict as the punch. Same words,
+   and the break is where the sentence already turns. */
+.head{
+  font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;
+  letter-spacing:.005em;
+  padding:calc(var(--fw) * .058) calc(var(--fw) * .05) 0;
+}
+.head .claim{display:block;font-size:calc(var(--fw) * .058);line-height:1.0;}
+.head .punch{
+  display:block;font-style:normal;color:var(--red);
+  font-size:calc(var(--fw) * .118);line-height:.9;
+  margin-top:calc(var(--fw) * .018);
+}
+.body{
+  padding:calc(var(--fw) * .038) calc(var(--fw) * .05) 0;
+  font-size:calc(var(--fw) * .0415);line-height:1.38;
+}
+.body p{margin:0 0 calc(var(--fw) * .026);}
+.body b{font-weight:800;}
+/* The scale of it, on one line. A rule above rather than a box around: boxes on
+   a yellow ground start to look like form fields. */
+.scale{
+  margin:calc(var(--fw) * .016) calc(var(--fw) * .05) 0;
+  border-top:2px solid var(--ink);
+  padding-top:calc(var(--fw) * .024);
+  font-family:"Space Mono",monospace;font-weight:700;
+  font-size:calc(var(--fw) * .029);letter-spacing:.05em;text-transform:uppercase;
+}
+.byline{
+  padding:calc(var(--fw) * .022) calc(var(--fw) * .05) calc(var(--fw) * .04);
+  font-family:"Space Mono",monospace;font-size:calc(var(--fw) * .026);
+  color:var(--on-yellow-soft);letter-spacing:.02em;
+}
+/* The link. The only other colour on the sheet, full bleed against the bottom
+   edge, about a fifth of it, arrow set as display type. */
+.go{
+  margin-top:auto;
+  background:var(--red);color:var(--paper);
+  display:flex;align-items:center;gap:calc(var(--fw) * .035);
+  padding:calc(var(--fw) * .045) calc(var(--fw) * .05);
+  border-top:3px solid var(--ink);
+}
+.go .txt{flex:1;}
+.go .big{
+  display:block;
+  font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;
+  font-size:calc(var(--fw) * .072);line-height:.98;letter-spacing:.01em;
+}
+.go .sml{
+  display:block;font-family:"Space Mono",monospace;font-weight:700;
+  font-size:calc(var(--fw) * .027);letter-spacing:.08em;text-transform:uppercase;
+  margin-top:calc(var(--fw) * .014);opacity:.92;
+}
+.go .arw{
+  font-family:"Anton",Impact,sans-serif;
+  font-size:calc(var(--fw) * .115);line-height:.8;
+}
+
+/* ---------- the rolled burst ---------- */
+.bursts{display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start;}
+.bwrap{display:flex;flex-direction:column;gap:8px;}
+.burst{
+  /* Drawn the way the REAL one is: an SVG path, filled, with a non-scaling
+     stroke for the ink outline. The first version of this bench faked it with a
+     CSS clip-path over a bordered box, and the box's border survived inside the
+     clip, showing as black slivers on every spike that reached the edge. That
+     artifact was the bench's, never the component's. */
+  box-sizing:border-box;   /* 104 and 250/190 are the REAL outer numbers */
+  height:104px;position:relative;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;text-align:center;
+}
+.burst svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.burst .in{position:relative;padding:0 30px;}
+.burst .t,.burst .s{display:block;}
+.burst.wide{width:250px;}
+.burst.narrow{width:190px;}
+.burst .t{
+  font-family:"Anton",Impact,sans-serif;text-transform:uppercase;
+  line-height:.94;
+}
+.burst.wide .t{font-size:17px;}
+.burst.narrow .t{font-size:14px;}
+.burst .s{
+  font-family:"Spectral",Georgia,serif;font-style:italic;
+  line-height:1.2;margin-top:4px;
+}
+.burst.wide .s{font-size:10.5px;}
+.burst.narrow .s{font-size:9px;}
+
+
+/* ---------- in place: the band between 04 and 05 ----------
+   Section metrics copied from index.html so the mock is to scale:
+     section{max-width:1100px;padding:72px 20px}
+     .sec-head{flex, baseline, gap 16, border-bottom 4px ink, padding-bottom 14}
+     .sec-head .num{Space Mono, red, 700, 1rem}
+     .sec-head h2{clamp(2rem,5vw,3.4rem)} */
+.sitebox{
+  background:var(--paper);color:var(--ink);
+  width:min(1100px,100%);box-sizing:border-box;
+  padding:0 20px 40px;border:1px solid #4a443d;
+}
+.sitebox.narrow{width:390px;}
+.tail{
+  font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;color:#9a9284;padding:18px 0 0;
+}
+.band{padding:52px 0;display:flex;justify-content:center;}
+.band.withprompt{gap:28px;align-items:center;justify-content:center;flex-wrap:wrap;}
+.prompt{max-width:30ch;}
+.prompt .k{
+  font-family:"Space Mono",monospace;font-weight:700;font-size:.72rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--red);
+}
+.prompt .l{
+  font-family:"Anton",Impact,sans-serif;text-transform:uppercase;
+  font-size:1.5rem;line-height:1;margin-top:7px;
+}
+.prompt .h{
+  font-family:"Space Mono",monospace;font-size:.72rem;color:#5d564c;margin-top:9px;
+}
+.mock-head{
+  display:flex;align-items:baseline;gap:16px;
+  border-bottom:4px solid var(--ink);padding-bottom:14px;
+}
+.mock-head .n{font-family:"Space Mono",monospace;color:var(--red);font-weight:700;font-size:1rem;}
+.mock-head h3{
+  font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;
+  font-size:clamp(2rem,5vw,3.4rem);line-height:.92;margin:0;letter-spacing:.01em;
+}
+
+/* the pair, shown together, which is the thing this pass is actually about */
+.pair{display:flex;align-items:center;gap:26px;flex-wrap:wrap;}
+.pair .arrowtxt{
+  font-family:"Space Mono",monospace;font-size:.72rem;color:#8d867c;
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.verdict{
+  font-family:"Space Mono",monospace;font-size:.72rem;line-height:1.65;
+  color:#bdb4a4;max-width:88ch;margin:14px 0 0;
+}
+.verdict b{color:var(--yellow);}
+</style>
+</head>
+<body>
+
+<h1 class="bench">Hero flyer draft: the HIDTA reporting</h1>
+<p class="bench-note">
+  Third pass. Stamp gone, redaction bars gone, and <b>the sheet is now the burst&rsquo;s yellow</b>,
+  so the closed button does not open into a poster, it unrolls into the same piece of paper. One
+  object in two states. It also leaves the red link block as the only other colour on the sheet,
+  which is what makes it the loudest thing on it.
+  <br /><br />
+  Five elements now: source, headline, the finding, the scale, the byline. The scale sits under a
+  rule rather than inside a box, because boxes on a yellow ground start to look like form fields.
+  <br /><br />
+  <b>Judge the 330px column</b>, the sheet on a phone where the clamp bottoms out, and the
+  <b>190px burst</b>, the rolled state on a narrow screen.
+</p>
+
+<!-- ======================= the pair ======================= -->
+<h2 class="row">Closed, then open</h2>
+<p class="row-sub">The whole argument for the yellow: these are meant to read as one object.</p>
+<div class="pair">
+  <div class="burst wide"><svg viewBox="0 0 220 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path vector-effect="non-scaling-stroke" fill="#f5c518" stroke="#161311" stroke-width="3" stroke-linejoin="miter" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" /></svg><span class="in"><span class="t">Cobb gives your<br />data away</span><span class="s">even though they say they don&rsquo;t</span></span></div>
+  <span class="arrowtxt">unrolls into &rarr;</span>
+  <div class="sheet at-phone">
+    <div class="head"><span class="claim">Cobb officials claim not to cooperate with outside agencies,</span><em class="punch">but this is a lie.</em></div>
+    <div class="body">
+      <p>A Georgia city cannot run plate readers on state roads without signing an agreement that
+      commits the data to <b>HIDTA</b>, a federal program run from the White House drug policy
+      office.</p>
+      <p>That is not a leak or a misuse, but the condition of switching them on.</p>
+    </div>
+    <div class="scale">33 regional programs &middot; all 50 states</div>
+    <div class="byline">Jason Koebler, 404 Media, 30 Sept 2026</div>
+    <a class="go"><span class="txt"><span class="big">Read the reporting</span><span class="sml">404media.co</span></span><span class="arw">&rarr;</span></a>
+  </div>
+</div>
+
+<!-- ======================= the sheet, both sizes ======================= -->
+<h2 class="row">The sheet</h2>
+<p class="row-sub">Same design at the two widths the real --fw-open resolves to.</p>
+<div class="sizes">
+  <div class="size">
+    <span class="size-label">desktop &middot; 500 &times; 625</span>
+    <div class="sheet at-desktop">
+      <div class="head"><span class="claim">Cobb officials claim not to cooperate with outside agencies,</span><em class="punch">but this is a lie.</em></div>
+      <div class="body">
+        <p>A Georgia city cannot run plate readers on state roads without signing an agreement that
+        commits the data to <b>HIDTA</b>, a federal program run from the White House drug policy
+        office.</p>
+        <p>That is not a leak or a misuse, but the condition of switching them on.</p>
+      </div>
+      <div class="scale">33 regional programs &middot; all 50 states</div>
+      <div class="byline">Jason Koebler, 404 Media, 30 Sept 2026</div>
+      <a class="go"><span class="txt"><span class="big">Read the reporting</span><span class="sml">404media.co</span></span><span class="arw">&rarr;</span></a>
+    </div>
+  </div>
+  <div class="size">
+    <span class="size-label">phone &middot; 330 &times; 412</span>
+    <div class="sheet at-phone">
+      <div class="head"><span class="claim">Cobb officials claim not to cooperate with outside agencies,</span><em class="punch">but this is a lie.</em></div>
+      <div class="body">
+        <p>A Georgia city cannot run plate readers on state roads without signing an agreement that
+        commits the data to <b>HIDTA</b>, a federal program run from the White House drug policy
+        office.</p>
+        <p>That is not a leak or a misuse, but the condition of switching them on.</p>
+      </div>
+      <div class="scale">33 regional programs &middot; all 50 states</div>
+      <div class="byline">Jason Koebler, 404 Media, 30 Sept 2026</div>
+      <a class="go"><span class="txt"><span class="big">Read the reporting</span><span class="sml">404media.co</span></span><span class="arw">&rarr;</span></a>
+    </div>
+  </div>
+</div>
+<p class="verdict">
+  Both sizes carry the same two lines now. The phone sheet looked starved without the second one:
+  the link block is pinned to the bottom edge, so whatever the copy does not use opens as dead
+  yellow above it rather than closing the gap.
+</p>
+
+<!-- ======================= the button ======================= -->
+<h2 class="row">The button, rolled</h2>
+<p class="row-sub">
+  Your corrected wording. Both ends of the clamp: 250px is a wide window, 190px a narrow phone,
+  and 190 is the one that decides.
+</p>
+<div class="bursts">
+  <div class="bwrap">
+    <span class="size-label">wide &middot; 250</span>
+    <div class="burst wide"><svg viewBox="0 0 220 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path vector-effect="non-scaling-stroke" fill="#f5c518" stroke="#161311" stroke-width="3" stroke-linejoin="miter" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" /></svg><span class="in"><span class="t">Cobb gives your<br />data away</span><span class="s">even though they say they don&rsquo;t</span></span></div>
+  </div>
+  <div class="bwrap">
+    <span class="size-label">narrow &middot; 190</span>
+    <div class="burst narrow"><svg viewBox="0 0 220 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path vector-effect="non-scaling-stroke" fill="#f5c518" stroke="#161311" stroke-width="3" stroke-linejoin="miter" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" /></svg><span class="in"><span class="t">Cobb gives your<br />data away</span><span class="s">even though they say they don&rsquo;t</span></span></div>
+  </div>
+  <div class="bwrap">
+    <span class="size-label">alt &middot; three lines</span>
+    <div class="burst narrow"><svg viewBox="0 0 220 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path vector-effect="non-scaling-stroke" fill="#f5c518" stroke="#161311" stroke-width="3" stroke-linejoin="miter" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" /></svg><span class="in"><span class="t">Cobb gives<br />your data away</span><span class="s">even though<br />they say they don&rsquo;t</span></span></div>
+  </div>
+</div>
+
+
+<!-- ======================= in place ======================= -->
+<h2 class="row">In place: the band between 04 and 05</h2>
+<p class="row-sub">
+  Section metrics copied from index.html, so this is to scale. The question it raises: closed, the
+  burst is a 250px object alone in a 1100px band, which is a lot of paper around a small shape. In
+  the hero it had a composition to sit in; here it does not.
+</p>
+<div class="sizes">
+  <div class="size">
+    <span class="size-label">A &middot; burst alone</span>
+    <div class="sitebox">
+      <div class="tail">&hellip; end of 04, The Letter</div>
+      <div class="band">
+        <div class="burst wide"><svg viewBox="0 0 220 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path vector-effect="non-scaling-stroke" fill="#f5c518" stroke="#161311" stroke-width="3" stroke-linejoin="miter" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" /></svg><span class="in"><span class="t">Cobb gives your<br />data away</span><span class="s">even though they say they don&rsquo;t</span></span></div>
+      </div>
+      <div class="mock-head"><span class="n">05</span><h3>Reach Cobb Officials</h3></div>
+    </div>
+  </div>
+</div>
+<div class="sizes" style="margin-top:26px;">
+  <div class="size">
+    <span class="size-label">B &middot; burst with a line beside it</span>
+    <div class="sitebox">
+      <div class="tail">&hellip; end of 04, The Letter</div>
+      <div class="band withprompt">
+        <div class="prompt">
+          <div class="k">New reporting</div>
+          <div class="l">Where your plate data actually goes</div>
+          <div class="h">Open it &rarr;</div>
+        </div>
+        <div class="burst wide"><svg viewBox="0 0 220 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path vector-effect="non-scaling-stroke" fill="#f5c518" stroke="#161311" stroke-width="3" stroke-linejoin="miter" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" /></svg><span class="in"><span class="t">Cobb gives your<br />data away</span><span class="s">even though they say they don&rsquo;t</span></span></div>
+      </div>
+      <div class="mock-head"><span class="n">05</span><h3>Reach Cobb Officials</h3></div>
+    </div>
+  </div>
+  <div class="size">
+    <span class="size-label">phone &middot; 390 wide</span>
+    <div class="sitebox narrow">
+      <div class="tail">&hellip; end of 04</div>
+      <div class="band">
+        <div class="burst narrow"><svg viewBox="0 0 220 110" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path vector-effect="non-scaling-stroke" fill="#f5c518" stroke="#161311" stroke-width="3" stroke-linejoin="miter" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" /></svg><span class="in"><span class="t">Cobb gives your<br />data away</span><span class="s">even though they say they don&rsquo;t</span></span></div>
+      </div>
+      <div class="mock-head"><span class="n">05</span><h3>Reach Cobb Officials</h3></div>
+    </div>
+  </div>
+</div>
+
+<p class="verdict">
+  <b>Settled:</b> keeps the burst and the unroll, stays a 4:5 poster, sits as an unnumbered band so
+  nothing renumbers, and does not retire itself.<br />
+  <b>Open:</b> whether the closed burst needs the line beside it (A or B above), and whether you
+  want &ldquo;reportedly&rdquo; inside the HIDTA sentence rather than carried by the byline.
+</p>
+
+<p class="verdict">
+  <b>Left to decide.</b><br />
+  1. Does the sheet headline stay &ldquo;What Cobb signed away&rdquo;? It follows the button well:
+  the burst makes the accusation, the sheet produces the receipt.<br />
+  2. Keep or cut the second line on the desktop sheet, per the note above.<br />
+  3. The sheet states the Georgia requirement flatly and attributes it with the source line and
+  byline rather than hedging inside the sentence. Say if you want &ldquo;reportedly&rdquo; in
+  the sentence itself.<br />
+  4. A retirement date. ENDS was pinned to painted artwork last time; typeset copy has no painted
+  date, so this one gets chosen rather than derived.
+</p>
+
+</body>
+</html>

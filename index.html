@@ -498,9 +498,11 @@
        which is what lets them interpolate. Regenerate together with dev/morph.py. */
     --open-dn:"M0.5000,0.0000 L0.5956,0.0000 L0.6994,0.0000 L0.8222,0.0000 L1.0000,0.0000 L1.0000,0.1449 L1.0000,0.2688 L1.0000,0.3737 L1.0000,0.4712 L1.0000,0.5681 L1.0000,0.6737 L1.0000,0.7968 L1.0000,1.0000 L0.8620,1.0000 L0.7244,1.0000 L0.6080,1.0000 L0.5000,1.0000 L0.3926,1.0000 L0.2757,1.0000 L0.1381,1.0000 L0.0000,1.0000 L0.0000,0.7984 L0.0000,0.6737 L0.0000,0.5677 L0.0000,0.4712 L0.0000,0.3733 L0.0000,0.2688 L0.0000,0.1446 L0.0000,0.0000 L0.1781,0.0000 L0.3000,0.0000 L0.4044,0.0000 Z";
     --open-d:"M110.0,0.0 L131.0,0.0 L153.9,0.0 L180.9,0.0 L220.0,0.0 L220.0,15.9 L220.0,29.6 L220.0,41.1 L220.0,51.8 L220.0,62.5 L220.0,74.1 L220.0,87.6 L220.0,110.0 L189.6,110.0 L159.4,110.0 L133.8,110.0 L110.0,110.0 L86.4,110.0 L60.7,110.0 L30.4,110.0 L0.0,110.0 L0.0,87.8 L0.0,74.1 L0.0,62.4 L0.0,51.8 L0.0,41.1 L-0.0,29.6 L0.0,15.9 L0.0,0.0 L39.2,0.0 L66.0,0.0 L89.0,0.0 Z";
-    /* Above the floating social cluster (90) so the flyer passes in front of it,
-       but under the sticky nav (100), which stays on top of everything. */
-    position:absolute;top:34px;right:calc(42.5% + 26px);z-index:95;
+    /* In the flow of its own band now, not pinned into the hero. Still above the
+       floating social cluster (90) so the open sheet passes in front of it, and still
+       under the sticky nav (100). Positioned rather than static because the open sheet
+       overlaps the section below it and has to paint over it. */
+    position:relative;z-index:95;width:var(--fw);margin:0 auto;
   }
   .flyer[hidden]{display:none;}
   /* A hover target that never changes shape.
@@ -566,6 +568,120 @@
     transition:none;
   }
   .flyer-window img{display:block;width:100%;height:auto;}
+
+  /* ---- The news band ----
+     An unnumbered strip between 04 and 05. Section metrics so it sits in the same
+     rhythm as the numbered sections above and below: same max-width, same gutter.
+     Its own vertical padding rather than a section's 72px, because a lone burst in
+     a band that tall reads as a gap rather than as a thing. */
+  .newsband{max-width:1100px;margin:0 auto;padding:46px 20px;}
+
+  /* ---- The typeset sheet ----
+     Everything is a fraction of --plate-w, never a px value: the plate is laid out at
+     the open width and scaled by --plate-s while rolled, so sizes measured off the open
+     width survive the unroll instead of being re-laid-out every frame. The ratio comes
+     from --ar, which is what every other piece of the open geometry is built from, so
+     the sheet cannot drift out of step with the window it sits in.
+
+     All block-level spans. This is inside a <button>, where flow content is invalid. */
+  .sheet404{
+    display:block;width:100%;aspect-ratio:var(--ar);
+    background:var(--yellow);color:var(--ink);
+    display:flex;flex-direction:column;text-align:left;
+  }
+  .s404-head{
+    display:block;
+    font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;
+    letter-spacing:.005em;
+    padding:calc(var(--plate-w) * .058) calc(var(--plate-w) * .05) 0;
+  }
+  /* A fourteen-word headline cannot be one display size and still read as a headline,
+     so it splits where the sentence already turns: the claim at reading weight, the
+     verdict as the punch. */
+  .s404-claim{display:block;font-size:calc(var(--plate-w) * .058);line-height:1;}
+  .s404-punch{
+    display:block;font-style:normal;color:var(--red);
+    font-size:calc(var(--plate-w) * .118);line-height:.9;
+    margin-top:calc(var(--plate-w) * .018);
+  }
+  .s404-body{
+    display:block;
+    font-family:"Spectral",Georgia,serif;text-transform:none;
+    padding:calc(var(--plate-w) * .038) calc(var(--plate-w) * .05) 0;
+    font-size:calc(var(--plate-w) * .0415);line-height:1.38;
+  }
+  .s404-body .p{display:block;margin-bottom:calc(var(--plate-w) * .026);}
+  .s404-body b{font-weight:800;}
+  /* A rule above rather than a box around: a box on a yellow ground reads as a form field. */
+  .s404-scale{
+    display:block;
+    margin:calc(var(--plate-w) * .016) calc(var(--plate-w) * .05) 0;
+    border-top:2px solid var(--ink);padding-top:calc(var(--plate-w) * .024);
+    font-family:"Space Mono",monospace;font-weight:700;
+    font-size:calc(var(--plate-w) * .029);letter-spacing:.05em;text-transform:uppercase;
+  }
+  /* The only place the source is named. It sits with the finding it supports rather than
+     crowning the sheet, where it would read as sourcing the accusation above it too. */
+  .s404-by{
+    display:block;
+    padding:calc(var(--plate-w) * .022) calc(var(--plate-w) * .05) calc(var(--plate-w) * .04);
+    font-family:"Space Mono",monospace;font-size:calc(var(--plate-w) * .026);
+    color:#6b5c12;letter-spacing:.02em;
+  }
+
+  /* ---- The link ----
+     A sibling of .flyer-btn wearing the button's geometry, for the same reason the paging
+     controls are: an <a> inside a <button> is invalid and unreachable. The wrapper spans
+     the whole open sheet and takes no pointer events; the bar inside takes them back, so
+     the red block is the only part that follows the link and the rest of the sheet still
+     toggles. Fades in late, after the unroll, so it does not ride the morph. */
+  .flyer-go{
+    position:absolute;left:0;top:0;
+    width:var(--fw);height:calc(var(--fw) / var(--ar));
+    transform:rotate(-2.2deg);transform-origin:100% 0;
+    pointer-events:none;opacity:0;
+    transition:opacity .18s ease, width .25s var(--ease) .125s,
+               transform .26s var(--ease) .125s;
+    z-index:3;text-decoration:none;
+  }
+  .fgo-bar{
+    position:absolute;left:4px;right:4px;bottom:4px;   /* the window's transparent border */
+    background:var(--red);color:var(--paper);
+    border-top:3px solid var(--ink);
+    display:flex;align-items:center;gap:calc(var(--plate-w) * .035);
+    padding:calc(var(--plate-w) * .045) calc(var(--plate-w) * .05);
+  }
+  .fgo-txt{flex:1;}
+  .fgo-big{
+    display:block;
+    font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;
+    font-size:calc(var(--plate-w) * .072);line-height:.98;letter-spacing:.01em;
+  }
+  .fgo-sml{
+    display:block;font-family:"Space Mono",monospace;font-weight:700;
+    font-size:calc(var(--plate-w) * .027);letter-spacing:.08em;text-transform:uppercase;
+    margin-top:calc(var(--plate-w) * .014);opacity:.92;
+  }
+  .fgo-arw{
+    font-family:"Anton",Impact,sans-serif;
+    font-size:calc(var(--plate-w) * .115);line-height:.8;
+  }
+  /* Only once the sheet is actually open, and on the same late clock as the paging
+     controls, so the link does not ride the morph. pointer-events land on the BAR and
+     never on the wrapper: the wrapper covers the whole sheet, and a wrapper that took
+     them would turn every click on the sheet into a trip to 404 Media instead of a
+     toggle. While shut the bar is invisible AND inert, or it would sit over the rolled
+     burst and swallow the click that opens it. */
+  .flyer:not(.is-popping).is-open .flyer-go,
+  .flyer:not(.is-popping).is-key .flyer-go{opacity:1;transition-delay:.18s;}
+  .flyer:not(.is-popping).is-open .fgo-bar,
+  .flyer:not(.is-popping).is-key .fgo-bar{pointer-events:auto;}
+  @media(hover:hover) and (min-width:861px){
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-go{opacity:1;transition-delay:.18s;}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .fgo-bar{pointer-events:auto;}
+  }
+  .flyer-go:hover .fgo-bar{background:var(--ink);}
+  .flyer-go:focus-visible{outline:3px solid var(--teal);outline-offset:3px;}
 
   /* ---- The slides ----
      The first one stays in normal flow and is what gives the plate its height; the rest
@@ -641,7 +757,7 @@
   }
   @media(prefers-reduced-motion:reduce){
     .flyer-slides .fslide{transition:none;}
-    .flyer-nav{transition:none;}
+    .flyer-nav,.flyer-go{transition:none;}
   }
   /* ---- The outline, in both shapes ----
      One path draws the flyer's edge the whole way through: a comic exclamation burst
@@ -685,15 +801,25 @@
      nothing. Put the same filter on the text alone and every glyph casts its own. */
   .flyer-burst .lbl{
     position:absolute;left:0;top:0;width:100%;height:var(--roll-h);z-index:1;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    /* Inset off the spikes. The burst is 250px at its widest but the shape narrows to
+       points at both ends, so a label measured against the full width runs out through
+       them. Everything here is phrasing inside a <button>, so this is the only place
+       the inset can live. */
+    box-sizing:border-box;padding:0 30px;
   }
   .flyer-burst .t{
     position:relative;font-family:"Anton",Impact,sans-serif;font-size:17px;line-height:1.06;
     color:var(--ink);letter-spacing:.03em;text-align:center;text-transform:uppercase;
   }
+  /* An aside under the shout, not a second shout. Mono at 10px with .1em of tracking
+     was sized for two words ("Week of Action") and runs straight out through the spikes
+     at anything longer; italic serif sets the same sentence in about two thirds the
+     width and reads as the quieter half of the line, which is what it is. */
   .flyer-burst .d{
-    position:relative;font-family:"Space Mono",monospace;font-weight:700;
-    font-size:10px;letter-spacing:.1em;color:var(--red-deep);
+    position:relative;font-family:"Spectral",Georgia,serif;font-style:italic;
+    font-weight:400;font-size:10.5px;line-height:1.2;letter-spacing:0;
+    color:var(--ink);text-align:center;
   }
   /* There is no curled bottom edge. There used to be a 10px shaded strip under the
      sheet, from when opening was a literal unroll and it stood in for the paper
@@ -729,6 +855,16 @@
   .flyer:not(.is-popping).is-key .flyer-btn,
   .flyer:not(.is-popping).is-open .flyer-btn{
     transition:width var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  /* The link carries the button's geometry, so it has to carry the button's MOTION too.
+     The button straightens from -2.2deg as it opens; a link left on the static tilt hangs
+     off the right and bottom edges of a sheet that is no longer tilted. Same clock, same
+     curve, with its own fade kept on top. */
+  .flyer:not(.is-popping):hover .flyer-go,
+  .flyer:not(.is-popping).is-key .flyer-go,
+  .flyer:not(.is-popping).is-open .flyer-go{
+    transition:width var(--dur) var(--ease), transform var(--dur) var(--ease),
+               opacity .18s ease;
   }
   .flyer:not(.is-popping):hover .flyer-window,
   .flyer:not(.is-popping).is-key .flyer-window,
@@ -787,7 +923,8 @@
      left ungated because nothing on a dismissed flyer is animating anyway. */
   @media(hover:hover) and (min-width:861px){
     .flyer:not(.is-popping):not(.is-dismissed):hover{--fw:var(--fw-open);--dur:.5s;}
-    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-btn{transform:rotate(0deg);}
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-btn,
+    .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-go{transform:rotate(0deg);}
     .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-window{height:calc(var(--fw) / var(--ar));}
     .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-plate{opacity:1;}
     .flyer:not(.is-popping):not(.is-dismissed):hover .flyer-burst{height:calc(var(--fw) / var(--ar));}
@@ -799,7 +936,9 @@
   .flyer:not(.is-popping).is-key,
   .flyer:not(.is-popping).is-open{--fw:var(--fw-open);--dur:.5s;}
   .flyer:not(.is-popping).is-key .flyer-btn,
-  .flyer:not(.is-popping).is-open .flyer-btn{transform:rotate(0deg);}
+  .flyer:not(.is-popping).is-open .flyer-btn,
+  .flyer:not(.is-popping).is-key .flyer-go,
+  .flyer:not(.is-popping).is-open .flyer-go{transform:rotate(0deg);}
   .flyer:not(.is-popping).is-key .flyer-window,
   .flyer:not(.is-popping).is-open .flyer-window{height:calc(var(--fw) / var(--ar));}
   .flyer:not(.is-popping).is-key .flyer-plate,
@@ -825,8 +964,9 @@
      class ever fails to land before the style flush the close is merely abrupt. The
      reverse arrangement — timings on the pop class, gentle by default — is what used
      to leave the sheet shrinking in view behind the droplets. */
-  .flyer.is-soft-close .flyer-btn{
-    transition:width .25s var(--ease), transform .25s var(--ease);
+  .flyer.is-soft-close .flyer-btn,
+  .flyer.is-soft-close .flyer-go{
+    transition:width .25s var(--ease), transform .25s var(--ease), opacity .18s ease;
   }
   .flyer.is-soft-close .flyer-window,
   .flyer.is-soft-close .flyer-burst{transition:height .25s var(--ease);}
@@ -1007,15 +1147,11 @@
        only unrolls: there's no room to grow wider, so --fw-open matches --fw. */
     .flyer{
       --fw-roll:min(320px,86vw); --fw-open:min(320px,86vw);
-      /* Relative rather than static so the z-index above still applies and the flyer
-         passes in front of the social bar. top/right MUST be cleared with it: they
-         are live on a relative box and the desktop values drag it off the screen.
-         Negative margins pull back against the hero's 40px grid gap, which is most
-         of the space above and below the burst. Halves both: 45px/66px to 22px/33px. */
-      position:relative;top:auto;right:auto;
-      width:var(--fw);margin:-19px auto -7px;
+      /* Nothing to undo here any more: the base rule is already in-flow and centred.
+         The negative margins that used to pull against the hero's 40px grid gap went
+         with the hero; the band sets its own spacing. */
     }
-    .flyer-btn{transform:none;}
+    .flyer-btn,.flyer-go{transform:none;}
     .flyer-hint .hov{display:none;}
     .flyer-hint .tap{display:inline;}
     /* Same swap, same reason: there is no clicking on a phone. */
@@ -2664,106 +2800,6 @@ body.is-reading{overscroll-behavior:none;}
 <div class="hero viewfinder reveal">
   <span class="vf-tr"></span><span class="vf-br"></span>
 
-  <!-- Rolled-up flyer: shows its header strip, unrolls to the full sheet on hover,
-       focus, or tap. Unhidden by script, and only until the week of action ends. -->
-  <div class="flyer" id="weekFlyer" hidden>
-    <!-- Lives inside .flyer so it inherits --open-dn and the open-state selectors reach
-         it. Clips the sheet to the same shape the outline is drawing (see .flyer-window).
-         The rolled shape is on the element as a plain `d` attribute, here and on both
-         burst paths, and that is not redundant with the CSS: the CSS `d` property is
-         what the morph animates, WebKit does not implement it, and geometry declared
-         only in CSS is therefore no geometry at all in Safari. An empty clipPath clips
-         everything, so the poster vanished and the burst had no shape — the flyer was
-         one line of HTML text and a puff of droplets on an iPhone. The attribute is the
-         floor every browser gets; CSS only ever moves it. See the @supports rule. -->
-    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
-      <clipPath id="flyerEdge" clipPathUnits="objectBoundingBox"><path d="M0.5000,-0.0428 L0.5775,0.0893 L0.7082,-0.0208 L0.7181,0.1523 L0.8741,0.1061 L0.8328,0.2540 L0.9770,0.2781 L0.8876,0.3956 L1.0338,0.4712 L0.9056,0.5498 L0.9739,0.6631 L0.8173,0.6778 L0.8628,0.8257 L0.7305,0.8079 L0.7051,0.9547 L0.5713,0.8205 L0.5000,1.0051 L0.4173,0.8781 L0.2954,0.9537 L0.2768,0.7974 L0.1357,0.8267 L0.1987,0.6684 L0.0106,0.6694 L0.1414,0.5404 L-0.0167,0.4712 L0.1300,0.3988 L0.0282,0.2802 L0.1739,0.2582 L0.1279,0.1072 L0.2685,0.1323 L0.2974,-0.0061 L0.4215,0.0841 Z" /></clipPath>
-    </svg>
-    <button type="button" class="flyer-btn" aria-expanded="false" aria-controls="flyerSheet">
-      <span class="sr-only">Thank you, Cobb County. Week of Action recap, 2 slides. Show them.</span>
-      <!-- The outline, drawn before the window so the sheet and its artwork paint over
-           it. One path: the burst while rolled, the sheet's frame when open. -->
-      <span class="flyer-burst" aria-hidden="true">
-        <svg class="sh" viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
-          <path vector-effect="non-scaling-stroke" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" />
-        </svg>
-        <svg class="fg" viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
-          <path vector-effect="non-scaling-stroke" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" />
-        </svg>
-        <span class="lbl">
-          <span class="t">Thank you,<br/>Cobb County!</span>
-          <span class="d">Week of Action</span>
-        </span>
-      </span>
-      <span class="flyer-window" id="flyerSheet">
-        <!-- Two slides, the carousel this was posted as. The first is in normal flow and
-             is what gives the plate its height; the rest are laid over it. Both are the
-             same 4:5 the schedule flyer was, so --ar stays at .8 and none of the open
-             geometry moves. -->
-        <span class="flyer-plate">
-          <span class="flyer-slides">
-            <img class="fslide is-on" src="assets/week-recap-1.webp" width="1000" height="1250"
-                 alt="Thank you. A collage of photographs from the Week of Action: residents protesting at a roadside holding hand-made signs reading Deflock Cobb Please and Flock Ignores the 4th Amendment of the Constitution; a hand-painted poster from the sign-making session headed Profit Over Privacy, asking why Flock cameras are aimed at biking and hiking trails and have been found at pools; a DeFlock Q and A in front of a seated audience; a yard sign reading Ask me who I hate, Flock, deflockcobb.com; and a speaker at the DeFlock presentation. Underneath, the words For showing up." />
-            <img class="fslide" src="assets/week-recap-2.webp" width="1000" height="1250"
-                 alt="National Week of Action, written on lined notebook paper beside a pencil. It was a success with your help. More people in our communities are aware of ALPRs and the role they play in the erosion of our data and privacy rights. Your commitment to sharing posts, educating yourself, and protesting for your 4th amendment rights has made a powerful impact. Keep this energy going by showing up at the Flock town hall meeting this Thursday to make your voice heard." />
-          </span>
-        </span>
-      </span>
-      <span class="sr-only flyer-status"></span>
-      <span class="flyer-pop" aria-hidden="true">
-        <i style="left:0%;top:0.94%;--d:9.2px;--dx:-23.5px;--dy:-27.3px;animation-delay:7ms"></i>
-        <i style="left:16.39%;top:0%;--d:6px;--dx:-2.1px;--dy:-22.6px;animation-delay:17ms"></i>
-        <i style="left:30.86%;top:0%;--d:6.4px;--dx:1.5px;--dy:-36px;animation-delay:13ms"></i>
-        <i style="left:49.89%;top:0%;--d:9.6px;--dx:5.3px;--dy:-35.8px;animation-delay:5ms"></i>
-        <i style="left:68.83%;top:0%;--d:7px;--dx:-2.9px;--dy:-14.7px;animation-delay:16ms"></i>
-        <i style="left:93.32%;top:0%;--d:9.1px;--dx:12.4px;--dy:-16.5px;animation-delay:34ms"></i>
-        <i class="s" style="left:100%;top:8.2%;--d:4px;--dx:8.1px;--dy:-11.8px;animation-delay:24ms"></i>
-        <i class="s" style="left:100%;top:14.79%;--d:8.9px;--dx:19.9px;--dy:4.7px;animation-delay:36ms"></i>
-        <i class="s" style="left:100%;top:29.98%;--d:10.4px;--dx:19.5px;--dy:-2.5px;animation-delay:3ms"></i>
-        <i class="s" style="left:100%;top:48.44%;--d:8.9px;--dx:33.4px;--dy:3.7px;animation-delay:13ms"></i>
-        <i class="s" style="left:100%;top:54.15%;--d:5.3px;--dx:24.7px;--dy:3.5px;animation-delay:15ms"></i>
-        <i class="s" style="left:100%;top:70.1%;--d:4.9px;--dx:26.9px;--dy:-1.4px;animation-delay:22ms"></i>
-        <i style="left:100%;top:87.72%;--d:10px;--dx:16.5px;--dy:15.2px;animation-delay:13ms"></i>
-        <i style="left:100%;top:97.79%;--d:5.1px;--dx:18.2px;--dy:25.5px;animation-delay:37ms"></i>
-        <i class="s" style="left:89.67%;top:100%;--d:6.9px;--dx:9.4px;--dy:11.3px;animation-delay:27ms"></i>
-        <i class="s" style="left:58.18%;top:100%;--d:4px;--dx:-2.3px;--dy:30.6px;animation-delay:20ms"></i>
-        <i class="s" style="left:53.16%;top:100%;--d:9.5px;--dx:-0.9px;--dy:18.7px;animation-delay:19ms"></i>
-        <i style="left:29.83%;top:100%;--d:8px;--dx:8.6px;--dy:35.5px;animation-delay:16ms"></i>
-        <i style="left:7.87%;top:100%;--d:8.8px;--dx:-23.3px;--dy:17.1px;animation-delay:26ms"></i>
-        <i class="s" style="left:3.92%;top:100%;--d:9.4px;--dx:-20.9px;--dy:14.7px;animation-delay:2ms"></i>
-        <i class="s" style="left:0%;top:83.23%;--d:5.1px;--dx:-19.2px;--dy:-1.5px;animation-delay:29ms"></i>
-        <i style="left:0%;top:72.96%;--d:6.5px;--dx:-36.8px;--dy:3.8px;animation-delay:17ms"></i>
-        <i class="s" style="left:0%;top:54.7%;--d:4.5px;--dx:-21.4px;--dy:-0.7px;animation-delay:17ms"></i>
-        <i style="left:0%;top:42.01%;--d:4.2px;--dx:-17.8px;--dy:-3.3px;animation-delay:25ms"></i>
-        <i class="s" style="left:0%;top:33.26%;--d:9.9px;--dx:-24.2px;--dy:-0.3px;animation-delay:16ms"></i>
-        <i class="s" style="left:0%;top:11.51%;--d:4.8px;--dx:-13.4px;--dy:-15.9px;animation-delay:24ms"></i>
-      </span>
-      <span class="flyer-hint mono" aria-hidden="true">
-        <span class="hov">▼ Hover for info</span><span class="tap">▼ Tap for info</span>
-      </span>
-    </button>
-    <!-- OUTSIDE the button, deliberately. The flyer's toggle is one big <button> wrapping
-         the whole sheet, and a button inside a button is invalid content and is not
-         reliably exposed to screen readers. So the paging controls are siblings, laid back
-         over the sheet by carrying the same width, rotation and origin as .flyer-btn. They
-         only exist while the sheet is open. -->
-    <div class="flyer-nav" hidden>
-      <button type="button" class="fnav fnav-prev" aria-controls="flyerSheet">
-        <span aria-hidden="true">&#8249;</span><span class="sr-only">Previous slide</span>
-      </button>
-      <button type="button" class="fnav fnav-next" aria-controls="flyerSheet">
-        <span aria-hidden="true">&#8250;</span><span class="sr-only">Next slide</span>
-      </button>
-      <div class="fdots">
-        <button type="button" class="fdot is-on" aria-controls="flyerSheet">
-          <span class="sr-only">Slide 1, thank you collage</span>
-        </button>
-        <button type="button" class="fdot" aria-controls="flyerSheet">
-          <span class="sr-only">Slide 2, week of action note</span>
-        </button>
-      </div>
-    </div>
-  </div>
 
   <div class="hero-copy">
     <span class="eyebrow mono"><span class="rec">●&nbsp;REC</span>&nbsp;Cobb County, Georgia</span>
@@ -2958,6 +2994,122 @@ body.is-reading{overscroll-behavior:none;}
 </section>
 
 <!-- OFFICIALS -->
+
+<!-- An unnumbered band, deliberately. It sits between 04 and 05 without taking a number
+     of its own, so nothing after it renumbers and it can be lifted out again without
+     touching the rest of the page. The numbers are written into the markup by hand. -->
+<div class="newsband">
+  <!-- Rolled up, unrolls to the full sheet on hover, focus or tap. Unhidden by script.
+       Nothing retires it: the claim it carries does not expire the way an event does, so
+       it comes down by hand. -->
+  <div class="flyer" id="weekFlyer" hidden>
+    <!-- Lives inside .flyer so it inherits --open-dn and the open-state selectors reach
+         it. Clips the sheet to the same shape the outline is drawing (see .flyer-window).
+         The rolled shape is on the element as a plain `d` attribute, here and on both
+         burst paths, and that is not redundant with the CSS: the CSS `d` property is
+         what the morph animates, WebKit does not implement it, and geometry declared
+         only in CSS is therefore no geometry at all in Safari. An empty clipPath clips
+         everything, so the poster vanished and the burst had no shape — the flyer was
+         one line of HTML text and a puff of droplets on an iPhone. The attribute is the
+         floor every browser gets; CSS only ever moves it. See the @supports rule. -->
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+      <clipPath id="flyerEdge" clipPathUnits="objectBoundingBox"><path d="M0.5000,-0.0428 L0.5775,0.0893 L0.7082,-0.0208 L0.7181,0.1523 L0.8741,0.1061 L0.8328,0.2540 L0.9770,0.2781 L0.8876,0.3956 L1.0338,0.4712 L0.9056,0.5498 L0.9739,0.6631 L0.8173,0.6778 L0.8628,0.8257 L0.7305,0.8079 L0.7051,0.9547 L0.5713,0.8205 L0.5000,1.0051 L0.4173,0.8781 L0.2954,0.9537 L0.2768,0.7974 L0.1357,0.8267 L0.1987,0.6684 L0.0106,0.6694 L0.1414,0.5404 L-0.0167,0.4712 L0.1300,0.3988 L0.0282,0.2802 L0.1739,0.2582 L0.1279,0.1072 L0.2685,0.1323 L0.2974,-0.0061 L0.4215,0.0841 Z" /></clipPath>
+    </svg>
+    <button type="button" class="flyer-btn" aria-expanded="false" aria-controls="flyerSheet">
+      <span class="sr-only">New reporting: Cobb officials claim not to cooperate with outside agencies, but this is a lie. Open it.</span>
+      <!-- The outline, drawn before the window so the sheet and its artwork paint over
+           it. One path: the burst while rolled, the sheet's frame when open. -->
+      <span class="flyer-burst" aria-hidden="true">
+        <svg class="sh" viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
+          <path vector-effect="non-scaling-stroke" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" />
+        </svg>
+        <svg class="fg" viewBox="0 0 220 110" preserveAspectRatio="none" focusable="false">
+          <path vector-effect="non-scaling-stroke" d="M110.0,-4.7 L127.1,9.8 L155.8,-2.3 L158.0,16.8 L192.3,11.7 L183.2,27.9 L214.9,30.6 L195.3,43.5 L227.4,51.8 L199.2,60.5 L214.2,72.9 L179.8,74.6 L189.8,90.8 L160.7,88.9 L155.1,105.0 L125.7,90.2 L110.0,110.6 L91.8,96.6 L65.0,104.9 L60.9,87.7 L29.9,90.9 L43.7,73.5 L2.3,73.6 L31.1,59.4 L-3.7,51.8 L28.6,43.9 L6.2,30.8 L38.3,28.4 L28.1,11.8 L59.1,14.6 L65.4,-0.7 L92.7,9.2 Z" />
+        </svg>
+        <span class="lbl">
+          <span class="t">Cobb gives your<br/>data away</span>
+          <span class="d">even though they say they don’t</span>
+        </span>
+      </span>
+      <span class="flyer-window" id="flyerSheet">
+        <!-- A typeset sheet rather than artwork. It is phrasing content all the way
+             down, spans and <b>/<em> only, because every bit of this lives inside the
+             <button> and flow content there is invalid. Sized against --plate-w, not
+             --fw: the plate is laid out at the open width and scaled by --plate-s while
+             rolled, so type measured off the open width stays true through the unroll
+             instead of being re-laid-out on every frame. -->
+        <span class="flyer-plate">
+          <span class="sheet404">
+            <span class="s404-head">
+              <span class="s404-claim">Cobb officials claim not to cooperate with outside agencies,</span>
+              <em class="s404-punch">but this is a lie.</em>
+            </span>
+            <span class="s404-body">
+              <span class="p">A Georgia city cannot run plate readers on state roads without signing an agreement that commits the data to <b>HIDTA</b>, a federal program run from the White House drug policy office.</span>
+              <span class="p">That is not a leak or a misuse, but the condition of switching them on.</span>
+            </span>
+            <span class="s404-scale">33 regional programs &middot; all 50 states</span>
+            <span class="s404-by">Jason Koebler, 404 Media, 30 Sept 2026</span>
+          </span>
+        </span>
+      </span>
+      <span class="sr-only flyer-status"></span>
+      <span class="flyer-pop" aria-hidden="true">
+        <i style="left:0%;top:0.94%;--d:9.2px;--dx:-23.5px;--dy:-27.3px;animation-delay:7ms"></i>
+        <i style="left:16.39%;top:0%;--d:6px;--dx:-2.1px;--dy:-22.6px;animation-delay:17ms"></i>
+        <i style="left:30.86%;top:0%;--d:6.4px;--dx:1.5px;--dy:-36px;animation-delay:13ms"></i>
+        <i style="left:49.89%;top:0%;--d:9.6px;--dx:5.3px;--dy:-35.8px;animation-delay:5ms"></i>
+        <i style="left:68.83%;top:0%;--d:7px;--dx:-2.9px;--dy:-14.7px;animation-delay:16ms"></i>
+        <i style="left:93.32%;top:0%;--d:9.1px;--dx:12.4px;--dy:-16.5px;animation-delay:34ms"></i>
+        <i class="s" style="left:100%;top:8.2%;--d:4px;--dx:8.1px;--dy:-11.8px;animation-delay:24ms"></i>
+        <i class="s" style="left:100%;top:14.79%;--d:8.9px;--dx:19.9px;--dy:4.7px;animation-delay:36ms"></i>
+        <i class="s" style="left:100%;top:29.98%;--d:10.4px;--dx:19.5px;--dy:-2.5px;animation-delay:3ms"></i>
+        <i class="s" style="left:100%;top:48.44%;--d:8.9px;--dx:33.4px;--dy:3.7px;animation-delay:13ms"></i>
+        <i class="s" style="left:100%;top:54.15%;--d:5.3px;--dx:24.7px;--dy:3.5px;animation-delay:15ms"></i>
+        <i class="s" style="left:100%;top:70.1%;--d:4.9px;--dx:26.9px;--dy:-1.4px;animation-delay:22ms"></i>
+        <i style="left:100%;top:87.72%;--d:10px;--dx:16.5px;--dy:15.2px;animation-delay:13ms"></i>
+        <i style="left:100%;top:97.79%;--d:5.1px;--dx:18.2px;--dy:25.5px;animation-delay:37ms"></i>
+        <i class="s" style="left:89.67%;top:100%;--d:6.9px;--dx:9.4px;--dy:11.3px;animation-delay:27ms"></i>
+        <i class="s" style="left:58.18%;top:100%;--d:4px;--dx:-2.3px;--dy:30.6px;animation-delay:20ms"></i>
+        <i class="s" style="left:53.16%;top:100%;--d:9.5px;--dx:-0.9px;--dy:18.7px;animation-delay:19ms"></i>
+        <i style="left:29.83%;top:100%;--d:8px;--dx:8.6px;--dy:35.5px;animation-delay:16ms"></i>
+        <i style="left:7.87%;top:100%;--d:8.8px;--dx:-23.3px;--dy:17.1px;animation-delay:26ms"></i>
+        <i class="s" style="left:3.92%;top:100%;--d:9.4px;--dx:-20.9px;--dy:14.7px;animation-delay:2ms"></i>
+        <i class="s" style="left:0%;top:83.23%;--d:5.1px;--dx:-19.2px;--dy:-1.5px;animation-delay:29ms"></i>
+        <i style="left:0%;top:72.96%;--d:6.5px;--dx:-36.8px;--dy:3.8px;animation-delay:17ms"></i>
+        <i class="s" style="left:0%;top:54.7%;--d:4.5px;--dx:-21.4px;--dy:-0.7px;animation-delay:17ms"></i>
+        <i style="left:0%;top:42.01%;--d:4.2px;--dx:-17.8px;--dy:-3.3px;animation-delay:25ms"></i>
+        <i class="s" style="left:0%;top:33.26%;--d:9.9px;--dx:-24.2px;--dy:-0.3px;animation-delay:16ms"></i>
+        <i class="s" style="left:0%;top:11.51%;--d:4.8px;--dx:-13.4px;--dy:-15.9px;animation-delay:24ms"></i>
+      </span>
+      <span class="flyer-hint mono" aria-hidden="true">
+        <span class="hov">▼ Hover for info</span><span class="tap">▼ Tap for info</span>
+      </span>
+    </button>
+    <!-- OUTSIDE the button, and it has to be: the flyer's toggle is one big <button>
+         wrapping the whole sheet, and an <a> inside a <button> is invalid content and is
+         not reliably reachable, exactly as a nested <button> was. So the link is a
+         sibling wearing the button's own geometry, the same trick the paging controls
+         used: same width, same rotation, same origin, so it lands exactly over the sheet.
+         The wrapper takes no pointer events and the bar inside takes them back, so only
+         the red block is clickable and the rest of the sheet still toggles.
+
+         A multi-slide flyer re-adds .flyer-nav here; its CSS and its script both survive
+         and switch themselves off while there is only one sheet. -->
+    <a class="flyer-go" href="https://www.404media.co/how-cities-are-forced-to-funnel-license-plate-data-to-a-massive-federal-surveillance-program-hidta/"
+       target="_blank" rel="noopener">
+      <span class="fgo-bar">
+        <span class="fgo-txt">
+          <span class="fgo-big">Read the reporting</span>
+          <span class="fgo-sml">404media.co</span>
+        </span>
+        <span class="fgo-arw" aria-hidden="true">&rarr;</span>
+      </span>
+    </a>
+    </div>
+  </div>
+</div>
+
 <section id="officials" class="reveal">
   <div class="sec-head"><span class="num">05</span><h2>Reach Cobb Officials</h2></div>
   <div class="gov-band">
@@ -4298,15 +4450,13 @@ body.is-reading{overscroll-behavior:none;}
   (function(){
     const flyer = document.getElementById('weekFlyer');
     if(!flyer) return;
-    /* 11:59 PM ET on Thursday 27 Aug 2026 (EDT is UTC-4). The date is set by the artwork,
-       not by taste: slide 2 ends "showing up at the Flock town hall meeting THIS THURSDAY",
-       and the moment that Thursday is over the flyer is telling people to attend something
-       that already happened. There are three more town halls after it, but the event bars
-       carry those and say so correctly; this sheet cannot, because the words are painted
-       into the picture. Past ENDS the flyer never unhides and the hero goes back to normal
-       on its own. Move this only by replacing the artwork. */
-    const ENDS = Date.UTC(2026, 7, 28, 3, 59, 0);
-    if(Date.now() >= ENDS) return;
+    /* NOTHING RETIRES THIS ONE, and that is a decision rather than an oversight.
+       Every previous sheet carried artwork with a date painted into it, so it had to be
+       gone the moment that date passed. This one is typeset and makes a standing claim:
+       the MOU requirement is as true next year as it is today, and the sheet says nothing
+       that goes stale. So it stays until somebody takes it out, which means taking it out
+       is a thing to remember rather than a thing that happens. Documented in the README
+       beside the rest of the flyer, which is the only other place it is written down. */
     flyer.hidden = false;
     // Unhidden but not yet on screen: the space is held from the first paint and the
     // spawn below is what puts the button in it. See .is-spawning in the stylesheet.
@@ -4775,8 +4925,6 @@ body.is-reading{overscroll-behavior:none;}
       show(0, false);
     }
 
-    // Retire the flyer on the same schedule if the page is still open by then.
-    setTimeout(() => { flyer.hidden = true; }, ENDS - Date.now());
     // Escape and a tap outside both dismiss it, but neither pops it. The pop belongs to
     // the flyer itself being let go of — the pointer leaving it, or a tap on it — not to
     // an unrelated tap somewhere else on the page, where a burst of droplets across the

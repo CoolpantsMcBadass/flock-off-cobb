@@ -221,11 +221,46 @@ from that box.
 `dev/ticker-bar.html` is the bench the affordances and the opening were chosen on, and is
 not part of the site.
 
-## The hero flyer
-The empty space in the hero holds the Week of Action flyer. Closed, it is a comic
-exclamation burst naming the event; hovering (on a wide screen), tapping, or tabbing to
-it pops the burst and unrolls the whole sheet. It is a `<button>`, so it works from the
-keyboard, and the schedule is spelled out in the image `alt` text for screen readers.
+## The flyer
+Closed, it is a comic exclamation burst; hovering (on a wide screen), tapping, or tabbing
+to it pops the burst and unrolls the whole sheet. It is a `<button>`, so it works from the
+keyboard.
+
+**It is no longer in the hero.** It lived in the empty space there for its first two
+occupants, both Week of Action artwork. Since 2026-10-01 it sits in `.newsband`, an
+unnumbered band between section 04 (The Letter) and section 05 (Reach Cobb Officials).
+Unnumbered deliberately: the section numbers are written into the markup by hand, so
+taking a number would renumber 05 and 06 and want a nav entry, and this block is meant to
+be swapped out when the news moves on. The band is section metrics (1100px, 20px gutter)
+with its own 46px vertical padding, because a lone burst inside a section's 72px reads as
+a gap rather than as a thing.
+
+**The current occupant is typeset, not artwork.** It carries 404 Media's HIDTA reporting
+(Jason Koebler, 30 Sept 2026): a Georgia city cannot run plate readers on state roads
+without signing an MOU committing that data to HIDTA, a federal program run from the
+White House drug policy office. Because it is markup rather than an image, everything in
+it is phrasing content, spans and `<b>`/`<em>` only. Flow content inside a `<button>` is
+invalid, which is what rules out `<p>` and `<div>` here.
+
+Type on the sheet is sized against `--plate-w`, never in px and never against `--fw`. The
+plate is laid out at the open width and scaled by `--plate-s` while rolled, so sizes
+measured off the open width stay true through the unroll rather than being re-laid-out on
+every frame.
+
+### The link is a sibling, and has to be
+An `<a>` inside a `<button>` is invalid content and is not reliably reachable, exactly as
+a nested `<button>` was. So `.flyer-go` sits outside the button wearing the button's own
+geometry: same width, same `rotate(-2.2deg)`, same `transform-origin`, which lands it over
+the sheet. Two things that bite:
+
+- **It must track the button's motion, not just its resting pose.** The button straightens
+  to `rotate(0deg)` as it opens. A link left on the static tilt hangs off the right and
+  bottom edges of a sheet that is no longer tilted. It rides the same clock and curve in
+  every state, the hover open, the keyboard open, and the quiet close.
+- **Pointer events go on the bar, never the wrapper.** The wrapper covers the whole sheet,
+  so a wrapper that took pointer events would turn every click on the sheet into a trip to
+  404 Media instead of a toggle. And while the sheet is shut the bar is inert as well as
+  invisible, or it sits over the rolled burst and swallows the click that opens it.
 
 The burst (`.flyer-burst`) is its own element rather than a crop of the flyer's own
 header. A crop was the obvious approach and it does not work: on this flyer "WEEK OF
@@ -646,12 +681,21 @@ ran perfectly. Reproducing it took dispatching `mouseenter` first, deliberately,
 imitate what the hardware does. Every other read of `hovering` in that IIFE is already
 gated the same way; this one was the exception.
 
-### The retirement date belongs to the artwork
-`ENDS` is not a matter of taste. The current slide 2 ends "showing up at the Flock town
-hall meeting **THIS THURSDAY**", so the flyer is wrong the moment that Thursday is over,
-which is why it retires 11:59 PM ET on Thu 27 Aug 2026. Three more town halls follow it
-and the event bars carry those correctly, but this sheet cannot: the words are painted
-into the picture. Move `ENDS` only by replacing the artwork.
+### Retirement: there is none, and that is deliberate
+**Nothing takes the current sheet down. Taking it down is a thing to remember, not a thing
+that happens.** This is the only place that is written down, so read it before assuming
+the flyer expires like the ones before it.
+
+Every previous occupant was artwork with a date painted into it and so had to retire on a
+clock: the Week of Action schedule went at 11:59 PM ET Sun 23 Aug 2026, and the two-slide
+recap that replaced it at 11:59 PM ET Thu 27 Aug 2026, because its slide 2 said "THIS
+THURSDAY" and the sheet was wrong the moment that Thursday passed. Those dates belonged to
+the artwork, never to taste.
+
+The HIDTA sheet is typeset and makes a standing claim. The MOU requirement is as true next
+year as today and nothing on the sheet goes stale, so `ENDS` and the retirement `setTimeout`
+are gone rather than set far out. **An occupant that does expire has to bring its own
+`ENDS` back with it.**
 
 ## The map
 The "Cameras Are Already Here" section is a self-hosted Leaflet map centered on
