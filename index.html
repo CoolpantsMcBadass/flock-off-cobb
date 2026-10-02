@@ -5366,6 +5366,29 @@ body.is-reading{overscroll-behavior:none;}
       autoSize: true
     });
     flip.loadFromHTML(leaves);
+
+    // Reaching the front cover means the book is shut, and a shut book belongs
+    // on the page, not in the reader.
+    //
+    // Pressing a cover has closed the reader since the day the covers learned to
+    // do anything, but there are two other ways to arrive at page 0 and neither
+    // was covered: DRAGGING a cover shut, which coverRelease answers by calling
+    // flipPrev, and the prev arrow from the opening spread. Both left a closed
+    // comic sitting in an open reader — the exact state the inside-front-cover
+    // fix was written to abolish, reached by the two routes that fix did not
+    // touch. From there the only way out is the Close button, which is not where
+    // anyone is looking after shutting a book.
+    //
+    // Hung off the settle rather than off either route, so a swipe, a drag, an
+    // arrow, a keyboard turn and anything added later all land the same way.
+    flip.on('flip', function(e){
+      if(e.data !== 0) return;
+      // Never while something else owns the reader: not before the first open
+      // has finished (loadFromHTML and the silent turnToPage(2) both settle
+      // pages while the stand-in is still flying), and not mid-morph.
+      if(!coverIsExit || reader.hidden || morph) return;
+      close();
+    });
     // Appended after load. StPageFlip only manages its own .stf__wrapper child,
     // and these being inside .book is what makes them hide with it.
     bookEl.appendChild(edgeL);
@@ -5813,6 +5836,12 @@ body.is-reading{overscroll-behavior:none;}
   // stand-in over a closed reader.
   var openSeq = 0, morph = null, closeTimer = null;
 
+  // Whether landing on the front cover should shut the reader. False while an
+  // open is still in flight, because loadFromHTML and the silent turnToPage(2)
+  // both settle pages before the stand-in has landed, and true once the book is
+  // actually being read. See the 'flip' handler in build().
+  var coverIsExit = false;
+
 
   function cancelMorph(){
     if(morph){ morph.cancel(); morph = null; }
@@ -5833,6 +5862,7 @@ body.is-reading{overscroll-behavior:none;}
     if(closeTimer){ window.clearTimeout(closeTimer); closeTimer = null; }
     var seq = ++openSeq;
 
+    coverIsExit = false;
     lastFocus = document.activeElement;
     // The nudge has done its job the moment this runs, and it writes a transform
     // on the very element the flight is about to measure and clone.
@@ -5885,7 +5915,7 @@ body.is-reading{overscroll-behavior:none;}
         // is a spread at every width, so the opening animation now runs on a
         // phone too and this is a guard rather than a branch anyone takes.
         if(animate && flip.getOrientation() !== 'landscape') animate = false;
-        if(!animate) return;
+        if(!animate){ coverIsExit = true; return; }
         // Hidden in the same task as build(), so no frame is ever painted with
         // the full-size cover sitting there — that flash is the jump cut this
         // whole thing exists to remove. visibility, not display: a hidden box
@@ -5896,7 +5926,7 @@ body.is-reading{overscroll-behavior:none;}
         // silently skipped the animation every time.
         whenMeasurable(bookEl, 20, function(box){
           // The poll can outlive the open that started it by twenty frames.
-          if(seq !== openSeq || !box){ bookEl.style.visibility = ''; return; }
+          if(seq !== openSeq || !box){ bookEl.style.visibility = ''; coverIsExit = true; return; }
           // Silently. turnToPage is pages.show() with no animation, so the live
           // book is already sitting on the title spread, hidden, before the
           // stand-in starts moving — which is why the swap at the end is free.
@@ -5923,7 +5953,7 @@ body.is-reading{overscroll-behavior:none;}
             front: flightFace(),
             back:  pageClone(leaves[1], ''),
             recto: pageClone(leaves[2], 'is-recto'),
-            onDone: function(){ bookEl.style.visibility = ''; }
+            onDone: function(){ bookEl.style.visibility = ''; coverIsExit = true; }
           });
           // Only now. Hiding the hero back at the click left the stage empty for
           // the nine or so frames it takes to build the book and wait for it to
@@ -5952,6 +5982,9 @@ body.is-reading{overscroll-behavior:none;}
     // open it would come back with the next open, over a book showing a
     // different page, still offering whatever was asked for last time.
     askClose();
+    // Disarmed before anything else: close() can be reached from the 'flip'
+    // handler itself, and the closing must not be able to trigger another.
+    coverIsExit = false;
     // Bump first. Everything still queued from the open being abandoned checks
     // this and stops, which is what keeps a half-finished motion from putting
     // the hero back to hidden after this function has just restored it.
@@ -6313,7 +6346,7 @@ body.is-reading{overscroll-behavior:none;}
     if(e.key === 'Escape') close();
     else if(e.key === 'ArrowRight' || e.key === 'PageDown') next();
     else if(e.key === 'ArrowLeft'  || e.key === 'PageUp')   prev();
-    else if(e.key === 'Home' && flip) jumpTo(0);
+    else if(e.key === 'Home' && flip) jumpTo(2);   // the opening spread, not the cover: see the 'flip' handler
     else if(e.key === 'End'  && flip) jumpTo(flip.getPageCount() - 1);
   });
 })();
