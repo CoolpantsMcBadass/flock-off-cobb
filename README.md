@@ -1040,6 +1040,32 @@ Plus the standing one from the flyer: `isMobile: true` makes WebKit derive its l
 viewport from the meta tag rather than the requested size, so every screen reports the
 same numbers. Use `isMobile: false` with an explicit viewport.
 
+A fourth, and the most expensive so far: **a headless window never resizes itself, so
+anything that only breaks after a resize looks fine until you resize it on purpose.** A
+phone collapses its URL bar on a scroll and that is a real `resize` event; nothing in a
+harness does that on its own. The book vanishing on a second open was called
+unreproducible on exactly that basis, and the entry recording it even wrote down "it
+recovers" about a code path no run had touched.
+
+The repro, which finds it first try — the resize is the whole trigger, so no page turning
+is needed:
+
+1. iPhone 13 device descriptor, WebKit, `.leaf` boxes as the measurement.
+2. Tap `#issueBtn`, let the flight finish, tap `#rClose`, wait for `#reader[hidden]`.
+3. `setViewportSize` to a shorter height and back again, with the reader closed. This is
+   the URL bar collapsing and returning.
+4. Tap `#issueBtn` again and measure. Broken is `.leaf` at 0x0 inside a `#book` still at
+   its full 358x253 — the book gone, the cover's own furniture left floating. Healthy is
+   179x253 on both opens.
+
+Why it happens is worth keeping: `St.PageFlip` binds one `window` resize listener for the
+life of the page and never tears it down between opens. On fire it nulls `boundsRect`,
+recomputes it from the book's `offsetWidth`/`offsetHeight` — 0x0 while `.reader[hidden]`
+is `display:none` — and stores that. `getRect()` only recomputes when `boundsRect` is
+`null`, so nothing ever asks again, and with `size:'stretch'` a zero block width gives
+`pageWidth: 0` and every page draws 0x0 forever. `build()`'s guard answers it with
+`flip.update()` on every reopen, which re-measures while the reader is genuinely visible.
+
 ## Preview locally
 ```
 cd "flock-off-cobb"

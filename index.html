@@ -5307,7 +5307,19 @@ body.is-reading{overscroll-behavior:none;}
   }
 
   function build(){
-    if(flip) return;
+    // Second and later opens land here. The vendored library binds its own
+    // window 'resize' listener for the life of the page (never torn down
+    // between opens) and reads the book's offsetWidth/offsetHeight straight
+    // off it whenever that fires. While the reader is closed the whole thing
+    // is display:none — .reader[hidden] — so the book measures 0x0, and on a
+    // phone a plain scroll can collapse the URL bar and fire a resize while
+    // we're sitting there closed. The library caches that zero size and never
+    // asks again on its own, so the book comes back with no pages, just the
+    // cover's own furniture (fold, staples, price tag), which floats free of
+    // whatever size StPageFlip thinks the page is. update() re-reads the box
+    // now, while the reader is genuinely visible again, so a corrupted resize
+    // taken while hidden can't outlive this open.
+    if(flip){ flip.update(); return; }
     flip = new St.PageFlip(bookEl, {
       // The ratio is what matters: an eighth of A4 landscape is A5 upright, so
       // the spread has the proportions of the sheet the zine prints on.

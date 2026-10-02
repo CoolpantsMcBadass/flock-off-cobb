@@ -3,6 +3,15 @@
 All notable changes to the Flock Off Cobb site are recorded here. Entries are kept short;
 the long-form reasoning behind older entries is in git history.
 
+## 2026-10-01
+
+### Fixed
+- **The zine vanishing on a second open is reproduced, and `flip.update()` in `build()`'s guard is the fix.** Both halves of the 2026-09-01 entry were hypotheses; this settles them.
+  - **The earlier "could not be reproduced" was a harness that never resized anything.** A headless window fires no spontaneous resize, so nothing was exercising the path the diagnosis named, and "the library re-measures to zero after a resize while hidden (it recovers)" was recorded off a run where no resize ever happened. Driving a real viewport change with `setViewportSize` while the reader sits closed reproduces it first try.
+  - Measured in WebKit at iPhone 13 size, `.leaf` boxes on the second open: **0x0 inside a `#book` still 358x253 on the shipped build** — the book gone and the page furniture left behind, which is exactly the reported symptom — against **179x253, unchanged from the first open, with the fix in place**. No page errors on either build.
+  - **The resize is the entire trigger; turning pages first is incidental.** Measured both ways round: pages turned with no resize is clean on the shipped build (179x253), and a resize with no pages turned breaks it (0x0). What "turn some pages" adds to the report is time spent with the reader open, not state.
+  - **The bug was reported against a build that never carried the fix.** It was written on 2026-09-01 and left uncommitted, so deflockcobb.com was still serving the old `if(flip) return` guard — any phone test against the live site before this is committed is a test of the old code. Recipe for the harness run is in the README under the zine's "Testing".
+
 ## 2026-09-01
 
 ### Fixed
