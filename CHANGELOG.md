@@ -5,6 +5,14 @@ the long-form reasoning behind older entries is in git history.
 
 ## 2026-10-01
 
+### Changed
+- **The recent-posts strip carries four new posts.** It had been showing the same four since 2026-08-25; the account has posted six times since, and nothing since 10 Sep. Now: 10 Sep (Cobb approves social media monitoring and more ALPRs, 5-0), 3 Sep (a Flock camera pointed at a community pool in Texas), 1 Sep (the AJC on Dunwoody and the children's gym) and 24 Aug (stop the expansion).
+  - **Two of the six were left out on purpose**, both event invites whose dates have passed — 9 Sep for an Austell council meeting on 14 Sep, and 27 Aug for the Cobb town halls. A card that invites someone to a meeting that already happened is worse than no card, and these would have sat there indefinitely because nothing retires a post from the strip. Both are in `posts.json` without a caption, so they are kept but do not render.
+  - **Captions are not the posts' opening lines this time.** The 10 Sep card's picture leads on a 5-0 vote at the 25 Aug commission meeting, which the post's own text never mentions; writing the card off the text would have described a different thing from the one in the picture.
+  - Alt text written from the pictures after downloading them, per the standing rule — the strip is four screenshots of type, so the words in each image are most of what alt has to carry.
+  - **Two entries now share 24 Aug**, the new reel and the older "Thank you Cobb County" carousel. The strip's sort is `localeCompare` on the date and `Array.prototype.sort` is stable, so array order breaks the tie; the reel is placed first in `posts.json` deliberately. Worth knowing before anyone reorders that file by hand.
+  - Verified rendered at 1400x950 and at iPhone 13 size: the intended four, in order, pictures loading, alt on all four, and the phone row still scrolls (884px of cards in a 281px rail) with the document itself not scrolling sideways.
+
 ### Fixed
 - **The zine vanishing on a second open is reproduced, and `flip.update()` in `build()`'s guard is the fix.** Both halves of the 2026-09-01 entry were hypotheses; this settles them.
   - **The earlier "could not be reproduced" was a harness that never resized anything.** A headless window fires no spontaneous resize, so nothing was exercising the path the diagnosis named, and "the library re-measures to zero after a resize while hidden (it recovers)" was recorded off a run where no resize ever happened. Driving a real viewport change with `setViewportSize` while the reader sits closed reproduces it first try.
