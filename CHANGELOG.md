@@ -5,6 +5,13 @@ the long-form reasoning behind older entries is in git history.
 
 ## 2026-10-01
 
+### Fixed
+- **The map's basemap had stopped loading, live, and nobody could see it.** CARTO's `light_all` tiles now return a 2,049-byte PNG reading "API KEY REQUIRED" instead of map data, with a **200 status**, so nothing errored and the map quietly filled with watermarks under the camera dots. Swapped to **Esri's World Light Gray Canvas**, which needs no key.
+  - **Cached tiles hid it completely.** It looked fine on two of William's own devices, desktop and phone, and was only visible in a private window. A reload is not enough to catch this class of fault; the old tiles have a long max-age and keep painting.
+  - Three differences from the CARTO layer, each of which fails silently if missed: the path is `{z}/{y}/{x}` rather than `{z}/{x}/{y}`, there are no `{s}` subdomains and no `{r}` retina suffix, and **the service stops at zoom 16**, past which it serves a grey "Map data not yet available" tile with another 200. `maxNativeZoom: 16` pins the request and lets Leaflet upscale to the map's `maxZoom: 18`.
+  - Verified: 18 tile requests, all 200, 5.6KB to 10.6KB, none the watermark size, no CARTO requests left, and zooming to 18 requests nothing above 16 and renders an upscaled map rather than grey squares.
+  - Attribution now credits Esri in place of CARTO. OpenStreetMap and DeFlock are unchanged.
+
 ### Changed
 - **The flyer has left the hero, and now carries 404 Media's HIDTA reporting.** It sits in a new unnumbered band between 04 (The Letter) and 05 (Reach Cobb Officials). Closed it is the same comic burst, reading "Cobb gives your data away / even though they say they don't"; opened it is a typeset yellow sheet ending in a full-bleed red link to the article.
   - **Unnumbered on purpose.** The section numbers are written into the markup by hand, so taking a number would renumber 05 and 06 and want a nav entry, and this block is meant to be lifted out again when the news moves on. Nothing else on the page moved.

@@ -3550,10 +3550,28 @@ body.is-reading{overscroll-behavior:none;}
     map.on("focus", () => map.scrollWheelZoom.enable());
     map.on("blur",  () => map.scrollWheelZoom.disable());
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a> &middot; cameras via <a href="https://deflock.org">DeFlock</a>',
-      subdomains: "abcd",
-      maxZoom: 20
+    /* Esri's Light Gray Canvas, not CARTO. CARTO's light_all basemap stopped serving
+       tiles to anyone without an API key: every request now returns a 2,049-byte PNG
+       reading "API KEY REQUIRED" with a 200 status, so nothing errors and the map just
+       quietly fills with watermarks under the dots. Confirmed on the live site in a
+       private window on 2026-10-01, and it is invisible to anyone with the old tiles
+       still cached, which is why it went unnoticed.
+
+       Three things differ from the CARTO layer and all three matter:
+         - the path is {z}/{y}/{x}, not {z}/{x}/{y}. Transposed, it loads tiles from
+           somewhere else entirely and looks like a map of nowhere.
+         - no {s} subdomains and no {r} retina suffix; this service has neither.
+         - IT STOPS AT ZOOM 16. Past that it serves a grey "Map data not yet available"
+           tile, with a 200 again, so the failure is silent in exactly the same way.
+           maxNativeZoom pins the request at 16 and lets Leaflet upscale to the map's
+           own maxZoom of 18, which is blurry but is a map rather than a grey square.
+
+       Still the right shape for this page: a pale grey canvas is what the red camera
+       dots were drawn to sit on, and a full-colour basemap would fight 6,900 of them. */
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &middot; basemap <a href="https://www.esri.com/">Esri</a> &middot; cameras via <a href="https://deflock.org">DeFlock</a>',
+      maxZoom: 18,
+      maxNativeZoom: 16
     }).addTo(map);
 
     fetch("assets/ga-alpr-cameras.geojson")

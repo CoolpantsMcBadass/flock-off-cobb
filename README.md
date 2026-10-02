@@ -700,7 +700,28 @@ are gone rather than set far out. **An occupant that does expire has to bring it
 ## The map
 The "Cameras Are Already Here" section is a self-hosted Leaflet map centered on
 Marietta, with red dots from `assets/ga-alpr-cameras.geojson` (sourced from
-OpenStreetMap, the same data DeFlock uses). It covers the northern half of Georgia
+OpenStreetMap, the same data DeFlock uses).
+
+### The basemap, and how it failed silently
+Tiles come from **Esri's World Light Gray Canvas**, which needs no key. They used to come
+from CARTO's `light_all`, and on 2026-10-01 that was found serving a 2,049-byte PNG
+reading "API KEY REQUIRED" for every tile, with a **200 status**, so nothing threw and
+the map simply filled with watermarks under the dots.
+
+**It was invisible to everyone who already had the old tiles cached**, which is most of
+the people who would notice, and is why it went unreported. The check that settles this
+class of question is a private window, not a reload.
+
+Three things about the Esri service differ from CARTO and all three fail quietly:
+- the path is `{z}/{y}/{x}`, **not** `{z}/{x}/{y}`. Transposed, it happily loads tiles of
+  somewhere else.
+- no `{s}` subdomains and no `{r}` retina suffix; this service has neither.
+- **it stops at zoom 16.** Past that it serves a grey "Map data not yet available" tile,
+  200 again. `maxNativeZoom: 16` pins the request there and lets Leaflet upscale to the
+  map's own `maxZoom: 18`. Blurry at the deepest zoom, but a map rather than a grey void.
+
+A pale grey canvas is not a style preference here: the red dots were drawn to sit on one,
+and a full-colour basemap competes with 6,900 of them. It covers the northern half of Georgia
 (lat 32.5–35.05) so the Cobb cluster reads in regional context. It is a snapshot, not
 live. To refresh it, re-query the Overpass API for ALPR-tagged nodes in that bbox:
 ```
