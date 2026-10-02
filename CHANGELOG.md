@@ -13,6 +13,7 @@ the long-form reasoning behind older entries is in git history.
   - Attribution now credits Esri in place of CARTO. OpenStreetMap and DeFlock are unchanged.
 
 ### Changed
+- **On a wide screen the burst sits with the heading it introduces**, dropped down the band and left-aligned to where "Reach Cobb Officials" begins, rather than floating centred in the middle of the gap. The offset is the section head's "05" plus its 16px flex gap, which is where the h2's own text starts, so the two share an edge: measured at 205px against 206px. Centred and untouched below 861px, where the burst is already 86vw and has nothing to align to.
 - **The flyer has left the hero, and now carries 404 Media's HIDTA reporting.** It sits in a new unnumbered band between 04 (The Letter) and 05 (Reach Cobb Officials). Closed it is the same comic burst, reading "Cobb gives your data away / even though they say they don't"; opened it is a typeset yellow sheet ending in a full-bleed red link to the article.
   - **Unnumbered on purpose.** The section numbers are written into the markup by hand, so taking a number would renumber 05 and 06 and want a nav entry, and this block is meant to be lifted out again when the news moves on. Nothing else on the page moved.
   - **The sheet is the burst's own yellow**, so the closed button does not open into a poster, it unrolls into the same piece of paper. It also leaves the red link block as the only other colour on the sheet, which is what makes it the loudest thing on it.

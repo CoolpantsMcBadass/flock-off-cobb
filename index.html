@@ -575,6 +575,17 @@
      Its own vertical padding rather than a section's 72px, because a lone burst in
      a band that tall reads as a gap rather than as a thing. */
   .newsband{max-width:1100px;margin:0 auto;padding:46px 20px;}
+  /* On a wide screen the burst drops down the band and lines up with the heading of the
+     section it introduces, rather than floating centred in the middle of the gap. The
+     left offset is not a round number by taste: it is the width of the section head's
+     "05" plus the 16px flex gap, which is where the h2's own text starts, so the burst
+     and the words below it share an edge. Measured, not guessed.
+     Centred below 861px and left alone: at 86vw the burst is nearly the full width of a
+     phone, so there is nothing to align it to and nowhere to move it. */
+  @media(min-width:861px){
+    .newsband{padding:70px 20px 0;}
+    .newsband .flyer{margin-left:35px;margin-right:auto;}
+  }
 
   /* ---- The typeset sheet ----
      Everything is a fraction of --plate-w, never a px value: the plate is laid out at
